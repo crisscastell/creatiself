@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+
+{% block title %}Inicio{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-100 py-8">
+    <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Contenido principal (izquierda) -->
+        <div class="lg:col-span-2 bg-white p-6 rounded-lg shadow-lg">
+            <h1 class="text-3xl font-bold text-gray-700 mb-6">Mis Citas</h1>
+            <!-- Aquí iría el contenido principal de citas -->
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+            <h2 class="text-2xl font-bold text-gray-700 mb-6">Calendario</h2>
+            <div class="text-center">
+                <div class="flex justify-between items-center mb-4">
+                    <button id="prevMonth" class="text-gray-500 hover:text-gray-700">&lt;</button>
+                    <span id="currentMonth" class="font-semibold"></span>
+                    <button id="nextMonth" class="text-gray-500 hover:text-gray-700">&gt;</button>
+                </div>
+                <div class="grid grid-cols-7 gap-2 mb-2">
+                    <!-- Días de la semana -->
+                    <div class="text-sm font-semibold text-gray-600">Lun</div>
+                    <div class="text-sm font-semibold text-gray-600">Mar</div>
+                    <div class="text-sm font-semibold text-gray-600">Mié</div>
+                    <div class="text-sm font-semibold text-gray-600">Jue</div>
+                    <div class="text-sm font-semibold text-gray-600">Vie</div>
+                    <div class="text-sm font-semibold text-gray-600">Sáb</div>
+                    <div class="text-sm font-semibold text-gray-600">Dom</div>
+                </div>
+                <div id="calendarDays" class="grid grid-cols-7 gap-2">
+                    <!-- Aquí se renderizan los días dinámicamente -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de usuarios (pacientes destacados) -->
+<div class="max-w-7xl mx-auto mt-8 bg-white p-6 rounded-lg shadow-lg">
+    <h2 class="text-2xl font-bold text-gray-700 mb-6">Pacientes Destacados</h2>
+    <div class="space-y-4">
+        {% for paciente in pacientes %}
+        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+            <div class="flex items-center">
+                <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
+                    {{ paciente.nombre.0|upper }} <!-- Inicial del nombre -->
+                </div>
+                <div class="ml-4">
+                    <p class="font-semibold text-gray-700">{{ paciente.nombre }} {{ paciente.apellido }}</p>
+                    <p class="text-sm text-gray-500">
+                        {{ paciente.get_tipo_paciente_display }}
+                    </p>
+                </div>
+            </div>
+            <button class="text-blue-500 hover:text-blue-700">
+                Ver detalles
+            </button>
+        </div>
+        {% empty %}
+        <p class="text-gray-500">No hay pacientes destacados disponibles.</p>
+        {% endfor %}
+    </div>
+</div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const currentMonthElement = document.getElementById("currentMonth");
+        const calendarDaysElement = document.getElementById("calendarDays");
+        const prevMonthButton = document.getElementById("prevMonth");
+        const nextMonthButton = document.getElementById("nextMonth");
+
+        let today = new Date();
+        let currentYear = today.getFullYear();
+        let currentMonth = today.getMonth();
+
+        function renderCalendar() {
+            calendarDaysElement.innerHTML = ""; // Limpiar el contenido antes de renderizar
+
+            // Obtener primer día del mes y número total de días
+            const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+            const lastDate = new Date(currentYear, currentMonth + 1, 0).getDate();
+            const prevLastDate = new Date(currentYear, currentMonth, 0).getDate();
+
+            // Ajuste del primer día (para que empiece en lunes)
+            const firstDayIndex = firstDay === 0 ? 6 : firstDay - 1;
+
+            // Días del mes anterior (gris)
+            for (let i = firstDayIndex; i > 0; i--) {
+                const dayElement = document.createElement("div");
+                dayElement.className = "p-2 text-center text-gray-400";
+                dayElement.textContent = prevLastDate - i + 1;
+                calendarDaysElement.appendChild(dayElement);
+            }
+
+            // Días del mes actual
+            for (let i = 1; i <= lastDate; i++) {
+                const dayElement = document.createElement("div");
+                dayElement.className =
+                    "p-2 text-center rounded-lg cursor-pointer hover:bg-blue-100 text-gray-700";
+                
+                // Resaltar el día actual
+                if (i === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear()) {
+                    dayElement.classList.add("bg-blue-500", "text-white");
+                }
+
+                dayElement.textContent = i;
+                calendarDaysElement.appendChild(dayElement);
+            }
+
+            // Días del mes siguiente (gris)
+            const totalBoxes = firstDayIndex + lastDate;
+            const remainingDays = totalBoxes % 7 === 0 ? 0 : 7 - (totalBoxes % 7);
+
+            for (let i = 1; i <= remainingDays; i++) {
+                const dayElement = document.createElement("div");
+                dayElement.className = "p-2 text-center text-gray-400";
+                dayElement.textContent = i;
+                calendarDaysElement.appendChild(dayElement);
+            }
+
+            // Mostrar mes y año
+            currentMonthElement.textContent = new Date(currentYear, currentMonth).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+        }
+
+        function changeMonth(step) {
+            currentMonth += step;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            } else if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            renderCalendar();
+        }
+
+        prevMonthButton.addEventListener("click", () => changeMonth(-1));
+        nextMonthButton.addEventListener("click", () => changeMonth(1));
+
+        renderCalendar();
+    });
+</script>
+{% endblock %}

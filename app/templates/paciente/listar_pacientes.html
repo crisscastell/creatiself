@@ -1,0 +1,245 @@
+{% extends 'base.html' %}
+
+{% block title %}Lista de Pacientes{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-100 py-8">
+    <div class="max-w-6xl mx-auto bg-white p-6 rounded-lg shadow-lg">
+        <h1 class="text-3xl font-bold text-center text-gray-700 mb-6">Pacientes</h1>
+        
+        <div class="overflow-x-auto">
+            <!-- Barra de Búsqueda -->
+         <!-- Barra de Búsqueda con Botón -->
+         <form method="GET" action="{% url 'Listar_pacientes' %}" class="flex space-x-2 mb-4">
+            <input 
+                type="text" 
+                name="q" 
+                placeholder="Buscar por cédula o nombre..." 
+                class="p-2 border border-gray-300 rounded-lg w-1/2" 
+                value="{{ query|default:'' }}"
+            />
+            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+                Buscar
+            </button>
+        </form>
+
+            <table class="min-w-full bg-white border border-gray-300 rounded-lg shadow-sm">
+                <thead class="bg-gray-200 text-gray-700 text-left">
+                    <tr>
+                        <th class="py-3 px-6 border-b">Tipo de paciente</th>
+                        <th class="py-3 px-6 border-b">Cédula</th>
+                        <th class="py-3 px-6 border-b">Nombre Completo</th>
+                        <th class="py-3 px-6 border-b">Edad</th>
+                        <th class="py-3 px-6 border-b">Sexo</th>
+                        <th class="py-3 px-6 border-b">Teléfono</th>
+                        <th class="py-3 px-6 border-b text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for paciente in pacientes %}
+                        <tr class="border-b hover:bg-gray-100">
+                            <td class="py-3 px-6">{{ paciente.tipo_paciente }}</td>
+                            <td class="py-3 px-6">{{ paciente.cedula }}</td>
+                            <td class="py-3 px-6">{{ paciente.nombre }} {{ paciente.apellido }}</td>
+                            <td class="py-3 px-6">{{ paciente.edad }}</td>
+                            <td class="py-3 px-6 capitalize">{{ paciente.sexo }}</td>
+                            <td class="py-3 px-6">{{ paciente.telefono }}</td>
+                            
+                                <td class="py-3 px-6">
+                                    <button 
+                                        class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-500 focus:ring-2 focus:ring-blue-400"
+                                        onclick="openModalEditarPaciente('{{ paciente.id }}')"
+                                    >
+                                    <i data-lucide="pencil" class="w-6 h-6"></i>
+                                    </button>
+                                </td>
+                            
+                        </tr>
+                        <!-- MODAL -->
+                        <div id="modalEditarPaciente{{ paciente.id }}" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden justify-center items-center">
+                            <div class="fixed inset-0 flex justify-center items-center z-50 bg-gray-500 bg-opacity-50">
+                                <div class="bg-gray-300 w-[23cm] h-[15cm] p-6 rounded-lg shadow-lg overflow-auto">
+                                    <h3 class="text-lg font-bold mb-4">Editar Paciente</h3>
+                                    <form method="POST" action="" class="max-w-full mx-auto bg-white p-6 rounded-lg shadow-md">
+                                        {% csrf_token %}
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <!-- Tipo de Paciente -->
+                                            <div>
+                                                <label for="tipo_paciente" class="block text-lg font-semibold text-gray-700">Tipo de Paciente</label>
+                                                <select id="tipo_paciente" name="tipo_paciente" class="form-control w-full p-3 border-2 rounded-lg">
+                                                    <option value="individual" {% if paciente.tipo_paciente == 'individual' %}selected{% endif %}>Individual</option>
+                                                    <option value="infantil" {% if paciente.tipo_paciente == 'infantil' %}selected{% endif %}>Infantil</option>
+                                                    <option value="pareja" {% if paciente.tipo_paciente == 'pareja' %}selected{% endif %}>Pareja</option>
+                                                </select>
+                                            </div>
+                                            <!-- Cédula -->
+                                            <div>
+                                                <label for="cedula" class="block text-lg font-semibold text-gray-700">Cédula</label>
+                                                <input type="text" id="cedula" name="cedula" class="form-control w-full p-3 border-2 rounded-lg" placeholder="Ingrese la cédula" value="{{ paciente.cedula }}">
+                                            </div>
+                                        </div>
+                        
+                                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
+                                            <!-- Nombre Completo -->
+                                            <div>
+                                                <label for="nombre" class="block text-lg font-semibold text-gray-700">Primer Nombre</label>
+                                                <input type="text" id="nombre" name="nombre" class="form-control w-full p-3 border-2 rounded-lg" placeholder="Primer nombre" value="{{ paciente.nombre }}">
+                                            </div>
+                                            <div>
+                                                <label for="nombre2" class="block text-lg font-semibold text-gray-700">Segundo Nombre</label>
+                                                <input type="text" id="nombre2" name="nombre2" class="form-control w-full p-3 border-2 rounded-lg" placeholder="Segundo nombre (opcional)" value="{{ paciente.nombre2 }}">
+                                            </div>
+                                            <div>
+                                                <label for="apellido" class="block text-lg font-semibold text-gray-700">Primer Apellido</label>
+                                                <input type="text" id="apellido" name="apellido" class="form-control w-full p-3 border-2 rounded-lg" placeholder="Primer apellido" value="{{ paciente.apellido }}">
+                                            </div>
+                                        </div>
+                        
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                                            <div>
+                                                <label for="apellido2" class="block text-lg font-semibold text-gray-700">Segundo Apellido</label>
+                                                <input type="text" id="apellido2" name="apellido2" class="form-control w-full p-3 border-2 rounded-lg" placeholder="Segundo apellido (opcional)" value="{{ paciente.apellido2 }}">
+                                            </div>
+                                            <div>
+                                                <label for="telefono" class="block text-lg font-semibold text-gray-700">Teléfono</label>
+                                                <input type="text" id="telefono" name="telefono" class="form-control w-full p-3 border-2 rounded-lg" placeholder="Teléfono" value="{{ paciente.telefono }}">
+                                            </div>
+                                        </div>
+                        
+                                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
+                                            <!-- Edad y Sexo -->
+                                            <div>
+                                                <label for="edad" class="block text-lg font-semibold text-gray-700">Edad</label>
+                                                <input type="number" id="edad" name="edad" class="form-control w-full p-3 border-2 rounded-lg" placeholder="Edad" value="{{ paciente.edad }}">
+                                            </div>
+                                            <div>
+                                                <label for="sexo" class="block text-lg font-semibold text-gray-700">Sexo</label>
+                                                <select id="sexo" name="sexo" class="form-control w-full p-3 border-2 rounded-lg">
+                                                    <option value="masculino" {% if paciente.sexo == 'masculino' %}selected{% endif %}>Masculino</option>
+                                                    <option value="femenino" {% if paciente.sexo == 'femenino' %}selected{% endif %}>Femenino</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label for="condicion" class="block text-lg font-semibold text-gray-700">Condición</label>
+                                                <select id="condicion" name="condicion" class="form-control w-full p-3 border-2 rounded-lg">
+                                                    {% for condicion in condiciones %}
+                                                        <option value="{{ condicion.id }}" {% if condicion.id == paciente.condicion.id %}selected{% endif %}>{{ condicion.nombre }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                        
+                                        <!-- Antecedentes Personales -->
+                                        <div class="mt-4">
+                                            <label for="antecedentes_personales" class="block text-lg font-semibold text-gray-700">Antecedentes Personales</label>
+                                            <select id="antecedentes_personales" name="antecedentes_personales" class="form-control w-full p-3 border-2 rounded-lg">
+                                                {% for antecedente in antecedentes %}
+                                                    <option value="{{ antecedente.id }}" {% if antecedente.id == paciente.antecedentes_personales.id %}selected{% endif %}>{{ antecedente.descripcion }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                        
+                                        <!-- Dirección -->
+                                        <div class="mt-4">
+                                            <label for="direccion" class="block text-lg font-semibold text-gray-700">Dirección</label>
+                                            <textarea id="direccion" name="direccion" rows="3" class="form-control w-full p-3 border-2 rounded-lg" placeholder="Ingrese la dirección">{{ paciente.direccion }}</textarea>
+                                        </div>
+                        
+                                        <!-- Ubicación -->
+                                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
+                                            <div>
+                                                <label for="pais" class="block text-lg font-semibold text-gray-700">País</label>
+                                                <select id="pais" name="pais" class="form-control w-full p-3 border-2 rounded-lg">
+                                                    {% for pais in paises %}
+                                                        <option value="{{ pais.id }}" {% if pais.id == paciente.pais.id %}selected{% endif %}>{{ pais.nombre }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label for="estado" class="block text-lg font-semibold text-gray-700">Estado</label>
+                                                <select id="estado" name="estado" class="form-control w-full p-3 border-2 rounded-lg">
+                                                    {% for estado in estados %}
+                                                        <option value="{{ estado.id }}" {% if estado.id == paciente.estado.id %}selected{% endif %}>{{ estado.nombre }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label for="ciudad" class="block text-lg font-semibold text-gray-700">Ciudad</label>
+                                                <select id="ciudad" name="ciudad" class="form-control w-full p-3 border-2 rounded-lg">
+                                                    {% for ciudad in ciudades %}
+                                                        <option value="{{ ciudad.id }}" {% if ciudad.id == paciente.ciudad.id %}selected{% endif %}>{{ ciudad.nombre }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                        
+                                        <!-- Botón de Envío -->
+                                        <div class="mt-6 flex justify-center">
+                                            <button type="button" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-400 mr-2" onclick="closeModalEditarPaciente('{{ paciente.id }}')">Cancelar</button>
+                                            <button type="submit" class="bg-black text-white py-3 px-8 rounded-lg text-lg font-semibold hover:bg-blue-700 transition-all">
+                                                Guardar Cambios
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Paginación (Máximo 15 pacientes por página) -->
+        <div class="mt-6 flex justify-center space-x-2">
+            {% if pacientes.has_previous %}
+                <a href="?page=1" class="bg-gray-400 text-white px-4 py-2 rounded-lg">Primera</a>
+                <a href="?page={{ pacientes.previous_page_number }}" class="bg-gray-400 text-white px-4 py-2 rounded-lg">Anterior</a>
+            {% endif %}
+
+            <span class="px-4 py-2 bg-gray-300 rounded-lg">Página {{ pacientes.number }} de {{ pacientes.paginator.num_pages }}</span>
+
+            {% if pacientes.has_next %}
+                <a href="?page={{ pacientes.next_page_number }}" class="bg-gray-400 text-white px-4 py-2 rounded-lg">Siguiente</a>
+                <a href="?page={{ pacientes.paginator.num_pages }}" class="bg-gray-400 text-white px-4 py-2 rounded-lg">Última</a>
+            {% endif %}
+        </div>
+
+        
+        <div class="mt-6 flex justify-end">
+            <a href="{% url 'Crear_pacientes' %}" class="bg-green-500 text-white py-2 px-6 rounded-lg hover:bg-green-600 transition">
+                Agregar Paciente
+            </a>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="edicion" role="dialog">
+
+</div>
+
+<script type="text/javascript">
+    lucide.createIcons();
+    
+    function openModalEditarPaciente(id) {
+        document.getElementById(`modalEditarPaciente${id}`).classList.remove('hidden');
+        document.getElementById(`modalEditarPaciente${id}`).classList.add('flex');
+    }
+
+    function closeModalEditarPaciente(id) {
+        document.getElementById(`modalEditarPaciente${id}`).classList.remove('flex');
+        document.getElementById(`modalEditarPaciente${id}`).classList.add('hidden');
+    }
+
+    function filterTable() {
+        let input = document.getElementById("searchInput").value.toLowerCase();
+        let rows = document.getElementById("tableBody").getElementsByTagName("tr");
+
+        for (let row of rows) {
+            let text = row.textContent.toLowerCase();
+            row.style.display = text.includes(input) ? "" : "none";
+        }
+    }
+</script>
+{% endblock %}

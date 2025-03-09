@@ -1,0 +1,94 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <script src="{% static 'tailwind.js' %}"></script>
+
+    <style>
+        /* Estilo para el fondo */
+        .bg-login {
+            background-color: #1e3a3a; /* Mismo tono del sidebar */
+        }
+
+        /* Tarjeta de login */
+        .login-card {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 12px; /* Más redondeado */
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        /* Botón mejorado */
+        .login-btn {
+            display: block;
+            width: 100%;
+            background-color: #2b5d5d;
+            color: white;
+            padding: 12px;
+            text-align: center;
+            border-radius: 10px;
+            font-weight: bold;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .login-btn:hover {
+            background-color: #1e3a3a;
+            transform: scale(1.05);
+        }
+
+        /* Inputs */
+        .input-field {
+            border: 1px solid #2b5d5d;
+            padding: 10px;
+            width: 100%;
+            border-radius: 8px;
+            transition: border 0.3s;
+        }
+
+        .input-field:focus {
+            border: 2px solid #1e3a3a;
+            outline: none;
+        }
+    </style>
+</head>
+<body class="bg-login flex justify-center items-center h-screen">
+    <div class="login-card">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Creatiself</h2>
+
+        <!-- Mostrar mensajes de error -->
+        {% if messages %}
+            <div class="mb-4 text-red-600">
+                {% for message in messages %}
+                    <p>{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="POST" action="{% url 'Login' %}">
+            {% csrf_token %}
+            <div class="mb-6">
+                <label for="role" class="block text-gray-700 font-semibold mb-2">Rol</label>
+                <select id="role" name="role" class="input-field">
+                    <option value="usuario">Usuario</option>
+                    <option value="administrador">Administrador</option>
+                </select>
+            </div>
+            <div class="mb-4">
+                <label for="username" class="block text-gray-700 font-semibold mb-2">Usuario</label>
+                <input type="text" id="username" name="username" class="input-field" required>
+            </div>
+            <div class="mb-6">
+                <label for="password" class="block text-gray-700 font-semibold mb-2">Contraseña</label>
+                <input type="password" id="password" name="password" class="input-field" required>
+            </div>
+
+            <button type="submit" class="login-btn">Ingresar</button>
+        </form>
+    </div>
+</body>
+</html>
