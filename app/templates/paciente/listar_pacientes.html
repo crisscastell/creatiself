@@ -45,14 +45,11 @@
                             <td class="py-3 px-6 capitalize">{{ paciente.sexo }}</td>
                             <td class="py-3 px-6">{{ paciente.telefono }}</td>
                             
-                                <td class="py-3 px-6">
-                                    <button 
-                                        class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-500 focus:ring-2 focus:ring-blue-400"
-                                        onclick="openModalEditarPaciente('{{ paciente.id }}')"
-                                    >
+                            <td class="py-3 px-6">
+                                <button class="text-blue-500 hover:text-blue-700" onclick="openModalEditarPaciente('{{ paciente.id }}')">
                                     <i data-lucide="pencil" class="w-6 h-6"></i>
-                                    </button>
-                                </td>
+                                </button>
+                            </td>
                             
                         </tr>
                         <!-- MODAL -->

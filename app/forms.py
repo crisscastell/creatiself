@@ -38,7 +38,10 @@ class EmpleadoForm(forms.ModelForm):
         widgets = {
             'fecha_nacimiento': forms.DateInput(attrs={'type': 'date'}),
             'fecha_ingreso': forms.DateInput(attrs={'type': 'date'}),
+            'nivel_academico': forms.Select(attrs={'class': 'form-control border-2 border-gray-200 rounded-lg p-3 w-full'})
         }
+       
+    
 
 
 class CitaForm(forms.ModelForm):

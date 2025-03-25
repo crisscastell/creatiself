@@ -1,27 +1,7 @@
 {% extends 'base.html' %}
 
+{% block title %}Lista de Empleados{% endblock %}
+
 {% block content %}
-<h1>Lista de Empleados</h1>
-<table>
-    <thead>
-        <tr>
-            <th>Cédula</th>
-            <th>Nombre</th>
-            <th>Cargo</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for empleado in empleados %}
-        <tr>
-            <td>{{ empleado.cedula }}</td>
-            <td>{{ empleado.nombre }} {{ empleado.apellido }}</td>
-            <td>{{ empleado.cargo }}</td>
-            <td>
-                <!-- Aquí puedes agregar enlaces para editar o eliminar empleados -->
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+
 {% endblock %}

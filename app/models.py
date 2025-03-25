@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.contrib.auth.models import AbstractUser
 # Rol
 class Rol(models.Model):
     nombre_rol = models.CharField(max_length=50)
@@ -8,19 +8,31 @@ class Rol(models.Model):
         return self.nombre_rol
 
 # Usuario
-class Usuario(models.Model):
+class Usuario(AbstractUser):
     cedula = models.CharField(max_length=20, unique=True)
-    nombre = models.CharField(max_length=50)
-    apellido = models.CharField(max_length=50)
     telefono = models.CharField(max_length=20, blank=True, null=True)
-    correo = models.EmailField(unique=True)
-    status = models.BooleanField(default=True)  
-    fecha_registro = models.DateField(auto_now_add=True)
-    clave = models.CharField(max_length=255)
-    rol = models.ForeignKey(Rol, on_delete=models.CASCADE)
+    rol = models.ForeignKey('Rol', on_delete=models.CASCADE, null=True, blank=True)
+
+# Define related_name únicos para evitar conflictos
+    groups = models.ManyToManyField(
+        'auth.Group',
+        verbose_name='groups',
+        blank=True,
+        help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.',
+        related_name='usuario_set',  # related_name único
+        related_query_name='usuario',
+    )
+    user_permissions = models.ManyToManyField(
+        'auth.Permission',
+        verbose_name='user permissions',
+        blank=True,
+        help_text='Specific permissions for this user.',
+        related_name='usuario_set',  # related_name único
+        related_query_name='usuario',
+    )
 
     def __str__(self):
-        return f"{self.nombre} {self.apellido}"
+        return self.username
 
 # País
 class Pais(models.Model):

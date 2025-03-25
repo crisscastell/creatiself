@@ -197,7 +197,7 @@
             </div>
             <div class="menu-item">
                 <span>
-                    <i class="fas fa-user-circle"></i> Citas
+                    <i class="fas fa-calendar"></i> Citas  
                     <i class="fas fa-chevron-down arrow"></i>
                 </span>
                 <div class="submenu">
@@ -207,10 +207,12 @@
                     <button class="submenu-item" style="width: 100%; text-align: left;" onclick="window.location.href='{% url 'Listar_citas' %}';">
                         Listar Citas
                     </button>
+                    <button class="submenu-item" style="width: 100%; text-align: left;" onclick="window.location.href='#';">
+                        Detalles Citas
+                    </button>
                 </div>
             </div>
-            
-            {% if request.user.is_authenticated and request.user.rol.nombre_rol == "Administrador" %}
+            {% if request.user.is_authenticated and request.session.usuario_rol == "Administrador" %}
                 <div class="menu-item">
                     <span>
                         <i class="fas fa-users"></i> Empleados
@@ -227,7 +229,26 @@
                         </button>
                     </div>
                 </div>
+                <!-- Nuevo menú de Usuario -->
+                <div class="menu-item">
+                    <span>
+                        <i class="fas fa-user"></i> Usuario  <!-- Ícono de usuario -->
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </span>
+                    <div class="submenu">
+                        <button class="submenu-item" style="width: 100%; text-align: left;" onclick="window.location.href='{% url 'Crear_usuario' %}';">
+                            Crear Usuario
+                        </button>
+                        <button class="submenu-item" style="width: 100%; text-align: left;" onclick="window.location.href='{% url 'Listar_usuarios' %}';">
+                            Listar Usuarios
+                        </button>
+                        
+                    </div>
+                </div>
             {% endif %}
+           
+                
+           
             <div class="menu-item">
                 <span>
                     <i class="fas fa-table"></i> Tablas
@@ -251,24 +272,33 @@
         <i class="fas fa-bars"></i>
     </button>
 
-    <!-- Panel de usuario alineado a la derecha -->
+        <!-- Panel de usuario alineado a la derecha -->
     <div class="relative ml-auto">
-        <button id="user-panel-toggle" class="flex items-center bg-white px-3 py-1 rounded-xl shadow-md transition hover:bg-gray-100">
-            <i class="fas fa-user-circle text-2xl text-gray-700 mr-2"></i>
-            <span class="font-medium text-gray-800 text-sm">{{ usuario_nombre }}</span>
-        </button>
-        
-        <!-- Menú desplegable -->
-        <div id="user-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-lg overflow-hidden">
-            <div class="p-4 text-gray-700">
-                <p><strong>Usuario:</strong> {{ usuario_nombre }}</p>
-                <p><strong>Rol:</strong> {{ usuario_rol }}</p>
-            </div>
-            <div class="border-t"></div>
-            <button onclick="window.location.href='{% url 'Login' %}';" class="w-full p-3 text-left text-red-600 hover:bg-gray-100">
-                <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+        {% if user.is_authenticated %}
+            <!-- Botón para abrir el menú desplegable -->
+            <button id="user-panel-toggle" class="flex items-center bg-white px-3 py-1 rounded-xl shadow-md transition hover:bg-gray-100">
+                <i class="fas fa-user-circle text-2xl text-gray-700 mr-2"></i>
+                <span class="font-medium text-gray-800 text-sm">{{ Usuario.nombre }}</span>
             </button>
-        </div>
+            
+            <!-- Menú desplegable -->
+            <div id="user-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-lg overflow-hidden">
+                <div class="p-4 text-gray-700">
+                    <p><strong>Usuario:</strong> {{ user.username }}</p>
+                    <p><strong>Rol:</strong> {{ user.rol.nombre_rol }}</p>
+                </div>
+                <div class="border-t"></div>
+                <button onclick="window.location.href='{% url 'Login' %}';" class="w-full p-3 text-left text-red-600 hover:bg-gray-100">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+                </button>
+            </div>
+        {% else %}
+            <!-- Botón de inicio de sesión si el usuario no está autenticado -->
+            <a href="{% url 'login' %}" class="flex items-center bg-white px-3 py-1 rounded-xl shadow-md transition hover:bg-gray-100">
+                <i class="fas fa-sign-in-alt text-2xl text-gray-700 mr-2"></i>
+                <span class="font-medium text-gray-800 text-sm">Iniciar sesión</span>
+            </a>
+        {% endif %}
     </div>
 </div>
 

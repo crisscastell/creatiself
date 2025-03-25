@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
-from app.models import Cita, DetalleCita
+from app.models import Cita, DetalleCita, Paciente
 from app.forms import CitaForm, DetalleCitaForm
 
 def crear_cita(request):
@@ -29,7 +29,7 @@ def editar_cita(request, cita_id):
         form = CitaForm(request.POST, instance=cita)
         if form.is_valid():
             form.save()
-            return redirect('listar_citas')  
+            return redirect('Listar_citas')  
     else:
         form = CitaForm(instance=cita)
     
@@ -40,7 +40,7 @@ def eliminar_cita(request, cita_id):
     
     if request.method == "POST":
         cita.delete()
-        return redirect('listar_citas')  
+        return redirect('Listar_citas')  
     
     return render(request, 'citas/eliminar_cita.html', {'cita': cita})
 
@@ -53,7 +53,7 @@ def crear_detalle_cita(request, cita_id):
             detalle_cita = form.save(commit=False)
             detalle_cita.cita = cita  # Asigna la cita al detalle de cita
             detalle_cita.save()
-            return redirect('listar_detalles_cita', cita_id=cita_id)  # Redirige a la lista de detalles de la cita
+            return redirect('Listar_detalles_cita', cita_id=cita_id)  # Redirige a la lista de detalles de la cita
     else:
         form = DetalleCitaForm()
 
@@ -66,7 +66,8 @@ def listar_detalles_cita(request, cita_id):
     return render(request, 'detallecita/listar_detalles_cita.html', {'detalles_cita': detalles_cita, 'cita': cita})
 
 def editar_detalle_cita(request, detalle_cita_id):
-    detalle_cita = get_object_or_404(DetalleCita, id=detalle_cita_id)  # Obtén el detalle de cita
+    detalle_cita = get_object_or_404(DetalleCita, id=detalle_cita_id)
+    pacientes = Paciente.objects.all()   # Obtén el detalle de cita
 
     if request.method == "POST":
         form = DetalleCitaForm(request.POST, instance=detalle_cita)

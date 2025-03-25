@@ -35,6 +35,62 @@
                                 <i data-lucide="pencil" class="w-6 h-6"></i>
                             </button>
                         </td>
+                        
+                        <!-- Modal de Edición -->
+                        <div id="modalEditarCita{{ cita.id }}" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden items-center justify-center">
+                            <div class="bg-white p-6 rounded-lg shadow-lg max-w-lg w-full">
+                                <h2 class="text-2xl font-bold mb-4">Editar Cita</h2>
+                                <div id="modal-body">
+                                    <form method="POST" action="{% url 'Editar_cita' cita.id %}" id="form-editar-cita">
+                                        {% csrf_token %}
+                                        <!-- Hora -->
+                                        <div class="mb-4">
+                                            <label for="hora" class="block text-lg font-semibold text-gray-700">Hora</label>
+                                            <input type="time" id="hora" name="hora" class="form-control w-full p-3 border-2 rounded-lg" value="{{ cita.hora|time:'H:i' }}">
+                                        </div>
+                        
+                                        <!-- Fecha -->
+                                        <div class="mb-4">
+                                            <label for="fecha" class="block text-lg font-semibold text-gray-700">Fecha</label>
+                                            <input type="datetime-local" id="fecha" name="fecha" class="form-control w-full p-3 border-2 rounded-lg" value="{{ cita.fecha|date:'Y-m-d H:i' }}">
+                                        </div>
+                        
+                                        <!-- Modalidad -->
+                                        <div class="mb-4">
+                                            <label for="modalidad" class="block text-lg font-semibold text-gray-700">Modalidad</label>
+                                            <select id="modalidad" name="modalidad" class="form-control w-full p-3 border-2 rounded-lg">
+                                                <option value="virtual" {% if cita.modalidad == 'virtual' %}selected{% endif %}>Virtual</option>
+                                                <option value="presencial" {% if cita.modalidad == 'presencial' %}selected{% endif %}>Presencial</option>
+                                            </select>
+                                        </div>
+                        
+                                        <!-- Motivo de Consulta -->
+                                        <div class="mb-4">
+                                            <label for="motivo_consulta" class="block text-lg font-semibold text-gray-700">Motivo de Consulta</label>
+                                            <textarea id="motivo_consulta" name="motivo_consulta" rows="3" class="form-control w-full p-3 border-2 rounded-lg" placeholder="Ingrese el motivo de consulta">{{ cita.motivo_consulta }}</textarea>
+                                        </div>
+                        
+                                        <!-- Paciente -->
+                                        <div class="mb-4">
+                                            <label for="paciente" class="block text-lg font-semibold text-gray-700">Paciente</label>
+                                            <select id="paciente" name="paciente" class="form-control w-full p-3 border-2 rounded-lg">
+                                                {% for paciente in pacientes %}
+                                                    <option value="{{ paciente.id }}" {% if paciente.id == cita.paciente.id %}selected{% endif %}>
+                                                        {{ paciente.nombre }} {{ paciente.apellido }}
+                                                    </option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                        
+                                        <!-- Botones -->
+                                        <div class="flex justify-end mt-4">
+                                            <button type="submit" class="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600">Guardar cambios</button>
+                                            <button type="button" id="cerrarModal" class="ml-4 bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600" onclick="closeModalEditarCita({{ cita.id }})">Cerrar</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
                     </tr>
                     {% empty %}
                     <tr>
@@ -53,25 +109,29 @@
     </div>
 </div>
 
-    <!-- Modal de Edición -->
-    <div id="modalEditarCita" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden items-center justify-center">
-    <div class="bg-white p-6 rounded-lg shadow-lg max-w-lg w-full">
-        <h2 class="text-2xl font-bold mb-4">Editar Cita</h2>
-        <div id="modal-body">
-            <form method="POST" action="" id="form-editar-cita">
-                {% csrf_token %}
-                <!-- Campos del formulario -->
-                <div class="flex justify-end mt-4">
-                    <button type="submit" class="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600">Guardar cambios</button>
-                    <button type="button" id="cerrarModal" class="ml-4 bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600">Cerrar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-    </div>
+    
 
 <script>
     lucide.createIcons();
-   
+
+    function openModalEditarCita(id) {
+        document.getElementById(`modalEditarCita${id}`).classList.remove('hidden');
+        document.getElementById(`modalEditarCita${id}`).classList.add('flex');
+    }
+    
+    function closeModalEditarCita(id) {
+        document.getElementById(`modalEditarCita${id}`).classList.remove('flex');
+        document.getElementById(`modalEditarCita${id}`).classList.add('hidden');
+    }
+
+    function filterTable() {
+        let input = document.getElementById("searchInput").value.toLowerCase();
+        let rows = document.getElementById("tableBody").getElementsByTagName("tr");
+
+        for (let row of rows) {
+            let text = row.textContent.toLowerCase();
+            row.style.display = text.includes(input) ? "" : "none";
+        }
+    }
 </script>
 {% endblock %}

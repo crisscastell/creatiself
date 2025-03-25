@@ -74,8 +74,9 @@
             <div class="mb-6">
                 <label for="role" class="block text-gray-700 font-semibold mb-2">Rol</label>
                 <select id="role" name="role" class="input-field">
-                    <option value="usuario">Usuario</option>
-                    <option value="administrador">Administrador</option>
+                    {% for rol in roles %}
+                        <option value="{{ rol.nombre_rol }}">{{ rol.nombre_rol }}</option>
+                    {% endfor %}
                 </select>
             </div>
             <div class="mb-4">

@@ -15,9 +15,8 @@ class RolAdmin(admin.ModelAdmin):
 
 @admin.register(Usuario)
 class UsuarioAdmin(admin.ModelAdmin):
-    list_display = ('cedula', 'nombre', 'apellido', 'correo', 'status', 'fecha_registro', 'rol')
-    list_filter = ('status', 'rol')
-    search_fields = ('cedula', 'nombre', 'apellido', 'correo')
+    list_display = ('username', 'first_name', 'last_name', 'email', 'is_active', 'date_joined')
+    list_filter = ('is_active',)
 
 
 @admin.register(Pais)

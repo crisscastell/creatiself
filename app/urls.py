@@ -6,13 +6,13 @@ from app.viewsempleados import *
 
 
 urlpatterns = [
-    path("", login, name="Login"),
+    path("", login, name='Login'),
 
     path('index/', index, name='Index'),
     path('pacientes/crear', crear_pacientes, name='Crear_pacientes'),
     path('pacientes/listar/', listar_pacientes, name='Listar_pacientes'),
     path('editar_paciente/<int:id>/', editar_paciente, name='Editar_paciente'),
-    path('api/paises/', obtener_paises, name='obtener_paises'),
+    path('api/paises/', get_countries, name='obtener_paises'),
     path('api/estados/', obtener_estados, name='obtener_estados'),
     path('api/ciudades/', obtener_ciudades, name='obtener_ciudades'),
     
@@ -20,14 +20,15 @@ urlpatterns = [
     path('listar/citas', listar_citas, name='Listar_citas'),
     path('editar_cita/<int:id>/', editar_cita, name='Editar_cita'),
 
-    path('empleados/crear/', crear_empleado, name='Crear_empleado'),
-    path('empleados/', listar_empleados, name='Listar_empleados'),
-    path('empleados/editar/<int:id>/', editar_empleado, name='Editar_empleado'),
+     path('crear_empleado/', crear_empleado, name='Crear_empleado'),
+    path('listar_empleados/', listar_empleados, name='Listar_empleados'),
+    path('crear_usuario/', crear_usuario, name='Crear_usuario'),
+    path('listar_usuarios/', listar_usuarios, name='Listar_usuarios'),
 
-    path('cita/<int:cita_id>/detalle/crear/', crear_detalle_cita, name='crear_detalle_cita'),
-    path('cita/<int:cita_id>/detalle/listar/', listar_detalles_cita, name='listar_detalles_cita'),
-    path('detalle/editar/<int:detalle_cita_id>/', editar_detalle_cita, name='editar_detalle_cita'),
-    path('detalle/eliminar/<int:detalle_cita_id>/', eliminar_detalle_cita, name='eliminar_detalle_cita'),
+    path('cita/<int:cita_id>/detalle/crear/', crear_detalle_cita, name='Crear_detalle_cita'),
+    path('cita/<int:cita_id>/detalle/listar/', listar_detalles_cita, name='Listar_detalles_cita'),
+    path('detalle/editar/<int:detalle_cita_id>/', editar_detalle_cita, name='Editar_detalle_cita'),
+    path('detalle/eliminar/<int:detalle_cita_id>/', eliminar_detalle_cita, name='Eliminar_detalle_cita'),
 
     path('tablas/', tablas, name='Tablas'),
 
