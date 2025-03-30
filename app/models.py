@@ -66,17 +66,31 @@ class Representante(models.Model):
     direccion = models.TextField()
     edad = models.IntegerField()
     sexo = models.CharField(max_length=10, choices=[('masculino', 'Masculino'), ('femenino', 'Femenino')])
-    parentesco = models.ForeignKey('Parentesco', on_delete=models.CASCADE)
+    parentesco = models.CharField(
+    max_length=20,
+    choices = [
+    ('padre', 'Padre'),
+    ('madre', 'Madre'),
+    ('abuelo', 'Abuelo'),
+    ('abuela', 'Abuela'),
+    ('bisabuelo', 'Bisabuelo'),
+    ('bisabuela', 'Bisabuela'),
+    ('hermano', 'Hermano'),
+    ('hermana', 'Hermana'),
+    ('tio', 'Tío'),
+    ('tia', 'Tía'),
+    ('primo', 'Primo'),
+    ('prima', 'Prima'),
+    ('padrino', 'Padrino'),
+    ('madrina', 'Madrina'),
+    ('sin_parentesco', 'Sin parentesco'),
+    ],
+    default='sin_parentesco'
+    )
 
     def __str__(self):
         return f"{self.nombre} {self.apellido}"
 
-# Parentesco
-class Parentesco(models.Model):
-    nombre = models.CharField(max_length=50)
-
-    def __str__(self):
-        return self.nombre
 
 # Paciente
 class Paciente(models.Model):
@@ -110,9 +124,9 @@ class Paciente(models.Model):
     ],
     default='sin_estudios'
     )
-    pais = models.ForeignKey(Pais, on_delete=models.CASCADE)
-    estado = models.ForeignKey(Estado, on_delete=models.CASCADE)
-    ciudad = models.ForeignKey(Ciudad, on_delete=models.CASCADE)
+    pais = models.ForeignKey('Pais', on_delete=models.CASCADE)
+    estado = models.ForeignKey('Estado', on_delete=models.CASCADE)
+    ciudad = models.ForeignKey('Ciudad', on_delete=models.CASCADE)
     antecedentes_personales = models.ForeignKey('AntecedentesPersonales', on_delete=models.SET_NULL, null=True, blank=True)
     condicion = models.ForeignKey('Condicion', on_delete=models.SET_NULL, null=True, blank=True)
  

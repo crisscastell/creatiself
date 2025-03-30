@@ -2,12 +2,11 @@ from django.shortcuts import render
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login as auth_login
 from django.contrib import messages
-import requests
+from django.core.paginator import Paginator
 from django.http import JsonResponse
 from .models import *
 from .forms import AntecedentesPersonalesForm, CondicionForm
 from django.contrib.auth.hashers import make_password
-from rest_framework import generics
 
 
 
@@ -82,15 +81,11 @@ def crear_antecedente(request):
         form = AntecedentesPersonalesForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('Listar_antecedentes')  # Nombre de la URL para listar
+            return redirect('Caracteristicas')  # Nombre de la URL para listar
     else:
         form = AntecedentesPersonalesForm()
     
-    return render(request, 'tablas/antecedentes_personales.html', {'form': form})
-
-def listar_antecedentes(request):
-    antecedentes = AntecedentesPersonales.objects.all()
-    return render(request, 'tablas/antecedentes_personales.html', {'antecedentes': antecedentes})
+    return render(request, 'paciente/caracteristicas.html', {'form': form})
 
 def editar_antecedente(request, id):
     antecedente = get_object_or_404(AntecedentesPersonales, id=id)
@@ -98,20 +93,11 @@ def editar_antecedente(request, id):
         form = AntecedentesPersonalesForm(request.POST, instance=antecedente)
         if form.is_valid():
             form.save()
-            return redirect('Listar_antecedentes')  # Redirige a la lista de antecedentes
+            return redirect('Caracteristicas')  # Redirige a la lista de antecedentes
     else:
         form = AntecedentesPersonalesForm(instance=antecedente)
     
-    return render(request, 'tablas/editar_antecedente.html', {'form': form})
-
-def eliminar_antecedente(request, id):
-    antecedente = get_object_or_404(AntecedentesPersonales, id=id)
-    if request.method == 'POST':
-        antecedente.delete()
-        return redirect('Listar_antecedentes')  # Redirige tras eliminar
-
-    return render(request, 'tablas/confirmar_eliminar.html', {'antecedente': antecedente})
-
+    return render(request, 'paciente/caracteristicas.html', {'form': form})
 
 # 🔹 CONDICIÓN
 def crear_condicion(request):
@@ -119,15 +105,11 @@ def crear_condicion(request):
         form = CondicionForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('Listar_condiciones')
+            return redirect('Caracteristicas')
     else:
         form = CondicionForm()
 
-    return render(request, 'tablas/condicion.html', {'form': form})
-
-def listar_condiciones(request):
-    condiciones = Condicion.objects.all()
-    return render(request, 'tablas/condicion.html', {'condiciones': condiciones})
+    return render(request, 'paciente/caracteristicas.html', {'form': form})
 
 def editar_condicion(request, id):
     condicion = get_object_or_404(Condicion, id=id)
@@ -135,21 +117,11 @@ def editar_condicion(request, id):
         form = CondicionForm(request.POST, instance=condicion)
         if form.is_valid():
             form.save()
-            return redirect('Listar_condiciones')
+            return redirect('Caracteristicas')
     else:
         form = CondicionForm(instance=condicion)
     
-    return render(request, 'tablas/editar_condicion.html', {'form': form})
-
-def eliminar_condicion(request, id):
-    condicion = get_object_or_404(Condicion, id=id)
-    if request.method == 'POST':
-        condicion.delete()
-        return redirect('Listar_condiciones')
-
-    return render(request, 'tablas/confirmar_eliminar.html', {'objeto': condicion, 'tipo': 'Condición'})
-
-
+    return render(request, 'paciente/caracteristicas.html', {'form': form})
 
 
 def pacientes(request):
@@ -161,18 +133,45 @@ def citas(request):
 def tablas(request):
     return render(request, "tablas.html")
 
+def caracteristicas(request):
+    # Obtener todos los antecedentes personales
+    antecedentes = AntecedentesPersonales.objects.all()
 
-def get_countries(request):
-    response = requests.get('https://api.countrystatecity.in/v1/countries', headers={'X-CSCAPI-KEY': 'YOUR_API_KEY'})
-    countries = response.json()
-    return JsonResponse(countries, safe=False)
+    # Obtener todas las condiciones
+    condiciones = Condicion.objects.all()
+    
+    # Paginación para antecedentes
+    paginator_antecedentes = Paginator(antecedentes, 5)  # 5 antecedentes por página
+    page_number_antecedentes = request.GET.get('page_antecedentes')  # Obtener el número de página para antecedentes desde la URL
+    page_obj_antecedentes = paginator_antecedentes.get_page(page_number_antecedentes)  # Obtener la página actual de antecedentes
 
-def obtener_estados(request):
-    pais_id = request.GET.get('pais_id')
-    estados = Estado.objects.filter(pais_id=pais_id)
-    return JsonResponse([{'id': estado.id, 'nombre': estado.nombre_estado} for estado in estados], safe=False)
+    # Paginación para condiciones
+    paginator_condiciones = Paginator(condiciones, 5)  # 5 condiciones por página
+    page_number_condiciones = request.GET.get('page_condiciones')  # Obtener el número de página para condiciones desde la URL
+    page_obj_condiciones = paginator_condiciones.get_page(page_number_condiciones)  # Obtener la página actual de condiciones
 
-def obtener_ciudades(request):
-    estado_id = request.GET.get('estado_id')
-    ciudades = Ciudad.objects.filter(estado_id=estado_id)
-    return JsonResponse([{'id': ciudad.id, 'nombre': ciudad.nombre_ciudad} for ciudad in ciudades], safe=False)
+    # Manejo del formulario de antecedentes
+    if request.method == 'POST' and 'antecedente' in request.POST:
+        form_antecedente = AntecedentesPersonalesForm(request.POST)
+        if form_antecedente.is_valid():
+            form_antecedente.save()
+            return redirect('Caracteristicas')  # Asegúrate de que el nombre de la URL sea correcto
+    else:
+        form_antecedente = AntecedentesPersonalesForm()  # Form vacío para mostrar en el template
+    
+    # Manejo del formulario de condiciones
+    if request.method == 'POST' and 'condicion' in request.POST:
+        form_condicion = CondicionForm(request.POST)
+        if form_condicion.is_valid():
+            form_condicion.save()
+            return redirect('Caracteristicas')  # Asegúrate de que el nombre de la URL sea correcto
+    else:
+        form_condicion = CondicionForm()  # Form vacío para mostrar en el template
+    
+    # Renderizar la página
+    return render(request, 'paciente/caracteristicas.html', {
+        'form_antecedente': form_antecedente, 
+        'form_condicion': form_condicion,  # Pasar el formulario de condiciones
+        'page_obj_antecedentes': page_obj_antecedentes,  # Pasar solo el paginador de antecedentes
+        'page_obj_condiciones': page_obj_condiciones,  # Pasar solo el paginador de condiciones
+    })

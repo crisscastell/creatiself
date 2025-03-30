@@ -3,19 +3,66 @@ from django.core.paginator import Paginator
 from django.contrib import messages
 from django.shortcuts import render
 from django.db.models import Q
-from .forms import EmpleadoForm
+from .forms import EmpleadoForm, UsuarioForm
 from .models import *
 from django.contrib.auth.decorators import login_required
 
-
-@login_required
 def crear_empleado(request):
     usuario = request.user
+    # Comprobamos si el usuario tiene el rol de 'Administrador'
     if usuario.rol.nombre_rol == 'Administrador':
-        return render(request, 'admin/crear_empleado.html')
+        if request.method == 'POST':
+            # Creamos un formulario con los datos recibidos del POST
+            form = EmpleadoForm(request.POST)
+            if form.is_valid():
+                # Guardamos el empleado
+                form.save()
+                # Redirigimos al listado de empleados después de registrar
+                return redirect('Listar_empleados')  # Cambia a la URL que muestra la lista de empleados
+
+        # Si el método es GET, mostramos el formulario vacío
+        form = EmpleadoForm()
+
+        # Obtenemos los países, estados y ciudades desde la base de datos
+        paises = Pais.objects.all()
+        estados = Estado.objects.all()
+        ciudades = Ciudad.objects.all()
+
+        # Pasamos estos datos al contexto
+        context = {
+            'form': form,
+            'paises': paises,
+            'estados': estados,
+            'ciudades': ciudades
+        }
+
+        return render(request, 'admin/crear_empleado.html', context)
     else:
         return redirect('acceso_denegado')
+    
+def editar_empleado(request, id):
+    empleado = get_object_or_404(Empleado, id=id)
+    
+    if request.method == 'POST':
+        form = EmpleadoForm(request.POST, instance=empleado)
+        if form.is_valid():
+            form.save()
+            return redirect('Listar_empleados') 
+    else:
+        form = EmpleadoForm(instance=empleado)
 
+    paises = Pais.objects.all()
+    estados = Estado.objects.all()
+    ciudades = Ciudad.objects.all()
+    
+    return render(request, 'empleado/listar_empleados.html', {
+        'form': form,
+        'empleado': empleado,
+        'paises': paises,
+        'estados': estados,
+        'ciudades': ciudades
+    })
+    
 @login_required
 def listar_empleados(request):
     usuario = request.user
@@ -32,6 +79,25 @@ def crear_usuario(request):
         return render(request, 'admin/crear_usuario.html')
     else:
         return redirect('acceso_denegado')
+
+def editar_usuario(request, id):
+    usuario = get_object_or_404(Usuario, id=id)
+    
+    if request.method == 'POST':
+        form = UsuarioForm(request.POST, instance=usuario)
+        if form.is_valid():
+            form.save()
+            return redirect('Listar_usuarios') 
+    else:
+        form = UsuarioForm(instance=usuario)
+
+    roles = Rol.objects.all()
+
+    return render(request, 'usuario/listar_usuarios.html', {
+        'form': form,
+        'usuario': usuario,
+        'roles': roles
+    })
 
 @login_required
 def listar_usuarios(request):

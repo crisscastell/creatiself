@@ -5,17 +5,20 @@ from app.forms import CitaForm, DetalleCitaForm
 
 def crear_cita(request):
     if request.method == "POST":
-       
         form = CitaForm(request.POST)
         if form.is_valid():
-            
             form.save()
-            return redirect('Listar_citas')  
+            return redirect('Listar_citas')  # Ajusta según el nombre de tu vista de lista
     else:
-      
         form = CitaForm()
 
-    return render(request, 'citas/crear_cita.html', {'form': form})
+    # Obtener los datos de las ForeignKey manualmente
+    pacientes = Paciente.objects.all()
+
+    return render(request, 'citas/crear_cita.html', {
+        'form': form,
+        'pacientes': pacientes
+    })
 
 def listar_citas(request):
     citas = Cita.objects.all()

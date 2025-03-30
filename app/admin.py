@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import (
-    Rol, Usuario, Pais, Estado, Ciudad, Representante, Parentesco, Paciente,
+    Rol, Usuario, Pais, Estado, Ciudad, Representante, Paciente,
     PacienteRepresentante, AntecedentesPersonales, Condicion, Cita, DetalleCita,
     PacienteCita, Empleado
 )
@@ -44,13 +44,6 @@ class RepresentanteAdmin(admin.ModelAdmin):
     list_display = ('cedula', 'nombre', 'apellido', 'telefono', 'edad', 'sexo', 'parentesco')
     list_filter = ('sexo', 'parentesco')
     search_fields = ('cedula', 'nombre', 'apellido')
-
-
-@admin.register(Parentesco)
-class ParentescoAdmin(admin.ModelAdmin):
-    list_display = ('nombre',)
-    search_fields = ('nombre',)
-
 
 @admin.register(Paciente)
 class PacienteAdmin(admin.ModelAdmin):

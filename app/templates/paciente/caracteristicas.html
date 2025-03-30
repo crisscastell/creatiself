@@ -1,0 +1,220 @@
+{% extends 'base.html' %}
+
+{% block title %}Lista de Antecedentes{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-100 py-8">
+    <div class="max-w-6xl mx-auto bg-white p-6 rounded-lg shadow-lg">
+
+        <h1 class="text-3xl font-bold text-center text-gray-700 mb-6">Gestión de Antecedentes y Condiciones</h1>
+
+        <!-- Contenedor principal -->
+        <div class="flex justify-between space-x-6">
+            <!-- Lado izquierdo: Formulario para agregar antecedentes -->
+            <div class="w-1/3 bg-gray-200 p-6 rounded-lg shadow-md">
+                <h2 class="text-2xl font-semibold text-gray-700 mb-4">Agregar Antecedente</h2>
+                <form method="POST" action="{% url 'Crear_antecedentes' %}" onsubmit="recargarPagina()">
+                    {% csrf_token %}
+                    
+                    <!-- Campo de Descripción -->
+                    <div class="mb-4">
+                        <label for="descripcion" class="block text-lg font-semibold text-gray-700">Descripción</label>
+                        <textarea id="descripcion" name="descripcion" rows="4" class="form-control w-full p-3 border-2 rounded-lg" placeholder="Ingrese la descripción"></textarea>
+                    </div>
+                
+                    <!-- Botón de Agregar -->
+                    <button type="submit" name="antecedente" class="bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 w-full">
+                        Agregar Antecedente
+                    </button>
+                </form>
+            </div>
+
+            <!-- Lado derecho: Lista de antecedentes -->
+            <div class="w-2/3">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full bg-white border border-gray-300 rounded-lg shadow-sm">
+                        <thead class="bg-gray-200 text-gray-700 text-left">
+                            <tr>
+                                <th class="py-3 px-6 border-b">ID</th>
+                                <th class="py-3 px-6 border-b">Descripción</th>
+                                <th class="py-3 px-6 border-b text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for antecedente in page_obj_antecedentes %}
+                                <tr class="border-b hover:bg-gray-100">
+                                    <td class="py-3 px-6">{{ antecedente.id }}</td>
+                                    <td class="py-3 px-6">
+                                        <!-- Contenedor para la descripción como párrafo de múltiples líneas -->
+                                        <div class="max-w-xs break-words">
+                                            {{ antecedente.descripcion }}
+                                        </div>
+                                    </td>
+                                    <td class="py-3 px-6 flex justify-center space-x-4">
+                                        <button class="text-blue-500 hover:text-blue-700" onclick="openModalEditarAntecedente('{{ antecedente.id }}')">
+                                            <i data-lucide="pencil" class="w-6 h-6"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="3" class="py-4 text-center text-gray-500">No hay antecedentes registrados.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                    <!-- Paginación de Antecedentes -->
+                    <div class="flex justify-between items-center mt-6">
+                        {% if page_obj_antecedentes.has_previous %}
+                            <a href="?page_antecedentes={{ page_obj_antecedentes.previous_page_number }}" class="text-blue-500 hover:text-blue-700">
+                                <i class="fas fa-angle-left"></i>
+                            </a>
+                        {% else %}
+                            <span class="text-gray-300">
+                                <i class="fas fa-angle-left"></i>
+                            </span>
+                        {% endif %}
+
+                        <div class="flex items-center space-x-2">
+                            {% for num in page_obj_antecedentes.paginator.page_range %}
+                                <a href="?page_antecedentes={{ num }}" class="px-3 py-1 text-sm border border-gray-300 rounded-lg 
+                                    {% if page_obj_antecedentes.number == num %}
+                                        bg-blue-500 text-white
+                                    {% else %}
+                                        text-gray-500
+                                    {% endif %}">
+                                    {{ num }}
+                                </a>
+                            {% endfor %}
+                        </div>
+
+                        {% if page_obj_antecedentes.has_next %}
+                            <a href="?page_antecedentes={{ page_obj_antecedentes.next_page_number }}" class="text-blue-500 hover:text-blue-700 ml-2">
+                                <i class="fas fa-angle-right"></i>
+                            </a>
+                        {% else %}
+                            <span class="text-gray-300 ml-2">
+                                <i class="fas fa-angle-right"></i>
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contenedor de Condiciones -->
+        <div class="flex justify-between space-x-6 mt-6">
+            <!-- Lado izquierdo: Formulario para agregar condición -->
+            <div class="w-1/3 bg-gray-200 p-6 rounded-lg shadow-md">
+                <h2 class="text-2xl font-semibold text-gray-700 mb-4">Agregar Condición</h2>
+                <form method="POST" action="{% url 'Crear_condicion' %}" onsubmit="recargarPagina()">
+                    {% csrf_token %}
+                    
+                    <!-- Campo de Nombre -->
+                    <div class="mb-4">
+                        <label for="nombre" class="block text-lg font-semibold text-gray-700">Nombre de la Condición</label>
+                        <input type="text" id="nombre" name="nombre" class="form-control w-full p-3 border-2 rounded-lg" placeholder="Ingrese el nombre de la condición">
+                    </div>
+
+                    <!-- Campo de Descripción -->
+                    <div class="mb-4">
+                        <label for="descripcion" class="block text-lg font-semibold text-gray-700">Descripción</label>
+                        <textarea id="descripcion" name="descripcion" rows="4" class="form-control w-full p-3 border-2 rounded-lg" placeholder="Ingrese la descripción"></textarea>
+                    </div>
+
+                    <!-- Botón de Agregar -->
+                    <button type="submit" name="condicion" class="bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 w-full">
+                        Agregar Condición
+                    </button>
+                </form>
+            </div>
+
+            <!-- Lado derecho: Lista de condiciones -->
+            <div class="w-2/3">
+                <h2 class="text-2xl font-semibold text-gray-700 mb-4">Lista de Condiciones</h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full bg-white border border-gray-300 rounded-lg shadow-sm">
+                        <thead class="bg-gray-200 text-gray-700 text-left">
+                            <tr>
+                                <th class="py-3 px-6 border-b">ID</th>
+                                <th class="py-3 px-6 border-b">Nombre</th>
+                                <th class="py-3 px-6 border-b">Descripción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for condicion in page_obj_condiciones %}
+                                <tr class="border-b hover:bg-gray-100">
+                                    <td class="py-3 px-6">{{ condicion.id }}</td>
+                                    <td class="py-3 px-6">{{ condicion.nombre }}</td>
+                                    <td class="py-3 px-6">
+                                        <!-- Contenedor para la descripción como párrafo de múltiples líneas -->
+                                        <div class="max-w-xs break-words">
+                                            {{ condicion.descripcion }}
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="3" class="py-4 text-center text-gray-500">No hay condiciones registradas.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                    <!-- Paginación de Condiciones -->
+                    <div class="flex justify-between items-center mt-6">
+                        {% if page_obj_condiciones.has_previous %}
+                            <a href="?page_condiciones={{ page_obj_condiciones.previous_page_number }}" class="text-blue-500 hover:text-blue-700">
+                                <i class="fas fa-angle-left"></i>
+                            </a>
+                        {% else %}
+                            <span class="text-gray-300">
+                                <i class="fas fa-angle-left"></i>
+                            </span>
+                        {% endif %}
+
+                        <div class="flex items-center space-x-2">
+                            {% for num in page_obj_condiciones.paginator.page_range %}
+                                <a href="?page_condiciones={{ num }}" class="px-3 py-1 text-sm border border-gray-300 rounded-lg 
+                                    {% if page_obj_condiciones.number == num %}
+                                        bg-blue-500 text-white
+                                    {% else %}
+                                        text-gray-500
+                                    {% endif %}">
+                                    {{ num }}
+                                </a>
+                            {% endfor %}
+                        </div>
+
+                        {% if page_obj_condiciones.has_next %}
+                            <a href="?page_condiciones={{ page_obj_condiciones.next_page_number }}" class="text-blue-500 hover:text-blue-700 ml-2">
+                                <i class="fas fa-angle-right"></i>
+                            </a>
+                        {% else %}
+                            <span class="text-gray-300 ml-2">
+                                <i class="fas fa-angle-right"></i>
+                            </span>
+                        {% endif %}
+                    </div>        
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleDescription(id) {
+        var descriptionText = document.getElementById('descripcion-' + id);
+        var button = descriptionText.nextElementSibling;
+        
+        if (descriptionText.style.maxHeight === '4em') {
+            descriptionText.style.maxHeight = 'none';
+            button.textContent = 'Leer menos';
+        } else {
+            descriptionText.style.maxHeight = '4em';
+            button.textContent = 'Leer más';
+        }
+    }
+</script>
+{% endblock %}

@@ -8,15 +8,17 @@
         <h1 class="text-3xl font-bold text-center text-gray-700 mb-6">Pacientes</h1>
         
         <div class="overflow-x-auto">
-            <!-- Barra de Búsqueda -->
+        
          <!-- Barra de Búsqueda con Botón -->
          <form method="GET" action="{% url 'Listar_pacientes' %}" class="flex space-x-2 mb-4">
             <input 
                 type="text" 
+                id="searchInput"
                 name="q" 
-                placeholder="Buscar por cédula o nombre..." 
+                placeholder="Buscar por nombre, apellido, cédula o teléfono..." 
                 class="p-2 border border-gray-300 rounded-lg w-1/2" 
-                value="{{ query|default:'' }}"
+                value="{{ query|default:'' }}" 
+                onkeyup="filterTable()"
             />
             <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
                 Buscar
@@ -57,7 +59,7 @@
                             <div class="fixed inset-0 flex justify-center items-center z-50 bg-gray-500 bg-opacity-50">
                                 <div class="bg-gray-300 w-[23cm] h-[15cm] p-6 rounded-lg shadow-lg overflow-auto">
                                     <h3 class="text-lg font-bold mb-4">Editar Paciente</h3>
-                                    <form method="POST" action="" class="max-w-full mx-auto bg-white p-6 rounded-lg shadow-md">
+                                    <form method="POST" action="{% url 'Editar_paciente' paciente.id %}" class="max-w-full mx-auto bg-white p-6 rounded-lg shadow-md">
                                         {% csrf_token %}
                                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                             <!-- Tipo de Paciente -->
@@ -119,8 +121,10 @@
                                             <div>
                                                 <label for="condicion" class="block text-lg font-semibold text-gray-700">Condición</label>
                                                 <select id="condicion" name="condicion" class="form-control w-full p-3 border-2 rounded-lg">
-                                                    {% for condicion in condiciones %}
-                                                        <option value="{{ condicion.id }}" {% if condicion.id == paciente.condicion.id %}selected{% endif %}>{{ condicion.nombre }}</option>
+                                                    {% for paciente.condicion in condiciones %}
+                                                        <option value="{{ condicion.id }}" {% if paciente.condicion and paciente.condicion.id == condicion.id %}selected{% endif %}>
+                                                            {{ condicion.nombre }}
+                                                        </option>
                                                     {% endfor %}
                                                 </select>
                                             </div>
@@ -144,30 +148,39 @@
                         
                                         <!-- Ubicación -->
                                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
+                                            <!-- País -->
                                             <div>
-                                                <label for="pais" class="block text-lg font-semibold text-gray-700">País</label>
-                                                <select id="pais" name="pais" class="form-control w-full p-3 border-2 rounded-lg">
+                                                <label for="pais" class="block text-sm font-semibold text-gray-700 mb-2">País</label>
+                                                <select id="pais" name="pais" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all" required>
+                                                    <option value="">Seleccione un país</option>
                                                     {% for pais in paises %}
-                                                        <option value="{{ pais.id }}" {% if pais.id == paciente.pais.id %}selected{% endif %}>{{ pais.nombre }}</option>
+                                                        <option value="{{ pais.id }}">{{ pais.nombre_pais }}</option>
                                                     {% endfor %}
                                                 </select>
                                             </div>
+
+                                            <!-- Estado -->
                                             <div>
-                                                <label for="estado" class="block text-lg font-semibold text-gray-700">Estado</label>
-                                                <select id="estado" name="estado" class="form-control w-full p-3 border-2 rounded-lg">
+                                                <label for="estado" class="block text-sm font-semibold text-gray-700 mb-2">Estado</label>
+                                                <select id="estado" name="estado" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all" required>
+                                                    <option value="">Seleccione un estado</option>
                                                     {% for estado in estados %}
-                                                        <option value="{{ estado.id }}" {% if estado.id == paciente.estado.id %}selected{% endif %}>{{ estado.nombre }}</option>
+                                                        <option value="{{ estado.id }}">{{ estado.nombre_estado }}</option>
                                                     {% endfor %}
                                                 </select>
                                             </div>
+
+                                            <!-- Ciudad -->
                                             <div>
-                                                <label for="ciudad" class="block text-lg font-semibold text-gray-700">Ciudad</label>
-                                                <select id="ciudad" name="ciudad" class="form-control w-full p-3 border-2 rounded-lg">
+                                                <label for="ciudad" class="block text-sm font-semibold text-gray-700 mb-2">Ciudad</label>
+                                                <select id="ciudad" name="ciudad" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all" required>
+                                                    <option value="">Seleccione una ciudad</option>
                                                     {% for ciudad in ciudades %}
-                                                        <option value="{{ ciudad.id }}" {% if ciudad.id == paciente.ciudad.id %}selected{% endif %}>{{ ciudad.nombre }}</option>
+                                                        <option value="{{ ciudad.id }}">{{ ciudad.nombre_ciudad }}</option>
                                                     {% endfor %}
                                                 </select>
                                             </div>
+            
                                         </div>
                         
                                         <!-- Botón de Envío -->
@@ -234,8 +247,16 @@
         let rows = document.getElementById("tableBody").getElementsByTagName("tr");
 
         for (let row of rows) {
-            let text = row.textContent.toLowerCase();
-            row.style.display = text.includes(input) ? "" : "none";
+            let cedula = row.cells[0].textContent.toLowerCase();
+            let nombre = row.cells[1].textContent.toLowerCase();
+            let apellido = row.cells[2].textContent.toLowerCase();
+            let telefono = row.cells[3].textContent.toLowerCase();
+
+            if (cedula.includes(input) || nombre.includes(input) || apellido.includes(input) || telefono.includes(input)) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+            }
         }
     }
 </script>

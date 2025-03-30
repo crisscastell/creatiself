@@ -8,7 +8,7 @@
         <h1 class="text-4xl font-extrabold text-center mt-16 mb-8 text-transparent bg-clip-text bg-gray-800">
             Registrar Paciente
         </h1>
-        <form method="POST" action="">
+        <form method="POST" action="{%url 'Crear_pacientes' %}">
             {% csrf_token %}
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Tipo de Paciente -->
@@ -99,11 +99,14 @@
                     <textarea id="direccion" name="direccion" rows="3" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all" placeholder="Ingrese la dirección del paciente" required></textarea>
                 </div>
                
-                 <!-- País -->
-                 <div>
+                <!-- País -->
+                <div>
                     <label for="pais" class="block text-sm font-semibold text-gray-700 mb-2">País</label>
                     <select id="pais" name="pais" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all" required>
                         <option value="">Seleccione un país</option>
+                        {% for pais in paises %}
+                            <option value="{{ pais.id }}">{{ pais.nombre_pais }}</option>
+                        {% endfor %}
                     </select>
                 </div>
 
@@ -112,6 +115,9 @@
                     <label for="estado" class="block text-sm font-semibold text-gray-700 mb-2">Estado</label>
                     <select id="estado" name="estado" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all" required>
                         <option value="">Seleccione un estado</option>
+                        {% for estado in estados %}
+                            <option value="{{ estado.id }}">{{ estado.nombre_estado }}</option>
+                        {% endfor %}
                     </select>
                 </div>
 
@@ -120,6 +126,9 @@
                     <label for="ciudad" class="block text-sm font-semibold text-gray-700 mb-2">Ciudad</label>
                     <select id="ciudad" name="ciudad" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all" required>
                         <option value="">Seleccione una ciudad</option>
+                        {% for ciudad in ciudades %}
+                            <option value="{{ ciudad.id }}">{{ ciudad.nombre_ciudad }}</option>
+                        {% endfor %}
                     </select>
                 </div>
             
@@ -132,100 +141,6 @@
             </div>
         </form>
     </div>
+
 </div>
-
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const paisSelect = document.getElementById("pais");
-        const estadoSelect = document.getElementById("estado");
-        const ciudadSelect = document.getElementById("ciudad");
-
-        // Cargar los países cuando se cargue la página
-        fetch('/api/paises/')  // Usando nuestra API interna
-            .then(response => response.json())
-            .then(data => {
-                data.forEach(pais => {
-                    let option = new Option(pais.nombre, pais.id);
-                    paisSelect.add(option);
-                });
-            });
-
-        // Cuando se seleccione un país, cargar los estados
-        paisSelect.addEventListener("change", function () {
-            estadoSelect.innerHTML = "<option value=''>Seleccione un estado</option>";
-            ciudadSelect.innerHTML = "<option value=''>Seleccione una ciudad</option>";
-
-            const paisId = paisSelect.value;
-
-            fetch(`/api/estados/?pais_id=${paisId}`)
-                .then(response => response.json())
-                .then(data => {
-                    data.forEach(estado => {
-                        let option = new Option(estado.nombre, estado.id);
-                        estadoSelect.add(option);
-                    });
-                });
-        });
-
-        // Cuando se seleccione un estado, cargar las ciudades
-        estadoSelect.addEventListener("change", function () {
-            ciudadSelect.innerHTML = "<option value=''>Seleccione una ciudad</option>";
-
-            const estadoId = estadoSelect.value;
-
-            fetch(`/api/ciudades/?estado_id=${estadoId}`)
-                .then(response => response.json())
-                .then(data => {
-                
-                    data.forEach(ciudad => {
-                        let option = new Option(ciudad.nombre, ciudad.id);
-                        ciudadSelect.add(option);
-                    });
-                });
-        });
-    });
-    document.addEventListener("DOMContentLoaded", function () {
-        const edadInput = document.getElementById("edad");
-        const registrarBtn = document.getElementById("registrarPaciente");
-        const modalRepresentante = document.getElementById("modalRepresentante");
-        const cerrarModalBtn = document.getElementById("cerrarModal");
-        const guardarRepresentanteBtn = document.getElementById("guardarRepresentante");
-        let menorDeEdad = false;
-
-        registrarBtn.addEventListener("click", function () {
-            const edad = parseInt(edadInput.value);
-
-            if (edad < 18) {
-                menorDeEdad = true;
-                modalRepresentante.classList.remove("hidden");
-            } else {
-                document.getElementById("pacienteForm").submit();
-            }
-        });
-
-        cerrarModalBtn.addEventListener("click", function () {
-            modalRepresentante.classList.add("hidden");
-        });
-
-        guardarRepresentanteBtn.addEventListener("click", function () {
-            if (menorDeEdad) {
-                const representante = {
-                    cedula: document.getElementById("cedula_rep").value,
-                    nombre: document.getElementById("nombre_rep").value,
-                    apellido: document.getElementById("apellido_rep").value,
-                    telefono: document.getElementById("telefono_rep").value,
-                    sexo: document.getElementById("sexo_rep").value,
-                    parentesco: document.getElementById("parentesco_rep").value
-                };
-
-                if (representante.cedula && representante.nombre && representante.apellido && representante.telefono && representante.sexo && representante.parentesco) {
-                    modalRepresentante.classList.add("hidden");
-                    document.getElementById("pacienteForm").submit();
-                } else {
-                    alert("Por favor, complete todos los datos del representante.");
-                }
-            }
-        });
-    });
-</script>
 {% endblock %}

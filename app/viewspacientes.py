@@ -5,6 +5,8 @@ from django.db.models import Q
 from .models import *
 from .forms import PacienteForm
 from django.shortcuts import render, get_object_or_404
+from .models import Pais, Estado, Ciudad
+
 
 def crear_pacientes(request):
     if request.method == 'POST':
@@ -21,7 +23,7 @@ def crear_pacientes(request):
     paises = Pais.objects.all()
     estados = Estado.objects.all()
     ciudades = Ciudad.objects.all()
-
+    
     return render(request, 'paciente/crear_pacientes.html', {
         'form': form,
         'condiciones': condiciones,
@@ -29,6 +31,7 @@ def crear_pacientes(request):
         'paises': paises,
         'estados': estados,
         'ciudades': ciudades
+        
     })
 
 def listar_pacientes(request):
@@ -53,14 +56,28 @@ def listar_pacientes(request):
     return render(request, 'paciente/listar_pacientes.html', {'pacientes': pacientes, 'query': query})
 
 def editar_paciente(request, id):
-    paciente = get_object_or_404(Paciente, id=id)  # Asegura que el paciente existe
-    form = PacienteForm(instance=paciente)
-
+    paciente = get_object_or_404(Paciente, id=id)
+    
     if request.method == 'POST':
         form = PacienteForm(request.POST, instance=paciente)
         if form.is_valid():
             form.save()
-            return redirect('Listar_pacientes')  # Redirige a la lista de pacientes después de editar
+            return redirect('Listar_pacientes') 
+    else:
+        form = PacienteForm(instance=paciente)
 
-    return render(request, 'paciente/listar_pacientes.html', {'form': form, 'paciente': paciente})
-
+    condiciones = Condicion.objects.all()
+    antecedentes = AntecedentesPersonales.objects.all()
+    paises = Pais.objects.all()
+    estados = Estado.objects.all()
+    ciudades = Ciudad.objects.all()
+    
+    return render(request, 'paciente/listar_pacientes.html', {
+        'form': form,
+        'paciente': paciente,
+        'condiciones': condiciones,
+        'antecedentes': antecedentes,
+        'paises': paises,
+        'estados': estados,
+        'ciudades': ciudades
+    })
