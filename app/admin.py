@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import (
     Rol, Usuario, Pais, Estado, Ciudad, Representante, Paciente,
     PacienteRepresentante, AntecedentesPersonales, Condicion, Cita, DetalleCita,
-    PacienteCita, Empleado
+    PacienteCita, Empleado, RelacionPaciente
 )
 
 # Registro de modelos
@@ -97,3 +97,10 @@ class EmpleadoAdmin(admin.ModelAdmin):
     list_display = ('cedula', 'nombre', 'apellido', 'cargo', 'status')
     list_filter = ('cargo', 'status', 'nivel_academico', 'sexo')
     search_fields = ('cedula', 'nombre', 'apellido')
+
+
+@admin.register(RelacionPaciente)
+class RelacionPacienteAdmin(admin.ModelAdmin):
+    list_display = ('paciente1', 'paciente2', 'tipo_relacion', 'fecha_relacion')
+    search_fields = ('paciente1__nombre', 'paciente2__nombre', 'tipo_relacion')  # Asumiendo que Paciente tiene un campo "nombre"
+    list_filter = ('tipo_relacion', 'fecha_relacion')  # Filtro por tipo de relación y fecha

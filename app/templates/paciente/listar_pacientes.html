@@ -56,10 +56,10 @@
                         </tr>
                         <!-- MODAL -->
                         <div id="modalEditarPaciente{{ paciente.id }}" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden justify-center items-center">
-                            <div class="fixed inset-0 flex justify-center items-center z-50 bg-gray-500 bg-opacity-50">
+                            <div class="flex justify-center items-center z-50 bg-gray-500 bg-opacity-50">
                                 <div class="bg-gray-300 w-[23cm] h-[15cm] p-6 rounded-lg shadow-lg overflow-auto">
                                     <h3 class="text-lg font-bold mb-4">Editar Paciente</h3>
-                                    <form method="POST" action="{% url 'Editar_paciente' paciente.id %}" class="max-w-full mx-auto bg-white p-6 rounded-lg shadow-md">
+                                    <form method="POST" action="{% url 'Editar_paciente' paciente.id %}">
                                         {% csrf_token %}
                                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                             <!-- Tipo de Paciente -->

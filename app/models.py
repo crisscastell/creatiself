@@ -221,3 +221,19 @@ class Empleado(models.Model):
 
     def __str__(self):
         return f"{self.nombre} {self.apellido}"
+
+class RelacionPaciente(models.Model):
+    paciente1 = models.ForeignKey(Paciente, related_name='relaciones_como_paciente1', on_delete=models.CASCADE)
+    paciente2 = models.ForeignKey(Paciente, related_name='relaciones_como_paciente2', on_delete=models.CASCADE)
+    tipo_relacion = models.CharField(max_length=50, choices=[
+        ('pareja', 'Pareja'),
+        ('familiar', 'Familiar'),
+        ('otro', 'Otro'),
+    ])
+    fecha_relacion = models.DateField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('paciente1', 'paciente2')  # Evita duplicados
+
+    def __str__(self):
+        return f"{self.paciente1} - {self.tipo_relacion} - {self.paciente2}"

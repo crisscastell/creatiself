@@ -118,4 +118,18 @@ class DetalleCitaForm(forms.ModelForm):
         self.fields['conclusion'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Conclusión', 'rows': 3})
         self.fields['cita'].widget.attrs.update({'class': 'form-control'})
 
+class RelacionPacienteForm(forms.ModelForm):
+    class Meta:
+        model = RelacionPaciente
+        fields = ['paciente1', 'paciente2', 'tipo_relacion']
 
+    def __init__(self, *args, **kwargs):
+        super(RelacionPacienteForm, self).__init__(*args, **kwargs)
+        self.fields['paciente1'].queryset = Paciente.objects.all()
+        self.fields['paciente2'].queryset = Paciente.objects.all()
+
+        self.fields['tipo_relacion'].widget = forms.Select(choices=[
+            ('pareja', 'Pareja'),
+            ('familiar', 'Familiar'),
+            ('otro', 'Otro')
+        ])

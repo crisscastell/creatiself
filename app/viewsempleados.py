@@ -12,18 +12,20 @@ def crear_empleado(request):
     # Comprobamos si el usuario tiene el rol de 'Administrador'
     if usuario.rol.nombre_rol == 'Administrador':
         if request.method == 'POST':
-            # Creamos un formulario con los datos recibidos del POST
             form = EmpleadoForm(request.POST)
             if form.is_valid():
-                # Guardamos el empleado
-                form.save()
-                # Redirigimos al listado de empleados después de registrar
-                return redirect('Listar_empleados')  # Cambia a la URL que muestra la lista de empleados
+                empleado = form.save(commit=False)
+                empleado.usuario = request.user
+                empleado.save()
+                return redirect('Listar_empleados')
+            else:
+                print(form.errors) # Cambia a la URL que muestra la lista de empleados
 
         # Si el método es GET, mostramos el formulario vacío
         form = EmpleadoForm()
 
         # Obtenemos los países, estados y ciudades desde la base de datos
+        usuarios = Usuario.objects.all()
         paises = Pais.objects.all()
         estados = Estado.objects.all()
         ciudades = Ciudad.objects.all()
@@ -33,7 +35,8 @@ def crear_empleado(request):
             'form': form,
             'paises': paises,
             'estados': estados,
-            'ciudades': ciudades
+            'ciudades': ciudades,
+            'usuarios':usuarios
         }
 
         return render(request, 'admin/crear_empleado.html', context)
@@ -55,7 +58,7 @@ def editar_empleado(request, id):
     estados = Estado.objects.all()
     ciudades = Ciudad.objects.all()
     
-    return render(request, 'empleado/listar_empleados.html', {
+    return render(request, 'admin/listar_empleados.html', {
         'form': form,
         'empleado': empleado,
         'paises': paises,

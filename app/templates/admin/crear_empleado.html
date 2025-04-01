@@ -8,48 +8,62 @@
         <h1 class="text-4xl font-extrabold text-center mt-16 mb-8 text-transparent bg-clip-text bg-gray-800">
             Registrar Empleado
         </h1>
-        <form method="POST" action="{%url 'Crear_empleado' %}">
+        <form method="POST" action="{% url 'Crear_empleado' %}">
             {% csrf_token %}
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Usuario -->
+                <div>
+                    <label for="usuario" class="block text-sm font-semibold text-gray-700 mb-2">Usuario</label>
+                    <select id="usuario" name="usuario" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full" required>
+                        {% for usuario in usuarios %}
+                            <option value="{{ usuario.id }}">{{ usuario.username }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
                 <!-- Cédula -->
                 <div>
                     <label for="cedula" class="block text-sm font-semibold text-gray-700 mb-2">Cédula</label>
-                    <input type="text" id="cedula" name="cedula" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full" placeholder="Ingrese la cédula" required>
+                    <input type="text" id="cedula" name="cedula" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full" required>
                 </div>
-                <!-- Nombre -->
+                <!-- Nombres -->
                 <div>
                     <label for="nombre" class="block text-sm font-semibold text-gray-700 mb-2">Primer Nombre</label>
-                    <input type="text" id="nombre" name="nombre" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full" placeholder="Ingrese el primer nombre" required>
+                    <input type="text" id="nombre" name="nombre" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full" required>
                 </div>
                 <div>
                     <label for="nombre2" class="block text-sm font-semibold text-gray-700 mb-2">Segundo Nombre</label>
-                    <input type="text" id="nombre2" name="nombre2" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full" placeholder="Ingrese el segundo nombre (opcional)">
+                    <input type="text" id="nombre2" name="nombre2" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full">
                 </div>
                 <!-- Apellidos -->
                 <div>
                     <label for="apellido" class="block text-sm font-semibold text-gray-700 mb-2">Primer Apellido</label>
-                    <input type="text" id="apellido" name="apellido" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full" placeholder="Ingrese el primer apellido" required>
+                    <input type="text" id="apellido" name="apellido" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full" required>
                 </div>
                 <div>
                     <label for="apellido2" class="block text-sm font-semibold text-gray-700 mb-2">Segundo Apellido</label>
-                    <input type="text" id="apellido2" name="apellido2" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full" placeholder="Ingrese el segundo apellido (opcional)">
+                    <input type="text" id="apellido2" name="apellido2" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full">
                 </div>
                 <!-- Cargo -->
                 <div>
                     <label for="cargo" class="block text-sm font-semibold text-gray-700 mb-2">Cargo</label>
-                    <input type="text" id="cargo" name="cargo" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full" placeholder="Ingrese el cargo" required>
+                    <input type="text" id="cargo" name="cargo" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full" required>
+                </div>
+                <!-- Dirección -->
+                <div class="col-span-1 md:col-span-2">
+                    <label for="direccion" class="block text-sm font-semibold text-gray-700 mb-2">Dirección</label>
+                    <textarea id="direccion" name="direccion" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full" required></textarea>
                 </div>
                 <!-- Teléfono -->
                 <div>
                     <label for="telefono" class="block text-sm font-semibold text-gray-700 mb-2">Teléfono</label>
-                    <input type="text" id="telefono" name="telefono" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full" placeholder="Ingrese el número de teléfono" required>
+                    <input type="text" id="telefono" name="telefono" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full" required>
                 </div>
-                <!-- Fecha de nacimiento -->
+                <!-- Fecha de Nacimiento -->
                 <div>
                     <label for="fecha_nacimiento" class="block text-sm font-semibold text-gray-700 mb-2">Fecha de Nacimiento</label>
                     <input type="date" id="fecha_nacimiento" name="fecha_nacimiento" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full" required>
                 </div>
-                <!-- Fecha de ingreso -->
+                <!-- Fecha de Ingreso -->
                 <div>
                     <label for="fecha_ingreso" class="block text-sm font-semibold text-gray-700 mb-2">Fecha de Ingreso</label>
                     <input type="date" id="fecha_ingreso" name="fecha_ingreso" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full" required>
@@ -57,7 +71,7 @@
                 <!-- Edad -->
                 <div>
                     <label for="edad" class="block text-sm font-semibold text-gray-700 mb-2">Edad</label>
-                    <input type="number" id="edad" name="edad" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full" placeholder="Ingrese la edad" required>
+                    <input type="number" id="edad" name="edad" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full" required>
                 </div>
                 <!-- Sexo -->
                 <div>
@@ -70,64 +84,43 @@
                 <!-- Nivel Académico -->
                 <div>
                     <label for="nivel_academico" class="block text-sm font-semibold text-gray-700 mb-2">Nivel Académico</label>
-                    <select id="nivel_academico" name="nivel_academico" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full" required>
-                      <option value="primaria">Primaria</option>
-                      <option value="secundaria">Secundaria</option>
-                      <option value="bachillerato">Bachillerato</option>
-                      <option value="tecnico">Técnico</option>
-                      <option value="tecnologo">Tecnólogo</option>
-                      <option value="pregrado">Pregrado</option>
-                      <option value="licenciatura">Licenciatura</option>
-                      <option value="especializacion">Especialización</option>
-                      <option value="maestria">Maestría</option>
-                      <option value="doctorado">Doctorado</option>
-                      <option value="postdoctorado">Postdoctorado</option>
-                      <option value="diplomado">Diplomado</option>
-                      <option value="curso">Curso</option>
-                      <option value="sin_estudios">Sin estudios formales</option>
-                  </select>
+                    <select id="nivel_academico" name="nivel_academico" 
+                        class="form-control border-2 border-gray-200 rounded-lg p-3 w-full focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all" required>
+                        {% for value, label in form.nivel_academico.field.choices %}
+                            <option value="{{ value }}" {% if form.nivel_academico.value == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
                 </div>
-                <!-- Dirección -->
-                <div class="col-span-1 md:col-span-2">
-                    <label for="direccion" class="block text-sm font-semibold text-gray-700 mb-2">Dirección</label>
-                    <textarea id="direccion" name="direccion" rows="3" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full" placeholder="Ingrese la dirección del empleado" required></textarea>
-                </div>
-                <!-- País -->
+                <!-- País, Estado y Ciudad -->
                 <div>
                     <label for="pais" class="block text-sm font-semibold text-gray-700 mb-2">País</label>
-                    <select id="pais" name="pais" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all" required>
-                        <option value="">Seleccione un país</option>
+                    <select id="pais" name="pais" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full" required>
                         {% for pais in paises %}
                             <option value="{{ pais.id }}">{{ pais.nombre_pais }}</option>
                         {% endfor %}
                     </select>
                 </div>
-
-                <!-- Estado -->
                 <div>
                     <label for="estado" class="block text-sm font-semibold text-gray-700 mb-2">Estado</label>
-                    <select id="estado" name="estado" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all" required>
-                        <option value="">Seleccione un estado</option>
+                    <select id="estado" name="estado" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full" required>
                         {% for estado in estados %}
                             <option value="{{ estado.id }}">{{ estado.nombre_estado }}</option>
                         {% endfor %}
                     </select>
                 </div>
-
-                <!-- Ciudad -->
                 <div>
                     <label for="ciudad" class="block text-sm font-semibold text-gray-700 mb-2">Ciudad</label>
-                    <select id="ciudad" name="ciudad" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all" required>
-                        <option value="">Seleccione una ciudad</option>
+                    <select id="ciudad" name="ciudad" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full" required>
                         {% for ciudad in ciudades %}
                             <option value="{{ ciudad.id }}">{{ ciudad.nombre_ciudad }}</option>
                         {% endfor %}
                     </select>
                 </div>
             </div>
-            <!-- Botón de Envío -->
             <div class="mt-8">
-                <button type="submit" class="w-full bg-gray-800 text-white py-3 px-6 rounded-xl font-semibold hover:scale-105">
+                <button type="submit" class="w-full bg-gray-800 text-white py-3 px-6 rounded-xl font-semibold hover:bg-gray-700 transition-all">
                     Registrar Empleado
                 </button>
             </div>

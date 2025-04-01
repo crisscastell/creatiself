@@ -13,6 +13,9 @@ urlpatterns = [
     path('pacientes/listar/', listar_pacientes, name='Listar_pacientes'),
     path('editar_paciente/<int:id>/', editar_paciente, name='Editar_paciente'),
     path('pacientes/caracteristicas', caracteristicas, name='Caracteristicas'),
+
+    path('relaciones/crear/', crear_relacion, name='Crear_relacion'),
+    path('relaciones/', lista_relaciones, name='Listar_relaciones'),
     
     path('crear/citas', crear_cita, name='Crear_citas'),
     path('listar/citas', listar_citas, name='Listar_citas'),

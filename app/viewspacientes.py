@@ -3,9 +3,11 @@ from django.shortcuts import render, redirect
 from django.core.paginator import Paginator
 from django.db.models import Q
 from .models import *
-from .forms import PacienteForm
+from .forms import PacienteForm, RelacionPacienteForm
 from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse
 from .models import Pais, Estado, Ciudad
+from django.contrib import messages
 
 
 def crear_pacientes(request):
@@ -81,3 +83,35 @@ def editar_paciente(request, id):
         'estados': estados,
         'ciudades': ciudades
     })
+
+def crear_relacion(request):
+    if request.method == "POST":
+        form = RelacionPacienteForm(request.POST)
+        if form.is_valid():
+            paciente1 = form.cleaned_data["paciente1"]
+            paciente2 = form.cleaned_data["paciente2"]
+
+            if paciente1 == paciente2:
+                messages.error(request, "No puedes relacionar un paciente consigo mismo.")
+                return redirect("Crear_relacion")
+
+            # Verificar si la relación ya existe en cualquier orden
+            if RelacionPaciente.objects.filter(
+                paciente1=paciente1, paciente2=paciente2
+            ).exists() or RelacionPaciente.objects.filter(
+                paciente1=paciente2, paciente2=paciente1
+            ).exists():
+                messages.warning(request, "Estos pacientes ya tienen una relación registrada.")
+                return redirect("Crear_relacion")
+
+            form.save()
+            messages.success(request, "Relación creada correctamente.")
+            return redirect("Listar_relaciones")
+    else:
+        form = RelacionPacienteForm()
+
+    return render(request, "paciente/crear_relacion.html", {"form": form})
+
+def lista_relaciones(request):
+    relaciones = RelacionPaciente.objects.select_related("paciente1", "paciente2").all()
+    return render(request, "paciente/listar_relaciones.html", {"relaciones": relaciones})
