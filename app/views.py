@@ -10,13 +10,11 @@ from django.contrib.auth.hashers import make_password
 
 
 
-def login(request):
-    roles = Rol.objects.all()  # Obtiene todos los roles de la base de datos
 
+def login(request):
     if request.method == "POST":
         username = request.POST["username"]
         password = request.POST["password"]
-        role = request.POST["role"].strip().lower()  # Normalizamos el rol
 
         try:
             usuario = Usuario.objects.get(username=username)
@@ -33,11 +31,6 @@ def login(request):
                 messages.error(request, "Contraseña incorrecta")
                 return redirect("Login")
 
-            # Validar el rol del usuario
-            if usuario.rol and usuario.rol.nombre_rol.strip().lower() != role:
-                messages.error(request, "Rol incorrecto")
-                return redirect("Login")
-
             # Iniciar sesión
             auth_login(request, user)
 
@@ -52,7 +45,7 @@ def login(request):
             messages.error(request, "Usuario no encontrado")
             return redirect("Login")
 
-    return render(request, "login.html", {"roles": roles})  # Pasar los roles a la plantilla
+    return render(request, "login.html")  # Ya no se pasan roles
 
 
 def index(request):

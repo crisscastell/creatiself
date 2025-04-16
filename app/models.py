@@ -12,6 +12,7 @@ class Usuario(AbstractUser):
     cedula = models.CharField(max_length=20, unique=True)
     telefono = models.CharField(max_length=20, blank=True, null=True)
     rol = models.ForeignKey('Rol', on_delete=models.CASCADE, null=True, blank=True)
+    password = models.CharField(max_length=128, default='123456')
 
 # Define related_name únicos para evitar conflictos
     groups = models.ManyToManyField(

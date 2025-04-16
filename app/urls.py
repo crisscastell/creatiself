@@ -36,7 +36,7 @@ urlpatterns = [
 
     path('tablas/', tablas, name='Tablas'),
 
-    path('antecedentes_personales/listar', caracteristicas, name='Caracteristicas'),
+    path('caracteristicas/listar', caracteristicas, name='Caracteristicas'),
 
     path('antecedentes_personales/crear', crear_antecedente, name='Crear_antecedentes'),
     path('editar_antecedente/<int:id>/', editar_antecedente, name='Editar_antecedente'),

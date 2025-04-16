@@ -89,34 +89,35 @@ class UsuarioForm(UserChangeForm):
             'rol': forms.Select(attrs={'class': 'form-control'}),
             'first_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre'}),
             'last_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Apellido'}),
-        }  
+        }
+
+    def __init__(self, *args, **kwargs):
+        super(UsuarioForm, self).__init__(*args, **kwargs)
+        self.fields['rol'].queryset = Rol.objects.all()  # <- Esto soluciona el problema
 
 
 class CitaForm(forms.ModelForm):
     class Meta:
         model = Cita
-        fields = ['hora', 'fecha', 'modalidad', 'motivo_consulta', 'paciente']
+        fields = ['hora', 'fecha', 'modalidad', 'motivo_consulta'] 
         widgets = {
             'hora': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
             'fecha': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'modalidad': forms.Select(attrs={'class': 'form-control'}),
             'motivo_consulta': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
-            'paciente': forms.Select(attrs={'class': 'form-control'}),
         }
 
 
 class DetalleCitaForm(forms.ModelForm):
     class Meta:
         model = DetalleCita
-        fields = ['titulo', 'anotacion', 'conclusion', 'cita']  # Campos del modelo
+        fields = ['titulo', 'anotacion', 'conclusion']  # <--- quitamos 'cita'
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Personaliza los campos si es necesario
         self.fields['titulo'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Título'})
         self.fields['anotacion'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Anotación', 'rows': 3})
         self.fields['conclusion'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Conclusión', 'rows': 3})
-        self.fields['cita'].widget.attrs.update({'class': 'form-control'})
 
 class RelacionPacienteForm(forms.ModelForm):
     class Meta:

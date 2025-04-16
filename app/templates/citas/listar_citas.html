@@ -9,100 +9,175 @@
         
         <div class="overflow-x-auto">
 
-            <form method="GET" action="{% url 'Listar_citas' %}" class="flex space-x-2 mb-4">
+            <div class="mb-4 flex space-x-2">
                 <input 
                     type="text" 
                     id="searchInput"
-                    name="q" 
-                    placeholder="Buscar por paciente, fecha, hora, modalidad o motivo..." 
-                    class="p-2 border border-gray-300 rounded-lg w-1/2" 
-                    value="{{ query|default:'' }}"
-                    onkeyup="filterTable()"
+                    placeholder="Buscar por nombre, fecha, hora, modalidad, motivo..." 
+                    class="p-2 border border-gray-300 rounded-lg w-1/2"
+                    onkeyup="filterCards()"
                 />
-                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
-                    Buscar
-                </button>
-            </form>
+            </div>
 
-            <table class="min-w-full bg-white border border-gray-300 rounded-lg shadow-sm">
-                <thead class="bg-gray-200 text-gray-700 text-left">
-                    <tr>
-                        <th class="py-3 px-6 border-b">#</th>
-                        <th class="py-3 px-6 border-b">Paciente</th>
-                        <th class="py-3 px-6 border-b">Fecha</th>
-                        <th class="py-3 px-6 border-b">Hora</th>
-                        <th class="py-3 px-6 border-b">Modalidad</th>
-                        <th class="py-3 px-6 border-b">Motivo de Consulta</th>
-                        <th class="py-3 px-6 border-b text-center">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody">
-                    {% for cita in citas %}
-                    <tr class="hover:bg-gray-100 transition duration-300">
-                        <td class="py-3 px-6 border-b">{{ forloop.counter }}</td>
-                        <td class="py-3 px-6 border-b">{{ cita.paciente.nombre }} {{ cita.paciente.apellido }}</td>
-                        <td class="py-3 px-6 border-b">{{ cita.fecha|date:"d/m/Y" }}</td>
-                        <td class="py-3 px-6 border-b">{{ cita.hora|time:"H:i" }}</td>
-                        <td class="py-3 px-6 border-b capitalize">{{ cita.modalidad }}</td>
-                        <td class="py-3 px-6 border-b">{{ cita.motivo_consulta|truncatewords:10 }}</td>
-                        <td class="py-3 px-6 border-b flex justify-center space-x-4">
-                            <!-- Botón de Editar -->
-                            <button onclick="openModalEditarCita({{ cita.id }})" class="text-blue-500 hover:text-blue-700">
-                                <i data-lucide="pencil" class="w-6 h-6"></i>
-                            </button>
-                        </td>
-                        
-                        <!-- Modal de Edición -->
-                        <div id="modalEditarCita{{ cita.id }}" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden items-center justify-center">
-                            <div class="bg-white p-6 rounded-lg shadow-lg max-w-lg w-full">
-                                <h2 class="text-2xl font-bold mb-4">Editar Cita</h2>
-                                <div id="modal-body">
-                                    <form method="POST" action="{% url 'Editar_cita' cita.id %}" id="form-editar-cita">
-                                        {% csrf_token %}
-                                        <!-- Hora -->
-                                        <div class="mb-4">
-                                            <label for="hora" class="block text-lg font-semibold text-gray-700">Hora</label>
-                                            <input type="time" id="hora" name="hora" class="form-control w-full p-3 border-2 rounded-lg" value="{{ cita.hora|time:'H:i' }}">
-                                        </div>
-                        
-                                        <!-- Fecha -->
-                                        <div class="mb-4">
-                                            <label for="fecha" class="block text-lg font-semibold text-gray-700">Fecha</label>
-                                            <input type="datetime-local" id="fecha" name="fecha" class="form-control w-full p-3 border-2 rounded-lg" value="{{ cita.fecha|date:'Y-m-d H:i' }}">
-                                        </div>
-                        
-                                        <!-- Modalidad -->
-                                        <div class="mb-4">
-                                            <label for="modalidad" class="block text-lg font-semibold text-gray-700">Modalidad</label>
-                                            <select id="modalidad" name="modalidad" class="form-control w-full p-3 border-2 rounded-lg">
-                                                <option value="virtual" {% if cita.modalidad == 'virtual' %}selected{% endif %}>Virtual</option>
-                                                <option value="presencial" {% if cita.modalidad == 'presencial' %}selected{% endif %}>Presencial</option>
-                                            </select>
-                                        </div>
-                        
-                                        <!-- Motivo de Consulta -->
-                                        <div class="mb-4">
-                                            <label for="motivo_consulta" class="block text-lg font-semibold text-gray-700">Motivo de Consulta</label>
-                                            <textarea id="motivo_consulta" name="motivo_consulta" rows="3" class="form-control w-full p-3 border-2 rounded-lg" placeholder="Ingrese el motivo de consulta">{{ cita.motivo_consulta }}</textarea>
-                                        </div>
-                        
-                                        <!-- Botones -->
-                                        <div class="flex justify-end mt-4">
-                                            <button type="submit" class="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600">Guardar cambios</button>
-                                            <button type="button" id="cerrarModal" class="ml-4 bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600" onclick="closeModalEditarCita({{ cita.id }})">Cerrar</button>
-                                        </div>
-                                    </form>
+            <div class="space-y-4">
+                {% for cita in citas %}
+                <div class="cita-card bg-white rounded-lg shadow-md flex justify-between items-center p-4 hover:shadow-lg transition"
+                >
+                    <!-- Info principal -->
+                    <div>
+                        <!-- Nombre del paciente -->
+                        <p class="text-lg font-semibold text-gray-800">
+                            {{ cita.paciente.nombre }} {{ cita.paciente.apellido }}
+                        </p>
+                    
+                        <!-- Fecha y hora de la cita -->
+                        <p class="text-sm text-gray-600">
+                            {{ cita.fecha|date:"d/m/Y" }} — {{ cita.hora|time:"H:i" }}
+                        </p>
+                    
+                        <!-- Modalidad de la cita -->
+                        <p class="text-sm text-gray-600 capitalize">
+                            Modalidad: {{ cita.modalidad }}
+                        </p>
+                    
+                        <!-- Motivo de consulta -->
+                        <p class="text-sm text-gray-600">
+                            Motivo: {{ cita.motivo_consulta }}
+                        </p>
+                    
+                        <!-- Cedula del paciente (oculta para búsqueda) -->
+                        <p class="hidden">
+                            {{ cita.paciente.cedula }}
+                        </p>
+                    </div>
+            
+                    <!-- Acciones -->
+                    <div class="flex space-x-4">
+                        <!-- Botón de Detalles -->
+                        <button onclick="openModalDetalleCita({{ cita.id }})" class="text-yellow-500 hover:text-yellow-600">
+                            <i data-lucide="eye" class="w-5 h-5"></i>
+                        </button>
+            
+                        <!-- Botón Agregar Detalle -->
+                        <button onclick="openModalAgregarDetalle({{ cita.id }})" class="text-indigo-500 hover:text-indigo-700">
+                            <i data-lucide="plus-circle" class="w-5 h-5"></i>
+                        </button>
+            
+                        <!-- Botón Editar -->
+                        <button onclick="openModalEditarCita({{ cita.id }})" class="text-blue-500 hover:text-blue-700">
+                            <i data-lucide="pencil" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                </div>
+            
+                <!-- Modal de Edición -->
+                <div id="modalEditarCita{{ cita.id }}" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden items-center justify-center">
+                    <div class="bg-white p-6 rounded-lg shadow-lg max-w-lg w-full">
+                        <h2 class="text-2xl font-bold mb-4">Editar Cita</h2>
+                        <div id="modal-body">
+                            <form method="POST" action="{% url 'Editar_cita' cita.id %}" id="form-editar-cita">
+                                {% csrf_token %}
+                                <!-- Hora -->
+                                <div class="mb-4">
+                                    <label for="hora" class="block text-lg font-semibold text-gray-700">Hora</label>
+                                    <input type="time" id="hora" name="hora" class="form-control w-full p-3 border-2 rounded-lg" value="{{ cita.hora|time:'H:i' }}">
                                 </div>
-                            </div>
+                
+                                <!-- Fecha -->
+                                <div class="mb-4">
+                                    <label for="fecha" class="block text-lg font-semibold text-gray-700">Fecha</label>
+                                    <input type="datetime-local" id="fecha" name="fecha" class="form-control w-full p-3 border-2 rounded-lg" value="{{ cita.fecha|date:'Y-m-d H:i' }}">
+                                </div>
+                
+                                <!-- Modalidad -->
+                                <div class="mb-4">
+                                    <label for="modalidad" class="block text-lg font-semibold text-gray-700">Modalidad</label>
+                                    <select id="modalidad" name="modalidad" class="form-control w-full p-3 border-2 rounded-lg">
+                                        <option value="virtual" {% if cita.modalidad == 'virtual' %}selected{% endif %}>Virtual</option>
+                                        <option value="presencial" {% if cita.modalidad == 'presencial' %}selected{% endif %}>Presencial</option>
+                                    </select>
+                                </div>
+                
+                                <!-- Motivo de Consulta -->
+                                <div class="mb-4">
+                                    <label for="motivo_consulta" class="block text-lg font-semibold text-gray-700">Motivo de Consulta</label>
+                                    <textarea id="motivo_consulta" name="motivo_consulta" rows="3" class="form-control w-full p-3 border-2 rounded-lg" placeholder="Ingrese el motivo de consulta">{{ cita.motivo_consulta }}</textarea>
+                                </div>
+                
+                                <!-- Botones -->
+                                <div class="flex justify-end mt-4">
+                                    <button type="submit" class="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600">Guardar cambios</button>
+                                    <button type="button" id="cerrarModal" class="ml-4 bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600" onclick="closeModalEditarCita({{ cita.id }})">Cerrar</button>
+                                </div>
+                            
+                            </form>
                         </div>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="7" class="py-4 text-center text-gray-500">No hay citas registradas.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                    </div>
+                </div>
+
+                <!-- Modal de Detalles de la Cita -->
+                <div id="modalDetalleCita{{ cita.id }}" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden items-center justify-center">
+                    <div class="bg-white p-6 rounded-lg shadow-lg max-w-lg w-full">
+                        <h2 class="text-2xl font-bold mb-4">Detalles de la Cita</h2>
+                        
+                        {% if cita.detallecita_set.all %}
+                            {% for detalle in cita.detallecita_set.all %}
+                                <div class="space-y-2 mb-6">
+                                    <p><strong class="text-gray-700">Título:</strong> {{ detalle.titulo }}</p>
+                                    <p><strong class="text-gray-700">Anotación:</strong> {{ detalle.anotacion }}</p>
+                                    <p><strong class="text-gray-700">Conclusión:</strong> {{ detalle.conclusion }}</p>
+                                </div>
+                                {% if not forloop.last %}
+                                <hr class="my-4 border-gray-300">
+                                {% endif %}
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-gray-500">Esta cita aún no tiene detalles registrados.</p>
+                        {% endif %}
+
+                        <div class="flex justify-end mt-6">
+                            <button class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600" onclick="closeModalDetalleCita({{ cita.id }})">Cerrar</button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Modal Agregar Detalle de Cita -->
+                <div id="modalAgregarDetalle{{ cita.id }}" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden items-center justify-center z-50">
+                    <div class="bg-white p-6 rounded-lg shadow-lg max-w-lg w-full">
+                        <h2 class="text-2xl font-bold mb-4">Agregar Detalle de Cita</h2>
+                        <form method="POST" action="{% url 'Crear_detalle_cita' cita.id %}">
+                            {% csrf_token %}
+                            
+                            <!-- Título -->
+                            <div class="mb-4">
+                                <label for="titulo" class="block text-lg font-semibold text-gray-700">Título</label>
+                                <input type="text" name="titulo" class="w-full p-3 border-2 rounded-lg" required>
+                            </div>
+
+                            <!-- Anotación -->
+                            <div class="mb-4">
+                                <label for="anotacion" class="block text-lg font-semibold text-gray-700">Anotación</label>
+                                <textarea name="anotacion" rows="4" class="w-full p-3 border-2 rounded-lg" required></textarea>
+                            </div>
+
+                            <!-- Conclusión -->
+                            <div class="mb-4">
+                                <label for="conclusion" class="block text-lg font-semibold text-gray-700">Conclusión</label>
+                                <textarea name="conclusion" rows="4" class="w-full p-3 border-2 rounded-lg" required></textarea>
+                            </div>
+
+                            <!-- Botones -->
+                            <div class="flex justify-end mt-4">
+                                <button type="submit" class="bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600">Guardar</button>
+                                <button type="button" class="ml-4 bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600" onclick="closeModalAgregarDetalle({{ cita.id }})">Cerrar</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                {% empty %}
+                <p class="text-center text-gray-500 mt-6">No hay citas registradas.</p>
+                {% endfor %}
+            </div>
         </div>
         
         <div class="mt-6 flex justify-end">
@@ -126,25 +201,34 @@
         document.getElementById(`modalEditarCita${id}`).classList.add('hidden');
     }
 
-    function filterTable() {
-        let input = document.getElementById("searchInput").value.toLowerCase();
-        let rows = document.getElementById("tableBody").getElementsByTagName("tr");
-
-        for (let row of rows) {
-            let paciente = row.cells[1].textContent.toLowerCase();  // Paciente (Nombre + Apellido)
-            let fecha = row.cells[2].textContent.toLowerCase();  // Fecha
-            let hora = row.cells[3].textContent.toLowerCase();   // Hora
-            let modalidad = row.cells[4].textContent.toLowerCase();  // Modalidad
-            let motivo = row.cells[5].textContent.toLowerCase();  // Motivo de consulta
-
-            // Verifica si cualquiera de los campos contiene el texto de búsqueda
-            if (paciente.includes(input) || fecha.includes(input) || hora.includes(input) || modalidad.includes(input) || motivo.includes(input)) {
-                row.style.display = "";
-            } else {
-                row.style.display = "none";
-            }
-        }
+    function openModalDetalleCita(id) {
+        document.getElementById(`modalDetalleCita${id}`).classList.remove('hidden');
+        document.getElementById(`modalDetalleCita${id}`).classList.add('flex');
     }
+    
+    function closeModalDetalleCita(id) {
+        document.getElementById(`modalDetalleCita${id}`).classList.remove('flex');
+        document.getElementById(`modalDetalleCita${id}`).classList.add('hidden');
+    }
+    function openModalAgregarDetalle(id) {
+    document.getElementById(`modalAgregarDetalle${id}`).classList.remove('hidden');
+    document.getElementById(`modalAgregarDetalle${id}`).classList.add('flex');
+}
+
+function closeModalAgregarDetalle(id) {
+    document.getElementById(`modalAgregarDetalle${id}`).classList.remove('flex');
+    document.getElementById(`modalAgregarDetalle${id}`).classList.add('hidden');
+}
+
+function filterCards() {
+    const input = document.getElementById("searchInput").value.toLowerCase();
+    const cards = document.getElementsByClassName("cita-card");
+
+    for (let card of cards) {
+        const text = card.textContent.toLowerCase();
+        card.style.display = text.includes(input) ? "" : "none";
+    }
+}
 </script>
 
 {% endblock %}

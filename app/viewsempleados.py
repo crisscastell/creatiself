@@ -6,6 +6,7 @@ from django.db.models import Q
 from .forms import EmpleadoForm, UsuarioForm
 from .models import *
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import get_user_model
 
 def crear_empleado(request):
     usuario = request.user
@@ -77,11 +78,19 @@ def listar_empleados(request):
 
 @login_required
 def crear_usuario(request):
-    usuario = request.user
-    if usuario.rol.nombre_rol == 'Administrador':
-        return render(request, 'admin/crear_usuario.html')
+    if request.method == 'POST':
+        form = UsuarioForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('Listar_usuarios')  # Redirige a donde quieras después de guardar
+        else:
+            print(form.errors)
     else:
-        return redirect('acceso_denegado')
+        form = UsuarioForm()
+
+    roles = Rol.objects.all()
+
+    return render(request, 'admin/crear_usuario.html', {'form': form, 'roles': roles})
 
 def editar_usuario(request, id):
     usuario = get_object_or_404(Usuario, id=id)

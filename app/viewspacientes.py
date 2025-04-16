@@ -38,24 +38,30 @@ def crear_pacientes(request):
 
 def listar_pacientes(request):
     pacientes = Paciente.objects.all()
-
-    query = request.GET.get('q', '')  # Captura el valor de búsqueda desde la URL
-    pacientes_list = Paciente.objects.all()
-
-    # Filtrar por nombre o cédula
+    query = request.GET.get('q', '')
+    
     if query:
-        pacientes_list = pacientes_list.filter(
+        pacientes = pacientes.filter(
             Q(cedula__icontains=query) | 
             Q(nombre__icontains=query) | 
             Q(apellido__icontains=query)
         )
 
-    # Paginación (15 pacientes por página)
-    paginator = Paginator(pacientes_list, 15)
+    paginator = Paginator(pacientes, 15)
     page_number = request.GET.get('page')
     pacientes = paginator.get_page(page_number)
 
-    return render(request, 'paciente/listar_pacientes.html', {'pacientes': pacientes, 'query': query})
+    context = {
+        'pacientes': pacientes,
+        'query': query,
+        'condiciones': Condicion.objects.all(),
+        'antecedentes': AntecedentesPersonales.objects.all(),
+        'paises': Pais.objects.all(),
+        'estados': Estado.objects.all(),
+        'ciudades': Ciudad.objects.all(),
+    }
+    
+    return render(request, 'paciente/listar_pacientes.html', context)
 
 def editar_paciente(request, id):
     paciente = get_object_or_404(Paciente, id=id)
@@ -64,25 +70,12 @@ def editar_paciente(request, id):
         form = PacienteForm(request.POST, instance=paciente)
         if form.is_valid():
             form.save()
-            return redirect('Listar_pacientes') 
-    else:
-        form = PacienteForm(instance=paciente)
-
-    condiciones = Condicion.objects.all()
-    antecedentes = AntecedentesPersonales.objects.all()
-    paises = Pais.objects.all()
-    estados = Estado.objects.all()
-    ciudades = Ciudad.objects.all()
+            messages.success(request, "Paciente actualizado correctamente")
+            return redirect('Listar_pacientes')
+        else:
+            messages.error(request, "Error al actualizar el paciente")
     
-    return render(request, 'paciente/listar_pacientes.html', {
-        'form': form,
-        'paciente': paciente,
-        'condiciones': condiciones,
-        'antecedentes': antecedentes,
-        'paises': paises,
-        'estados': estados,
-        'ciudades': ciudades
-    })
+    return redirect('Listar_pacientes')
 
 def crear_relacion(request):
     if request.method == "POST":

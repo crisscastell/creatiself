@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from app.models import Cita, DetalleCita, Paciente
 from app.forms import CitaForm, DetalleCitaForm
+from django.contrib import messages
 
 def crear_cita(request):
     if request.method == "POST":
@@ -25,18 +26,18 @@ def listar_citas(request):
     
     return render(request, 'citas/listar_citas.html', {'citas': citas})
 
-def editar_cita(request, cita_id):
-    cita = get_object_or_404(Cita, id=cita_id)
+def editar_cita(request, id):
+    cita = get_object_or_404(Cita, id=id)
     
-    if request.method == "POST":
+    if request.method == 'POST':
         form = CitaForm(request.POST, instance=cita)
         if form.is_valid():
             form.save()
-            return redirect('Listar_citas')  
-    else:
-        form = CitaForm(instance=cita)
-    
-    return render(request, 'citas/editar_cita.html', {'form': form})
+            messages.success(request, "Cita actualizada correctamente")
+        else:
+            messages.error(request, "Error al actualizar la cita")
+
+    return redirect('Listar_citas')
 
 def eliminar_cita(request, cita_id):
     cita = get_object_or_404(Cita, id=cita_id)
@@ -60,13 +61,13 @@ def crear_detalle_cita(request, cita_id):
     else:
         form = DetalleCitaForm()
 
-    return render(request, 'detallecita/crear_detalle_cita.html', {'form': form, 'cita': cita})
+    return redirect('Listar_citas')
 
 def listar_detalles_cita(request, cita_id):
     cita = get_object_or_404(Cita, id=cita_id)  # Obtén la cita relacionada
     detalles_cita = DetalleCita.objects.filter(cita=cita)  # Filtra los detalles de la cita
 
-    return render(request, 'detallecita/listar_detalles_cita.html', {'detalles_cita': detalles_cita, 'cita': cita})
+    return redirect('Listar_citas')
 
 def editar_detalle_cita(request, detalle_cita_id):
     detalle_cita = get_object_or_404(DetalleCita, id=detalle_cita_id)
@@ -80,14 +81,4 @@ def editar_detalle_cita(request, detalle_cita_id):
     else:
         form = DetalleCitaForm(instance=detalle_cita)
 
-    return render(request, 'detallecita/editar_detalle_cita.html', {'form': form, 'detalle_cita': detalle_cita})
-
-def eliminar_detalle_cita(request, detalle_cita_id):
-    detalle_cita = get_object_or_404(DetalleCita, id=detalle_cita_id)  # Obtén el detalle de cita
-
-    if request.method == "POST":
-        cita_id = detalle_cita.cita.id  # Guarda el ID de la cita antes de eliminar
-        detalle_cita.delete()
-        return redirect('listar_detalles_cita', cita_id=cita_id)  # Redirige a la lista de detalles de la cita
-
-    return render(request, 'detallecita/eliminar_detalle_cita.html', {'detalle_cita': detalle_cita})
+    return redirect('Listar_citas')

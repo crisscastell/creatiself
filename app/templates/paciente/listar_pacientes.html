@@ -119,10 +119,11 @@
                                                 </select>
                                             </div>
                                             <div>
-                                                <label for="condicion" class="block text-lg font-semibold text-gray-700">Condición</label>
-                                                <select id="condicion" name="condicion" class="form-control w-full p-3 border-2 rounded-lg">
-                                                    {% for paciente.condicion in condiciones %}
-                                                        <option value="{{ condicion.id }}" {% if paciente.condicion and paciente.condicion.id == condicion.id %}selected{% endif %}>
+                                                <label class="block text-lg font-semibold text-gray-700">Condición</label>
+                                                <select name="condicion" class="form-control w-full p-3 border-2 rounded-lg">
+                                                    {% for condicion in condiciones %}
+                                                        <option value="{{ condicion.id }}" 
+                                                            {% if paciente.condicion.id == condicion.id %}selected{% endif %}>
                                                             {{ condicion.nombre }}
                                                         </option>
                                                     {% endfor %}
@@ -132,11 +133,34 @@
                         
                                         <!-- Antecedentes Personales -->
                                         <div class="mt-4">
-                                            <label for="antecedentes_personales" class="block text-lg font-semibold text-gray-700">Antecedentes Personales</label>
+                                            <label for="antecedentes_personales" class="block text-lg font-semibold text-gray-700">Antecedentes</label>
                                             <select id="antecedentes_personales" name="antecedentes_personales" class="form-control w-full p-3 border-2 rounded-lg">
                                                 {% for antecedente in antecedentes %}
-                                                    <option value="{{ antecedente.id }}" {% if antecedente.id == paciente.antecedentes_personales.id %}selected{% endif %}>{{ antecedente.descripcion }}</option>
+                                                    <option value="{{ antecedente.id }}" 
+                                                            {% if paciente.antecedentes_personales.id == antecedente.id %}selected{% endif %}>
+                                                        {{ antecedente.descripcion }}
+                                                    </option>
                                                 {% endfor %}
+                                            </select>       
+                                        </div>
+                                        <!-- Nivel Academico -->
+                                        <div class="mt-4">
+                                            <label for="nivel_academico" class="block text-lg font-semibold text-gray-700">Nivel Académico</label>
+                                            <select id="nivel_academico" name="nivel_academico" class="form-control w-full p-3 border-2 rounded-lg">
+                                                <option value="primaria" {% if paciente.nivel_academico == 'primaria' %}selected{% endif %}>Primaria</option>
+                                                <option value="secundaria" {% if paciente.nivel_academico == 'secundaria' %}selected{% endif %}>Secundaria</option>
+                                                <option value="bachillerato" {% if paciente.nivel_academico == 'bachillerato' %}selected{% endif %}>Bachillerato</option>
+                                                <option value="tecnico" {% if paciente.nivel_academico == 'tecnico' %}selected{% endif %}>Técnico</option>
+                                                <option value="tecnologo" {% if paciente.nivel_academico == 'tecnologo' %}selected{% endif %}>Tecnólogo</option>
+                                                <option value="pregrado" {% if paciente.nivel_academico == 'pregrado' %}selected{% endif %}>Pregrado</option>
+                                                <option value="licenciatura" {% if paciente.nivel_academico == 'licenciatura' %}selected{% endif %}>Licenciatura</option>
+                                                <option value="especializacion" {% if paciente.nivel_academico == 'especializacion' %}selected{% endif %}>Especialización</option>
+                                                <option value="maestria" {% if paciente.nivel_academico == 'maestria' %}selected{% endif %}>Maestría</option>
+                                                <option value="doctorado" {% if paciente.nivel_academico == 'doctorado' %}selected{% endif %}>Doctorado</option>
+                                                <option value="postdoctorado" {% if paciente.nivel_academico == 'postdoctorado' %}selected{% endif %}>Postdoctorado</option>
+                                                <option value="diplomado" {% if paciente.nivel_academico == 'diplomado' %}selected{% endif %}>Diplomado</option>
+                                                <option value="curso" {% if paciente.nivel_academico == 'curso' %}selected{% endif %}>Curso</option>
+                                                <option value="sin_estudios" {% if paciente.nivel_academico == 'sin_estudios' %}selected{% endif %}>Sin estudios formales</option>
                                             </select>
                                         </div>
                         
@@ -152,9 +176,11 @@
                                             <div>
                                                 <label for="pais" class="block text-sm font-semibold text-gray-700 mb-2">País</label>
                                                 <select id="pais" name="pais" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all" required>
-                                                    <option value="">Seleccione un país</option>
                                                     {% for pais in paises %}
-                                                        <option value="{{ pais.id }}">{{ pais.nombre_pais }}</option>
+                                                        <option value="{{ pais.id }}" 
+                                                                {% if paciente.pais.id == pais.id %}selected{% endif %}>
+                                                            {{ pais.nombre_pais }}
+                                                        </option>
                                                     {% endfor %}
                                                 </select>
                                             </div>
@@ -163,9 +189,11 @@
                                             <div>
                                                 <label for="estado" class="block text-sm font-semibold text-gray-700 mb-2">Estado</label>
                                                 <select id="estado" name="estado" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all" required>
-                                                    <option value="">Seleccione un estado</option>
                                                     {% for estado in estados %}
-                                                        <option value="{{ estado.id }}">{{ estado.nombre_estado }}</option>
+                                                        <option value="{{ estado.id }}" 
+                                                                {% if paciente.estado.id == estado.id %}selected{% endif %}>
+                                                            {{ estado.nombre_estado }}
+                                                        </option>
                                                     {% endfor %}
                                                 </select>
                                             </div>
@@ -174,9 +202,11 @@
                                             <div>
                                                 <label for="ciudad" class="block text-sm font-semibold text-gray-700 mb-2">Ciudad</label>
                                                 <select id="ciudad" name="ciudad" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all" required>
-                                                    <option value="">Seleccione una ciudad</option>
                                                     {% for ciudad in ciudades %}
-                                                        <option value="{{ ciudad.id }}">{{ ciudad.nombre_ciudad }}</option>
+                                                        <option value="{{ ciudad.id }}" 
+                                                                {% if paciente.ciudad.id == ciudad.id %}selected{% endif %}>
+                                                            {{ ciudad.nombre_ciudad }}
+                                                        </option>
                                                     {% endfor %}
                                                 </select>
                                             </div>
