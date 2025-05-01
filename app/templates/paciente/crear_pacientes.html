@@ -3,144 +3,357 @@
 {% block title %}Registrar Paciente{% endblock %}
 
 {% block content %}
-<div class="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-50 to-purple-50">
-    <div class="w-full max-w-4xl bg-white rounded-xl shadow-2xl p-8 transform transition-all hover:scale-105">
-        <h1 class="text-4xl font-extrabold text-center mt-16 mb-8 text-transparent bg-clip-text bg-gray-800">
-            Registrar Paciente
-        </h1>
-        <form method="POST" action="{%url 'Crear_pacientes' %}">
+<div class="min-h-screen bg-gradient-to-r from-blue-50 to-purple-50 py-16 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
+        <!-- Encabezado con degradado -->
+        <div class="bg-gradient-to-r from-teal-600 to-teal-800 p-6 text-white">
+            <h1 class="text-3xl font-bold text-center">
+                <i class="fas fa-user-plus mr-2"></i>Registrar Nuevo Paciente
+            </h1>
+            <p class="text-center text-blue-100 mt-2">Complete todos los campos requeridos</p>
+        </div>
+        
+        <form method="POST" action="{% url 'Crear_pacientes' %}" class="p-8">
             {% csrf_token %}
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Tipo de Paciente -->
-                <div>
-                    <label for="tipo_paciente" class="block text-sm font-semibold text-gray-700 mb-2">Tipo de Paciente</label>
-                    <select id="tipo_paciente" name="tipo_paciente" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all" required>
-                        <option value="individual">Individual</option>
-                        <option value="infantil">Infantil</option>
-                        <option value="pareja">Pareja</option>
-                    </select>
-                </div>
-                <!-- Cédula -->
-                <div>
-                    <label for="cedula" class="block text-sm font-semibold text-gray-700 mb-2">Cédula</label>
-                    <input type="text" id="cedula" name="cedula" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all" placeholder="Ingrese la cédula" required>
-                </div>
-                <!-- Primer Nombre -->
-                <div>
-                    <label for="nombre" class="block text-sm font-semibold text-gray-700 mb-2">Primer Nombre</label>
-                    <input type="text" id="nombre" name="nombre" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all" placeholder="Ingrese el primer nombre" required>
-                </div>
-                <!-- Segundo Nombre -->
-                <div>
-                    <label for="nombre2" class="block text-sm font-semibold text-gray-700 mb-2">Segundo Nombre</label>
-                    <input type="text" id="nombre2" name="nombre2" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all" placeholder="Ingrese el segundo nombre (opcional)">
-                </div>
-                <!-- Primer Apellido -->
-                <div>
-                    <label for="apellido" class="block text-sm font-semibold text-gray-700 mb-2">Primer Apellido</label>
-                    <input type="text" id="apellido" name="apellido" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all" placeholder="Ingrese el primer apellido" required>
-                </div>
-                <!-- Segundo Apellido -->
-                <div>
-                    <label for="apellido2" class="block text-sm font-semibold text-gray-700 mb-2">Segundo Apellido</label>
-                    <input type="text" id="apellido2" name="apellido2" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all" placeholder="Ingrese el segundo apellido (opcional)">
-                </div>
-                <!-- Teléfono -->
-                <div>
-                    <label for="telefono" class="block text-sm font-semibold text-gray-700 mb-2">Teléfono</label>
-                    <input type="text" id="telefono" name="telefono" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all" placeholder="Ingrese el número de teléfono" required>
-                </div>
-                <!-- Edad -->
-                <div>
-                    <label for="edad" class="block text-sm font-semibold text-gray-700 mb-2">Edad</label>
-                    <input type="number" id="edad" name="edad" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all" placeholder="Ingrese la edad" required>
-                </div>
-                <!-- Sexo -->
-                <div>
-                    <label for="sexo" class="block text-sm font-semibold text-gray-700 mb-2">Sexo</label>
-                    <select id="sexo" name="sexo" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all" required>
-                        <option value="masculino">Masculino</option>
-                        <option value="femenino">Femenino</option>
-                    </select>
-                </div>
-                <!-- Condición -->
-                <div>
-                    <label for="condicion" class="block text-sm font-semibold text-gray-700 mb-2">Condición</label>
-                    <select id="condicion" name="condicion" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all" required>
-                        {% for condicion in condiciones %}
-                            <option value="{{ condicion.id }}">{{ condicion.nombre }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <!-- Antecedentes Personales -->
-                <div>
-                    <label for="antecedentes_personales" class="block text-sm font-semibold text-gray-700 mb-2">Antecedentes Personales</label>
-                    <select id="antecedentes_personales" name="antecedentes_personales" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all">
-                        {% for antecedente in antecedentes %}
-                            <option value="{{ antecedente.id }}">{{ antecedente.descripcion }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                 <!-- Nivel Académico -->
-                <div>
-                    <label for="nivel_academico" class="block text-sm font-semibold text-gray-700 mb-2">Nivel Académico</label>
-                    <select id="nivel_academico" name="nivel_academico" 
-                        class="form-control border-2 border-gray-200 rounded-lg p-3 w-full focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all" required>
-                        {% for value, label in form.nivel_academico.field.choices %}
-                            <option value="{{ value }}" {% if form.nivel_academico.value == value %}selected{% endif %}>
-                                {{ label }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <!-- Dirección -->
-                <div class="col-span-1 md:col-span-2">
-                    <label for="direccion" class="block text-sm font-semibold text-gray-700 mb-2">Dirección</label>
-                    <textarea id="direccion" name="direccion" rows="3" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all" placeholder="Ingrese la dirección del paciente" required></textarea>
-                </div>
-               
-                <!-- País -->
-                <div>
-                    <label for="pais" class="block text-sm font-semibold text-gray-700 mb-2">País</label>
-                    <select id="pais" name="pais" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all" required>
-                        <option value="">Seleccione un país</option>
-                        {% for pais in paises %}
-                            <option value="{{ pais.id }}">{{ pais.nombre_pais }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <!-- Estado -->
-                <div>
-                    <label for="estado" class="block text-sm font-semibold text-gray-700 mb-2">Estado</label>
-                    <select id="estado" name="estado" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all" required>
-                        <option value="">Seleccione un estado</option>
-                        {% for estado in estados %}
-                            <option value="{{ estado.id }}">{{ estado.nombre_estado }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <!-- Ciudad -->
-                <div>
-                    <label for="ciudad" class="block text-sm font-semibold text-gray-700 mb-2">Ciudad</label>
-                    <select id="ciudad" name="ciudad" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all" required>
-                        <option value="">Seleccione una ciudad</option>
-                        {% for ciudad in ciudades %}
-                            <option value="{{ ciudad.id }}">{{ ciudad.nombre_ciudad }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
             
+            <!-- Sección 1: Información Básica -->
+            <div class="mb-8">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-id-card mr-2 text-blue-600"></i> Información Básica
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Tipo de Paciente -->
+                    <div>
+                        <label for="tipo_paciente" class="block text-sm font-medium text-gray-700 mb-1">Tipo de Paciente <span class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <select id="tipo_paciente" name="tipo_paciente" class="w-full pl-3 pr-10 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                                <option value="individual">Individual</option>
+                                <option value="infantil">Infantil</option>
+                                <option value="pareja">Pareja</option>
+                            </select>
+                            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                <i class="fas fa-user-tag text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Cédula -->
+                    <div>
+                        <label for="cedula" class="block text-sm font-medium text-gray-700 mb-1">Cédula <span class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <input type="text" id="cedula" name="cedula" class="w-full pl-3 pr-10 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" placeholder="Ej: 123456789" required>
+                            <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                                <i class="fas fa-id-card text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Nombres -->
+                    <div>
+                        <label for="nombre" class="block text-sm font-medium text-gray-700 mb-1">Primer Nombre <span class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <input type="text" id="nombre" name="nombre" class="w-full pl-3 pr-10 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" placeholder="Ej: Juan" required>
+                            <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                                <i class="fas fa-signature text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label for="nombre2" class="block text-sm font-medium text-gray-700 mb-1">Segundo Nombre</label>
+                        <input type="text" id="nombre2" name="nombre2" class="w-full pl-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" placeholder="Ej: Carlos">
+                    </div>
+                    
+                    <!-- Apellidos -->
+                    <div>
+                        <label for="apellido" class="block text-sm font-medium text-gray-700 mb-1">Primer Apellido <span class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <input type="text" id="apellido" name="apellido" class="w-full pl-3 pr-10 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" placeholder="Ej: Pérez" required>
+                            <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                                <i class="fas fa-signature text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label for="apellido2" class="block text-sm font-medium text-gray-700 mb-1">Segundo Apellido</label>
+                        <input type="text" id="apellido2" name="apellido2" class="w-full pl-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" placeholder="Ej: González">
+                    </div>
+                </div>
             </div>
+            
+            <!-- Sección 2: Contacto y Demográficos -->
+            <div class="mb-8">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-address-book mr-2 text-blue-600"></i> Información de Contacto
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Teléfono -->
+                    <div>
+                        <label for="telefono" class="block text-sm font-medium text-gray-700 mb-1">Teléfono <span class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <input type="text" id="telefono" name="telefono" class="w-full pl-3 pr-10 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" placeholder="Ej: 04121234567" required>
+                            <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                                <i class="fas fa-phone text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Edad -->
+                    <div>
+                        <label for="edad" class="block text-sm font-medium text-gray-700 mb-1">Edad <span class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <input type="number" id="edad" name="edad" class="w-full pl-3 pr-10 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" placeholder="Ej: 35" required>
+                            <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                                <i class="fas fa-birthday-cake text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Sexo -->
+                    <div>
+                        <label for="sexo" class="block text-sm font-medium text-gray-700 mb-1">Sexo <span class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <select id="sexo" name="sexo" class="w-full pl-3 pr-10 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" required>
+                                <option value="masculino">Masculino</option>
+                                <option value="femenino">Femenino</option>
+                                <option value="otro">Otro</option>
+                            </select>
+                            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                <i class="fas fa-venus-mars text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Nivel Académico -->
+                    <div>
+                        <label for="nivel_academico" class="block text-sm font-medium text-gray-700 mb-1">Nivel Académico <span class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <select id="nivel_academico" name="nivel_academico" class="w-full pl-3 pr-10 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" required>
+                                {% for value, label in form.nivel_academico.field.choices %}
+                                    <option value="{{ value }}" {% if form.nivel_academico.value == value %}selected{% endif %}>
+                                        {{ label }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                <i class="fas fa-graduation-cap text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sección 3: Información Personal -->
+            <div class="mb-8">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-heartbeat mr-2 text-blue-600"></i> Información Personal
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Condición -->
+                    <div>
+                        <label for="condicion" class="block text-sm font-medium text-gray-700 mb-1">Condición <span class="text-red-500">*</span></label>
+                        <div class="flex items-center">
+                            <div class="relative flex-grow">
+                                <select id="condicion" name="condicion" class="w-full pl-3 pr-10 py-2.5 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" required>
+                                    {% for condicion in condiciones %}
+                                        <option value="{{ condicion.id }}">{{ condicion.nombre }}</option>
+                                    {% endfor %}
+                                </select>
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <i class="fas fa-stethoscope text-gray-400"></i>
+                                </div>
+                            </div>
+                            <button type="button" onclick="abrirModalCondicion()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2.5 rounded-r-lg transition-all">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Antecedentes Personales -->
+                    <div>
+                        <label for="antecedentes_personales" class="block text-sm font-medium text-gray-700 mb-1">Antecedentes Personales</label>
+                        <div class="flex items-center">
+                            <div class="relative flex-grow">
+                                <select id="antecedentes_personales" name="antecedentes_personales" class="w-full pl-3 pr-10 py-2.5 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                                    {% for antecedente in antecedentes %}
+                                        <option value="{{ antecedente.id }}">{{ antecedente.descripcion }}</option>
+                                    {% endfor %}
+                                </select>
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <i class="fas fa-file-medical text-gray-400"></i>
+                                </div>
+                            </div>
+                            <button type="button" onclick="abrirModalAntecedente()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2.5 rounded-r-lg transition-all">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sección 4: Ubicación -->
+            <div class="mb-8">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-map-marker-alt mr-2 text-blue-600"></i> Ubicación
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- País -->
+                    <div>
+                        <label for="pais" class="block text-sm font-medium text-gray-700 mb-1">País <span class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <select id="pais" name="pais" class="w-full pl-3 pr-10 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" required>
+                                <option value="">Seleccione un país</option>
+                                {% for pais in paises %}
+                                    <option value="{{ pais.id }}">{{ pais.nombre_pais }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                <i class="fas fa-globe-americas text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Estado -->
+                    <div>
+                        <label for="estado" class="block text-sm font-medium text-gray-700 mb-1">Estado <span class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <select id="estado" name="estado" class="w-full pl-3 pr-10 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" required>
+                                <option value="">Seleccione un estado</option>
+                                {% for estado in estados %}
+                                    <option value="{{ estado.id }}">{{ estado.nombre_estado }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                <i class="fas fa-map-marked-alt text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Ciudad -->
+                    <div>
+                        <label for="ciudad" class="block text-sm font-medium text-gray-700 mb-1">Ciudad <span class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <select id="ciudad" name="ciudad" class="w-full pl-3 pr-10 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" required>
+                                <option value="">Seleccione una ciudad</option>
+                                {% for ciudad in ciudades %}
+                                    <option value="{{ ciudad.id }}">{{ ciudad.nombre_ciudad }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                <i class="fas fa-city text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Dirección -->
+                <div class="mt-6">
+                    <label for="direccion" class="block text-sm font-medium text-gray-700 mb-1">Dirección <span class="text-red-500">*</span></label>
+                    <div class="relative">
+                        <textarea id="direccion" name="direccion" rows="3" class="w-full pl-3 pr-10 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" placeholder="Ingrese la dirección completa" required></textarea>
+                        <div class="absolute top-3 right-3">
+                            <i class="fas fa-home text-gray-400"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             <!-- Botón de Envío -->
             <div class="mt-8">
-                <button type="submit" class="w-full bg-gray-800 text-white py-3 px-6 rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 transition-all transform hover:scale-105">
-                    Registrar Paciente
+                <button type="submit" class="w-full bg-teal-700 hover:bg-teal-800 text-white py-3 px-6 rounded-xl font-semibold shadow-md hover:shadow-lg transition-all transform hover:scale-[1.01]">
+                    <i class="fas fa-save mr-2"></i> Registrar Paciente
                 </button>
             </div>
         </form>
     </div>
-
 </div>
+
+
+<!-- Modal Antecendentes -->
+
+<div id="modalAntecedente" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <form method="POST" action="{% url 'Crear_antecedentes' %}" class="bg-white rounded-xl p-6 w-full max-w-md">
+        {% csrf_token %}
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-semibold text-gray-800">Agregar Antecedente Personal</h3>
+            <button type="button" onclick="cerrarModalAntecedente()" class="text-gray-500 hover:text-gray-700">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="mb-4">
+            <label for="descripcion" class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+            <textarea name="descripcion" required rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"></textarea>
+        </div>
+
+        <div class="flex items-center">
+            <input type="checkbox" id="activo" name="activo" value="true" checked
+                class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded">
+            <label for="activo" class="ml-2 block text-sm text-gray-700">Activo</label>
+        </div>
+        
+        <div class="flex justify-end space-x-3">
+            <button type="button" onclick="cerrarModalAntecedente()" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">Cancelar</button>
+            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Guardar</button>
+        </div>
+    </form>
+</div>
+
+<!-- Modal Condicion -->
+
+<div id="modalCondicion" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <form method="POST" action="{% url 'Crear_condicion' %}" class="bg-white rounded-xl p-6 w-full max-w-md">
+        {% csrf_token %}
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-semibold text-gray-800">Agregar Nueva Condición</h3>
+            <button type="button" onclick="cerrarModalCondicion()" class="text-gray-500 hover:text-gray-700">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="mb-4">
+            <label for="nombre" class="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+            <input type="text" name="nombre" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+        </div>
+
+        <div class="mb-4">
+            <label for="descripcion" class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+            <textarea name="descripcion" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">Sin descripción</textarea>
+        </div>
+
+        <div class="flex items-center">
+            <input type="checkbox" id="activo" name="activo" value="true" checked
+                class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded">
+            <label for="activo" class="ml-2 block text-sm text-gray-700">Activo</label>
+        </div>
+
+        <div class="flex justify-end space-x-3">
+            <button type="button" onclick="cerrarModalCondicion()" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">Cancelar</button>
+            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Guardar</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    function abrirModalCondicion() {
+        document.getElementById('modalCondicion').classList.remove('hidden');
+    }
+
+    function cerrarModalCondicion() {
+        document.getElementById('modalCondicion').classList.add('hidden');
+    }
+
+    function abrirModalAntecedente() {
+        document.getElementById('modalAntecedente').classList.remove('hidden');
+    }
+
+    function cerrarModalAntecedente() {
+        document.getElementById('modalAntecedente').classList.add('hidden');
+    }
+</script>
+
+
 {% endblock %}

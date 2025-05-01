@@ -1,118 +1,379 @@
 {% extends 'base.html' %}
 
-{% block title %}Lista de Empleados{% endblock %}
+{% block title %}Gestión de Empleados{% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-gray-100 py-8">
-    <div class="max-w-6xl mx-auto bg-white p-6 rounded-lg shadow-lg">
-        <h1 class="text-3xl font-bold text-center text-gray-700 mb-6">Empleados</h1>
-        
-        <div class="overflow-x-auto">
-        
-         <form method="GET" action="{% url 'Listar_empleados' %}" class="flex space-x-2 mb-4">
-            <input 
-                type="text" 
-                id="searchInput"
-                name="q" 
-                placeholder="Buscar por nombre, cédula o teléfono..." 
-                class="p-2 border border-gray-300 rounded-lg w-1/2" 
-                value="{{ query|default:'' }}" 
-            />
-            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
-                Buscar
-            </button>
-        </form>
-
-            <table class="min-w-full bg-white border border-gray-300 rounded-lg shadow-sm">
-                <thead class="bg-gray-200 text-gray-700 text-left">
-                    <tr>
-                        <th class="py-3 px-6 border-b">Cédula</th>
-                        <th class="py-3 px-6 border-b">Nombre Completo</th>
-                        <th class="py-3 px-6 border-b">Cargo</th>
-                        <th class="py-3 px-6 border-b">Teléfono</th>
-                        <th class="py-3 px-6 border-b">Estado</th>
-                        <th class="py-3 px-6 border-b text-center">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for empleado in empleados %}
-                        <tr class="border-b hover:bg-gray-100">
-                            <td class="py-3 px-6">{{ empleado.cedula }}</td>
-                            <td class="py-3 px-6">{{ empleado.nombre }} {{ empleado.apellido }}</td>
-                            <td class="py-3 px-6">{{ empleado.cargo }}</td>
-                            <td class="py-3 px-6">{{ empleado.telefono }}</td>
-                            <td class="py-3 px-6">
-                                {% if empleado.status %}
-                                    <span class="text-green-500">Activo</span>
-                                {% else %}
-                                    <span class="text-red-500">Inactivo</span>
-                                {% endif %}
-                            </td>
-                            <td class="py-3 px-6">
-                                <button class="text-blue-500 hover:text-blue-700" onclick="openModalEditarEmpleado('{{ empleado.id }}')">
-                                    <i data-lucide="pencil" class="w-6 h-6"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        
-                        <!-- MODAL -->
-                        <div id="modalEditarEmpleado{{ empleado.id }}" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden justify-center items-center">
-                            <div class="bg-white w-2/3 p-6 rounded-lg shadow-lg overflow-auto">
-                                <h3 class="text-lg font-bold mb-4">Editar Empleado</h3>
-                                <form method="POST" action="{% url 'Editar_empleado' empleado.id %}" class="max-w-full mx-auto">
-                                    {% csrf_token %}
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div>
-                                            <label for="nombre" class="block text-lg font-semibold text-gray-700">Nombre</label>
-                                            <input type="text" id="nombre" name="nombre" class="form-control w-full p-3 border-2 rounded-lg" value="{{ empleado.nombre }}">
-                                        </div>
-                                        <div>
-                                            <label for="apellido" class="block text-lg font-semibold text-gray-700">Apellido</label>
-                                            <input type="text" id="apellido" name="apellido" class="form-control w-full p-3 border-2 rounded-lg" value="{{ empleado.apellido }}">
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="mt-4">
-                                        <label for="status" class="block text-lg font-semibold text-gray-700">Estado</label>
-                                        <select id="status" name="status" class="form-control w-full p-3 border-2 rounded-lg">
-                                            <option value="True" {% if empleado.status %}selected{% endif %}>Activo</option>
-                                            <option value="False" {% if not empleado.status %}selected{% endif %}>Inactivo</option>
-                                        </select>
-                                    </div>
-
-                                    <div class="mt-6 flex justify-center">
-                                        <button type="button" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-400 mr-2" onclick="closeModalEditarEmpleado('{{ empleado.id }}')">Cancelar</button>
-                                        <button type="submit" class="bg-black text-white py-3 px-8 rounded-lg text-lg font-semibold hover:bg-blue-700 transition-all">
-                                            Guardar Cambios
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    {% endfor %}
-                </tbody>
-            </table>
+<div class="min-h-screen bg-gray-50 py-20 px-4">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-2xl font-semibold text-gray-800">Gestión de Empleados</h1>
+            <p class="text-gray-500 mt-1">Administra el registro de empleados de tu organización</p>
         </div>
-        
+
+        <!-- Search and Filters -->
+        <div class="bg-white rounded-lg shadow-xs p-4 mb-6">
+            <form method="GET" action="{% url 'Listar_empleados' %}" class="flex flex-col md:flex-row gap-3">
+                <div class="relative flex-grow">
+                    <i data-lucide="search" class="absolute left-3 top-3 text-gray-500"></i>
+                    <input 
+                        type="text" 
+                        id="searchInput"
+                        placeholder="Buscar por nombre, cédula, teléfono..." 
+                        class="pl-10 pr-4 py-2 w-full border border-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        onkeyup="filterCards()"
+                    />
+                </div>
+                
+                <div class="flex gap-2">
+                
+                    
+                    <select name="status" class="p-2 border border-gray-200 rounded-lg text-sm focus:ring-blue-200 focus:border-blue-400">
+                        <option value="">Todos los estados</option>
+                        <option value="1" {% if request.GET.status == "1" %}selected{% endif %}>Activos</option>
+                        <option value="0" {% if request.GET.status == "0" %}selected{% endif %}>Inactivos</option>
+                    </select>
+                    
+                    <button type="submit" class="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                        <i data-lucide="filter" class="w-4 h-4"></i>
+                        Filtrar
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Employee Cards Container -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {% for empleado in empleados %}
+            <div class="empleado-card bg-white rounded-lg shadow-xs p-4 hover:shadow-md transition-shadow cursor-pointer" onclick="openModalVerEmpleado('{{ empleado.id }}')">
+                <!-- Card Header -->
+                <div class="flex justify-between items-start mb-3">
+                    <div>
+                        <h3 class="font-semibold text-gray-800">{{ empleado.nombre }} {{ empleado.apellido }}</h3>
+                        <p class="text-sm text-gray-500">{{ empleado.cargo }}</p>
+                    </div>
+                    <div>
+                        {% if empleado.status %}
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-200 text-green-800">Activo</span>
+                        {% else %}
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-200 text-red-800">Inactivo</span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Progress Bar -->
+                <div class="mb-4">
+                    <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div class="h-full bg-blue-500 rounded-full" style="width: {% if empleado.status %}90%{% else %}10%{% endif %}"></div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">Disponibilidad</p>
+                </div>
+                
+                <!-- Employee Details -->
+                <div class="space-y-2 text-sm">
+                    <div class="flex items-center">
+                        <i data-lucide="id-card" class="w-4 h-4 text-gray-500 mr-2"></i>
+                        <span class="text-gray-700">Cédula: {{ empleado.cedula }}</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i data-lucide="phone" class="w-4 h-4 text-gray-500 mr-2"></i>
+                        <span class="text-gray-700">{{ empleado.telefono }}</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i data-lucide="venus-mars" class="w-4 h-4 text-gray-500 mr-2"></i>
+                        <span class="text-gray-700">
+                            {% if empleado.sexo == 'masculino' %}Masculino{% else %}Femenino{% endif %}
+                        </span>
+                    </div>
+                </div>
+                
+                <!-- Actions -->
+                <div class="mt-4 flex justify-end">
+                    <button onclick="event.stopPropagation(); openModalEditarEmpleado('{{ empleado.id }}')" class="p-2 text-blue-500 hover:text-blue-700 rounded-full hover:bg-blue-50 transition-colors">
+                        <i data-lucide="edit" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        <div class="mt-6 bg-white px-6 py-3 flex items-center justify-between border-t border-gray-200 rounded-b-lg">
+            <div class="flex-1 flex justify-between items-center">
+                <p class="text-sm text-gray-700">
+                    Mostrando <span class="font-medium">{{ empleados.start_index }}</span> a <span class="font-medium">{{ empleados.end_index }}</span> de <span class="font-medium">{{ empleados.paginator.count }}</span> empleados
+                </p>
+                <div class="flex space-x-2">
+                    {% if empleados.has_previous %}
+                    <a href="?page=1" class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+                        &laquo;
+                    </a>
+                    <a href="?page={{ empleados.previous_page_number }}" class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+                        &lsaquo;
+                    </a>
+                    {% endif %}
+                    
+                    {% for num in empleados.paginator.page_range %}
+                        {% if num > empleados.number|add:'-3' and num < empleados.number|add:'3' %}
+                            {% if empleados.number == num %}
+                            <span class="px-3 py-1 border border-blue-500 bg-blue-50 text-blue-600 rounded-md text-sm font-medium">
+                                {{ num }}
+                            </span>
+                            {% else %}
+                            <a href="?page={{ num }}" class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                {{ num }}
+                            </a>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if empleados.has_next %}
+                    <a href="?page={{ empleados.next_page_number }}" class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+                        &rsaquo;
+                    </a>
+                    <a href="?page={{ empleados.paginator.num_pages }}" class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+                        &raquo;
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Button -->
         <div class="mt-6 flex justify-end">
-            <a href="{% url 'Crear_empleado' %}" class="bg-green-500 text-white py-2 px-6 rounded-lg hover:bg-green-600 transition">
+            <a href="{% url 'Crear_empleado' %}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                <i data-lucide="plus" class="mr-2 w-4 h-4"></i>
                 Agregar Empleado
             </a>
         </div>
     </div>
 </div>
 
-<script type="text/javascript">
+<!-- Modal para Ver Empleado (solo lectura) -->
+{% for empleado in empleados %}
+    <div id="modalVerEmpleado{{ empleado.id }}" class="fixed inset-0 bg-gray-500 bg-opacity-75 hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <!-- Modal Header -->
+            <div class="px-6 py-4 border-b flex justify-between items-center">
+                <h3 class="text-lg font-medium text-gray-900">Información del Empleado</h3>
+                <button type="button" onclick="closeModalVerEmpleado('{{ empleado.id }}')" class="text-gray-400 hover:text-gray-500">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            
+            <!-- Modal Content -->
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Columna 1 -->
+                    <div class="space-y-6">
+                        <!-- Información Básica -->
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-500 mb-3">INFORMACIÓN BÁSICA</h4>
+                            <div class="space-y-3">
+                                <div>
+                                    <p class="text-xs text-gray-500">Usuario</p>
+                                    <p class="text-sm text-gray-800">{{ empleado.usuario.username }}</p>
+                                </div>
+                                
+                                <div>
+                                    <p class="text-xs text-gray-500">Cédula</p>
+                                    <p class="text-sm text-gray-800">{{ empleado.cedula }}</p>
+                                </div>
+                                
+                                <div>
+                                    <p class="text-xs text-gray-500">Nombres</p>
+                                    <p class="text-sm text-gray-800">{{ empleado.nombre }} {{ empleado.nombre2 }}</p>
+                                </div>
+                                
+                                <div>
+                                    <p class="text-xs text-gray-500">Apellidos</p>
+                                    <p class="text-sm text-gray-800">{{ empleado.apellido }} {{ empleado.apellido2 }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Información Laboral -->
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-500 mb-3">INFORMACIÓN LABORAL</h4>
+                            <div class="space-y-3">
+                                <div>
+                                    <p class="text-xs text-gray-500">Cargo</p>
+                                    <p class="text-sm text-gray-800">{{ empleado.cargo }}</p>
+                                </div>
+                                
+                                <div>
+                                    <p class="text-xs text-gray-500">Fecha de Ingreso</p>
+                                    <p class="text-sm text-gray-800">{{ empleado.fecha_ingreso|date:"d/m/Y" }}</p>
+                                </div>
+                                
+                                <div>
+                                    <p class="text-xs text-gray-500">Nivel Académico</p>
+                                    <p class="text-sm text-gray-800">
+                                        {% if empleado.nivel_academico == 'primaria' %}Primaria
+                                        {% elif empleado.nivel_academico == 'secundaria' %}Secundaria
+                                        {% elif empleado.nivel_academico == 'bachillerato' %}Bachillerato
+                                        {% elif empleado.nivel_academico == 'tecnico' %}Técnico
+                                        {% elif empleado.nivel_academico == 'tecnologo' %}Tecnólogo
+                                        {% elif empleado.nivel_academico == 'pregrado' %}Pregrado
+                                        {% elif empleado.nivel_academico == 'licenciatura' %}Licenciatura
+                                        {% elif empleado.nivel_academico == 'especializacion' %}Especialización
+                                        {% elif empleado.nivel_academico == 'maestria' %}Maestría
+                                        {% elif empleado.nivel_academico == 'doctorado' %}Doctorado
+                                        {% elif empleado.nivel_academico == 'postdoctorado' %}Postdoctorado
+                                        {% elif empleado.nivel_academico == 'diplomado' %}Diplomado
+                                        {% elif empleado.nivel_academico == 'curso' %}Curso
+                                        {% elif empleado.nivel_academico == 'sin_estudios' %}Sin estudios formales
+                                        {% else %}{{ empleado.nivel_academico|default:"No especificado" }}
+                                        {% endif %}
+                                    </p>
+                                </div>
+                                
+                                <div>
+                                    <p class="text-xs text-gray-500">Estado</p>
+                                    <p class="text-sm text-gray-800">
+                                        {% if empleado.status %}
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-200 text-green-800">Activo</span>
+                                        {% else %}
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-200 text-red-800">Inactivo</span>
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Columna 2 -->
+                    <div class="space-y-6">
+                        <!-- Información Personal -->
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-500 mb-3">INFORMACIÓN PERSONAL</h4>
+                            <div class="space-y-3">
+                                <div>
+                                    <p class="text-xs text-gray-500">Teléfono</p>
+                                    <p class="text-sm text-gray-800">{{ empleado.telefono }}</p>
+                                </div>
+                                
+                                <div>
+                                    <p class="text-xs text-gray-500">Sexo</p>
+                                    <p class="text-sm text-gray-800">
+                                        {% if empleado.sexo == 'masculino' %}
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-200 text-blue-800">Masculino</span>
+                                        {% else %}
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-pink-200 text-pink-800">Femenino</span>
+                                        {% endif %}
+                                    </p>
+                                </div>
+                                
+                                <div>
+                                    <p class="text-xs text-gray-500">Fecha de Nacimiento</p>
+                                    <p class="text-sm text-gray-800">{{ empleado.fecha_nacimiento|date:"d/m/Y" }}</p>
+                                </div>
+                                
+                                <div>
+                                    <p class="text-xs text-gray-500">Edad</p>
+                                    <p class="text-sm text-gray-800">{{ empleado.edad }} años</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Ubicación -->
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-500 mb-3">UBICACIÓN</h4>
+                            <div class="space-y-3">
+                                <div>
+                                    <p class="text-xs text-gray-500">País</p>
+                                    <p class="text-sm text-gray-800">{{ empleado.pais.nombre_pais }}</p>
+                                </div>
+                                
+                                <div>
+                                    <p class="text-xs text-gray-500">Estado</p>
+                                    <p class="text-sm text-gray-800">{{ empleado.estado.nombre_estado }}</p>
+                                </div>
+                                
+                                <div>
+                                    <p class="text-xs text-gray-500">Ciudad</p>
+                                    <p class="text-sm text-gray-800">{{ empleado.ciudad.nombre_ciudad }}</p>
+                                </div>
+                                
+                                <div>
+                                    <p class="text-xs text-gray-500">Dirección</p>
+                                    <p class="text-sm text-gray-800">{{ empleado.direccion }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Modal Footer -->
+            <div class="px-6 py-4 border-t flex justify-end">
+                <button type="button" onclick="closeModalVerEmpleado('{{ empleado.id }}')" class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+{% endfor %}
+
+<!-- Modals de Edición (mantenidos igual) -->
+{% for empleado in empleados %}
+    <div id="modalEditarEmpleado{{ empleado.id }}" class="fixed inset-0 bg-gray-500 bg-opacity-75 hidden flex items-center justify-center z-50 p-4">
+        <!-- ... (mantener el mismo contenido del modal de edición) ... -->
+    </div>
+{% endfor %}
+
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>
     lucide.createIcons();
 
+    // Función para filtrar empleados
+    window.filterCards = function() {
+        const input = document.getElementById("searchInput").value.toLowerCase();
+        const cards = document.querySelectorAll(".empleado-card");
+        
+        cards.forEach(card => {
+            const text = card.textContent.toLowerCase();
+            card.style.display = text.includes(input) ? "" : "none";
+        });
+    };
+    
+    // Funciones para el modal de visualización
+    function openModalVerEmpleado(id) {
+        document.getElementById(`modalVerEmpleado${id}`).classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+    }
+    
+    function closeModalVerEmpleado(id) {
+        document.getElementById(`modalVerEmpleado${id}`).classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+    }
+    
+    // Funciones para el modal de edición
     function openModalEditarEmpleado(id) {
         document.getElementById(`modalEditarEmpleado${id}`).classList.remove('hidden');
-        document.getElementById(`modalEditarEmpleado${id}`).classList.add('flex');
+        document.body.classList.add('overflow-hidden');
     }
-
+    
     function closeModalEditarEmpleado(id) {
-        document.getElementById(`modalEditarEmpleado${id}`).classList.remove('flex');
         document.getElementById(`modalEditarEmpleado${id}`).classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
     }
+    
+    // Cerrar modales al presionar ESC
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('[id^="modalVerEmpleado"], [id^="modalEditarEmpleado"]').forEach(modal => {
+                modal.classList.add('hidden');
+                document.body.classList.remove('overflow-hidden');
+            });
+        }
+    });
+
+    // Evitar que el click en el botón de editar propague al contenedor
+    document.querySelectorAll('[onclick^="openModalEditarEmpleado"]').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+    });
 </script>
 {% endblock %}

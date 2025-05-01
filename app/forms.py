@@ -80,7 +80,7 @@ class EmpleadoForm(forms.ModelForm):
 class UsuarioForm(UserChangeForm):
     class Meta:
         model = Usuario
-        fields = ['username', 'email', 'cedula', 'telefono', 'rol', 'first_name', 'last_name']
+        fields = ['username', 'email', 'cedula', 'telefono', 'rol', 'first_name', 'last_name', 'is_active']
         widgets = {
             'username': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre de usuario'}),
             'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Correo electrónico'}),
@@ -89,6 +89,7 @@ class UsuarioForm(UserChangeForm):
             'rol': forms.Select(attrs={'class': 'form-control'}),
             'first_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre'}),
             'last_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Apellido'}),
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-checkbox h-5 w-5 text-blue-600'})
         }
 
     def __init__(self, *args, **kwargs):
@@ -99,13 +100,48 @@ class UsuarioForm(UserChangeForm):
 class CitaForm(forms.ModelForm):
     class Meta:
         model = Cita
-        fields = ['hora', 'fecha', 'modalidad', 'motivo_consulta'] 
+        fields = ['paciente', 'hora', 'fecha', 'modalidad', 'motivo_consulta']  # Agregué 'paciente'
         widgets = {
             'hora': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
             'fecha': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'modalidad': forms.Select(attrs={'class': 'form-control'}),
             'motivo_consulta': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
+            'paciente': forms.Select(attrs={'class': 'form-control'}),
         }
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        fecha = cleaned_data.get('fecha')
+        hora = cleaned_data.get('hora')
+        
+        if fecha and hora:
+            # Validar que no haya citas en la misma fecha y hora
+            citas_existentes = Cita.objects.filter(fecha=fecha, hora=hora)
+            
+            if self.instance.pk:  # Si es una edición, excluir la cita actual
+                citas_existentes = citas_existentes.exclude(pk=self.instance.pk)
+            
+            if citas_existentes.exists():
+                raise ValidationError('Ya existe una cita programada para esta fecha y hora exacta')
+            
+            # Validar margen de 2 horas
+            hora_inicio = hora
+            hora_fin = (datetime.datetime.combine(datetime.date.today(), hora_inicio) + 
+                       datetime.timedelta(hours=2)).time()
+            
+            citas_solapadas = Cita.objects.filter(
+                fecha=fecha,
+                hora__gte=hora_inicio,
+                hora__lt=hora_fin
+            )
+            
+            if self.instance.pk:  # Si es una edición, excluir la cita actual
+                citas_solapadas = citas_solapadas.exclude(pk=self.instance.pk)
+            
+            if citas_solapadas.exists():
+                raise ValidationError('Debe haber al menos 2 horas entre citas')
+        
+        return cleaned_data
 
 
 class DetalleCitaForm(forms.ModelForm):

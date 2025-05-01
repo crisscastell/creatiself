@@ -3,134 +3,204 @@
 {% block title %}Registrar Empleado{% endblock %}
 
 {% block content %}
-<div class="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-50 to-purple-50">
-    <div class="w-full max-w-4xl bg-white rounded-xl shadow-2xl p-8 transform transition-all hover:scale-105">
-        <h1 class="text-4xl font-extrabold text-center mt-16 mb-8 text-transparent bg-clip-text bg-gray-800">
-            Registrar Empleado
-        </h1>
-        <form method="POST" action="{% url 'Crear_empleado' %}">
-            {% csrf_token %}
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Usuario -->
-                <div>
-                    <label for="usuario" class="block text-sm font-semibold text-gray-700 mb-2">Usuario</label>
-                    <select id="usuario" name="usuario" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full" required>
-                        {% for usuario in usuarios %}
-                            <option value="{{ usuario.id }}">{{ usuario.username }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <!-- Cédula -->
-                <div>
-                    <label for="cedula" class="block text-sm font-semibold text-gray-700 mb-2">Cédula</label>
-                    <input type="text" id="cedula" name="cedula" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full" required>
-                </div>
-                <!-- Nombres -->
-                <div>
-                    <label for="nombre" class="block text-sm font-semibold text-gray-700 mb-2">Primer Nombre</label>
-                    <input type="text" id="nombre" name="nombre" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full" required>
-                </div>
-                <div>
-                    <label for="nombre2" class="block text-sm font-semibold text-gray-700 mb-2">Segundo Nombre</label>
-                    <input type="text" id="nombre2" name="nombre2" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full">
-                </div>
-                <!-- Apellidos -->
-                <div>
-                    <label for="apellido" class="block text-sm font-semibold text-gray-700 mb-2">Primer Apellido</label>
-                    <input type="text" id="apellido" name="apellido" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full" required>
-                </div>
-                <div>
-                    <label for="apellido2" class="block text-sm font-semibold text-gray-700 mb-2">Segundo Apellido</label>
-                    <input type="text" id="apellido2" name="apellido2" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full">
-                </div>
-                <!-- Cargo -->
-                <div>
-                    <label for="cargo" class="block text-sm font-semibold text-gray-700 mb-2">Cargo</label>
-                    <input type="text" id="cargo" name="cargo" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full" required>
-                </div>
-                <!-- Dirección -->
-                <div class="col-span-1 md:col-span-2">
-                    <label for="direccion" class="block text-sm font-semibold text-gray-700 mb-2">Dirección</label>
-                    <textarea id="direccion" name="direccion" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full" required></textarea>
-                </div>
-                <!-- Teléfono -->
-                <div>
-                    <label for="telefono" class="block text-sm font-semibold text-gray-700 mb-2">Teléfono</label>
-                    <input type="text" id="telefono" name="telefono" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full" required>
-                </div>
-                <!-- Fecha de Nacimiento -->
-                <div>
-                    <label for="fecha_nacimiento" class="block text-sm font-semibold text-gray-700 mb-2">Fecha de Nacimiento</label>
-                    <input type="date" id="fecha_nacimiento" name="fecha_nacimiento" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full" required>
-                </div>
-                <!-- Fecha de Ingreso -->
-                <div>
-                    <label for="fecha_ingreso" class="block text-sm font-semibold text-gray-700 mb-2">Fecha de Ingreso</label>
-                    <input type="date" id="fecha_ingreso" name="fecha_ingreso" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full" required>
-                </div>
-                <!-- Edad -->
-                <div>
-                    <label for="edad" class="block text-sm font-semibold text-gray-700 mb-2">Edad</label>
-                    <input type="number" id="edad" name="edad" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full" required>
-                </div>
-                <!-- Sexo -->
-                <div>
-                    <label for="sexo" class="block text-sm font-semibold text-gray-700 mb-2">Sexo</label>
-                    <select id="sexo" name="sexo" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full" required>
-                        <option value="masculino">Masculino</option>
-                        <option value="femenino">Femenino</option>
-                    </select>
-                </div>
-                <!-- Estado -->
-                <div class="flex items-center mt-2">
-                    <input type="checkbox" id="activo" name="activo" value="True"
-                        class="form-checkbox h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-300">
-                    <label for="activo" class="ml-2 text-sm font-semibold text-gray-700">Empleado Activo</label>
-                </div>
-                <!-- Nivel Académico -->
-                <div>
-                    <label for="nivel_academico" class="block text-sm font-semibold text-gray-700 mb-2">Nivel Académico</label>
-                    <select id="nivel_academico" name="nivel_academico" 
-                        class="form-control border-2 border-gray-200 rounded-lg p-3 w-full focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all" required>
-                        {% for value, label in form.nivel_academico.field.choices %}
-                            <option value="{{ value }}" {% if form.nivel_academico.value == value %}selected{% endif %}>
-                                {{ label }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <!-- País, Estado y Ciudad -->
-                <div>
-                    <label for="pais" class="block text-sm font-semibold text-gray-700 mb-2">País</label>
-                    <select id="pais" name="pais" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full" required>
-                        {% for pais in paises %}
-                            <option value="{{ pais.id }}">{{ pais.nombre_pais }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div>
-                    <label for="estado" class="block text-sm font-semibold text-gray-700 mb-2">Estado</label>
-                    <select id="estado" name="estado" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full" required>
-                        {% for estado in estados %}
-                            <option value="{{ estado.id }}">{{ estado.nombre_estado }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div>
-                    <label for="ciudad" class="block text-sm font-semibold text-gray-700 mb-2">Ciudad</label>
-                    <select id="ciudad" name="ciudad" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full" required>
-                        {% for ciudad in ciudades %}
-                            <option value="{{ ciudad.id }}">{{ ciudad.nombre_ciudad }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-            </div>
-            <div class="mt-8">
-                <button type="submit" class="w-full bg-gray-800 text-white py-3 px-6 rounded-xl font-semibold hover:bg-gray-700 transition-all">
+<div class="min-h-screen bg-gradient-to-br from-teal-50 to-white py-20 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-4xl mx-auto">
+        <!-- Header con efecto especial -->
+        <div class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-gray-800 mb-3">
+                <span class="bg-clip-text text-transparent bg-gradient-to-r from-teal-800 to-teal-700">
                     Registrar Empleado
-                </button>
-            </div>
-        </form>
+                </span>
+            </h1>
+            <p class="text-lg text-gray-600">Complete los campos requeridos (*)</p>
+            <div class="mt-4 w-24 h-1 bg-gradient-to-r from-teal-600 to-teal-400 mx-auto rounded-full"></div>
+        </div>
+
+        <!-- Tarjeta del formulario con sombra suave -->
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-teal-100">
+            <form method="POST" action="{% url 'Crear_empleado' %}" class="p-8">
+                {% csrf_token %}
+                
+                <!-- Sección 1: Información Básica -->
+                <div class="mb-12">
+                    <div class="flex items-center mb-6">
+                        <div class="h-10 w-1 bg-teal-500 rounded-r-md mr-4"></div>
+                        <h2 class="text-xl font-semibold text-gray-800">Información Básica</h2>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Fila 1 -->
+                        <div class="space-y-1">
+                            <label class="block text-sm font-medium text-gray-700">Usuario <span class="text-red-500">*</span></label>
+                            <select name="usuario" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-300 focus:border-teal-400 transition-all">
+                                {% for usuario in usuarios %}
+                                <option value="{{ usuario.id }}">{{ usuario.username }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="space-y-1">
+                            <label class="block text-sm font-medium text-gray-700">Cédula <span class="text-red-500">*</span></label>
+                            <input type="text" name="cedula" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-300 focus:border-teal-400 transition-all">
+                        </div>
+                        
+                        <!-- Fila 2 -->
+                        <div class="space-y-1">
+                            <label class="block text-sm font-medium text-gray-700">Primer Nombre <span class="text-red-500">*</span></label>
+                            <input type="text" name="nombre" placeholder="Ej: Juan" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-300 focus:border-teal-400 transition-all">
+                        </div>
+                        
+                        <div class="space-y-1">
+                            <label class="block text-sm font-medium text-gray-700">Segundo Nombre</label>
+                            <input type="text" name="nombre2" placeholder="Ej: Carlos" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-300 focus:border-teal-400 transition-all">
+                        </div>
+                        
+                        <!-- Fila 3 -->
+                        <div class="space-y-1">
+                            <label class="block text-sm font-medium text-gray-700">Primer Apellido <span class="text-red-500">*</span></label>
+                            <input type="text" name="apellido" placeholder="Ej: Pérez" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-300 focus:border-teal-400 transition-all">
+                        </div>
+                        
+                        <div class="space-y-1">
+                            <label class="block text-sm font-medium text-gray-700">Segundo Apellido</label>
+                            <input type="text" name="apellido2" placeholder="Ej: González" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-300 focus:border-teal-400 transition-all">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección 2: Información Laboral -->
+                <div class="mb-12">
+                    <div class="flex items-center mb-6">
+                        <div class="h-10 w-1 bg-teal-500 rounded-r-md mr-4"></div>
+                        <h2 class="text-xl font-semibold text-gray-800">Información Laboral</h2>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Fila 1 -->
+                        <div class="space-y-1">
+                            <label class="block text-sm font-medium text-gray-700">Cargo <span class="text-red-500">*</span></label>
+                            <input type="text" name="cargo" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-300 focus:border-teal-400 transition-all">
+                        </div>
+                        
+                        <div class="space-y-1">
+                            <label class="block text-sm font-medium text-gray-700">Fecha Ingreso <span class="text-red-500">*</span></label>
+                            <input type="date" name="fecha_ingreso" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-300 focus:border-teal-400 transition-all">
+                        </div>
+                        
+                        <!-- Fila 2 -->
+                        <div class="space-y-1">
+                            <label class="block text-sm font-medium text-gray-700">Nivel Académico <span class="text-red-500">*</span></label>
+                            <select name="nivel_academico" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-300 focus:border-teal-400 transition-all">
+                                {% for value, label in form.nivel_academico.field.choices %}
+                                <option value="{{ value }}">{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="flex items-center justify-center space-x-4">
+                            <div class="flex items-center">
+                                <input type="checkbox" name="activo" checked class="h-5 w-5 text-teal-600 rounded focus:ring-teal-500 border-gray-300">
+                                <label class="ml-2 text-sm font-medium text-gray-700">Activo</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección 3: Información Personal -->
+                <div class="mb-12">
+                    <div class="flex items-center mb-6">
+                        <div class="h-10 w-1 bg-teal-500 rounded-r-md mr-4"></div>
+                        <h2 class="text-xl font-semibold text-gray-800">Información Personal</h2>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Fila 1 -->
+                        <div class="space-y-1">
+                            <label class="block text-sm font-medium text-gray-700">Teléfono <span class="text-red-500">*</span></label>
+                            <input type="text" name="telefono" placeholder="Ej: 04121234567" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-300 focus:border-teal-400 transition-all">
+                        </div>
+                        
+                        <div class="space-y-1">
+                            <label class="block text-sm font-medium text-gray-700">Sexo <span class="text-red-500">*</span></label>
+                            <select name="sexo" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-300 focus:border-teal-400 transition-all">
+                                <option value="masculino">Masculino</option>
+                                <option value="femenino">Femenino</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Fila 2 -->
+                        <div class="space-y-1">
+                            <label class="block text-sm font-medium text-gray-700">Fecha Nacimiento <span class="text-red-500">*</span></label>
+                            <input type="date" name="fecha_nacimiento" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-300 focus:border-teal-400 transition-all">
+                        </div>
+                        
+                        <div class="space-y-1">
+                            <label class="block text-sm font-medium text-gray-700">Edad <span class="text-red-500">*</span></label>
+                            <input type="number" name="edad" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-300 focus:border-teal-400 transition-all">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección 4: Ubicación -->
+                <div class="mb-12">
+                    <div class="flex items-center mb-6">
+                        <div class="h-10 w-1 bg-teal-500 rounded-r-md mr-4"></div>
+                        <h2 class="text-xl font-semibold text-gray-800">Ubicación</h2>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="space-y-1">
+                            <label class="block text-sm font-medium text-gray-700">País <span class="text-red-500">*</span></label>
+                            <select name="pais" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-300 focus:border-teal-400 transition-all">
+                                {% for pais in paises %}
+                                <option value="{{ pais.id }}">{{ pais.nombre_pais }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="space-y-1">
+                            <label class="block text-sm font-medium text-gray-700">Estado <span class="text-red-500">*</span></label>
+                            <select name="estado" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-300 focus:border-teal-400 transition-all">
+                                {% for estado in estados %}
+                                <option value="{{ estado.id }}">{{ estado.nombre_estado }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="space-y-1">
+                            <label class="block text-sm font-medium text-gray-700">Ciudad <span class="text-red-500">*</span></label>
+                            <select name="ciudad" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-300 focus:border-teal-400 transition-all">
+                                {% for ciudad in ciudades %}
+                                <option value="{{ ciudad.id }}">{{ ciudad.nombre_ciudad }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 space-y-1">
+                        <label class="block text-sm font-medium text-gray-700">Dirección <span class="text-red-500">*</span></label>
+                        <textarea name="direccion" rows="3" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-300 focus:border-teal-400 transition-all"></textarea>
+                    </div>
+                </div>
+
+                <!-- Botón de envío con efecto hover -->
+                <div class="mt-8">
+                    <button type="submit" class="w-full bg-gradient-to-r from-teal-800 to-teal-700 hover:from-teal-700 hover:to-teal-600 text-white font-medium py-4 px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+                        Registrar Empleado
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
+
+<!-- Efectos visuales adicionales -->
+<style>
+    select, input, textarea {
+        transition: all 0.3s ease;
+    }
+    select:focus, input:focus, textarea:focus {
+        box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.2);
+    }
+</style>
 {% endblock %}

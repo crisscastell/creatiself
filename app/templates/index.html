@@ -53,9 +53,135 @@
                         </p>
                     </div>
                 </div>
-                <button class="text-blue-500 hover:text-blue-700" data-id="{{ paciente.id }}" onclick="openPatientDetailsModal(this)">
+                <button class="text-blue-500 hover:text-blue-700" data-id="{{ paciente.id }}" onclick="openModalHistorialPaciente('{{ paciente.id }}')">
                     Ver detalles
                 </button>
+                
+                <!-- Modal de Historial del Paciente Mejorado -->
+                <div id="modalHistorialPaciente{{ paciente.id }}" class="fixed inset-0 bg-black/30 hidden flex items-center justify-center z-50 p-4">
+                    <div class="bg-white rounded-xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
+                        
+                        <!-- Header - Más limpio y minimalista -->
+                        <div class="flex items-center justify-between p-5 border-b border-gray-100">
+                            <div>
+                                <h3 class="text-lg font-medium text-gray-900 flex items-center gap-2">
+                                    <i data-lucide="user" class="w-5 h-5 text-blue-500"></i>
+                                    <span>{{ paciente.nombre }} {{ paciente.apellido }}</span>
+                                </h3>
+                                <p class="text-s text-gray-500 mt-1">cedula: {{ paciente.cedula }}</p>
+                            </div>
+                            <button onclick="closeModalHistorialPaciente('{{ paciente.id }}')" 
+                                    class="text-gray-400 hover:text-gray-600 transition-colors">
+                                <i data-lucide="x" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+
+                        <!-- Body - Mejor organización visual -->
+                        <div class="overflow-y-auto divide-y divide-gray-100">
+                            
+                            <!-- Sección 1: Datos Personales -->
+                            <div class="p-5">
+                                <div class="flex items-center gap-2 mb-3">
+                                    <i data-lucide="id-card" class="w-4 h-4 text-gray-400"></i>
+                                    <h4 class="text-sm font-medium text-gray-500 uppercase tracking-wider">Datos Personales</h4>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                                    <div>
+                                        <p class="text-gray-500 mb-1">Tipo</p>
+                                        <p class="font-medium">{{ paciente.get_tipo_paciente_display }}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-gray-500 mb-1">Edad</p>
+                                        <p class="font-medium">{{ paciente.edad }} años</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-gray-500 mb-1">Sexo</p>
+                                        <p class="font-medium capitalize">{{ paciente.get_sexo_display }}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Sección 2: Contacto -->
+                            <div class="p-5">
+                                <div class="flex items-center gap-2 mb-3">
+                                    <i data-lucide="contact" class="w-4 h-4 text-gray-400"></i>
+                                    <h4 class="text-sm font-medium text-gray-500 uppercase tracking-wider">Contacto</h4>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                    <div>
+                                        <p class="text-gray-500 mb-1">Teléfono</p>
+                                        <p class="font-medium">{{ paciente.telefono }}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-gray-500 mb-1">Email</p>
+                                        <p class="font-medium">{{ paciente.email|default:"-" }}</p>
+                                    </div>
+                                    <div class="md:col-span-2">
+                                        <p class="text-gray-500 mb-1">Dirección</p>
+                                        <p class="font-medium">
+                                            {{ paciente.direccion }}, {{ paciente.ciudad.nombre_ciudad }}, 
+                                            {{ paciente.estado.nombre_estado }}, {{ paciente.pais.nombre_pais }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Sección 3: Historial Médico -->
+                            <div class="p-5">
+                                <div class="flex items-center gap-2 mb-3">
+                                    <i data-lucide="heart-pulse" class="w-4 h-4 text-gray-400"></i>
+                                    <h4 class="text-sm font-medium text-gray-500 uppercase tracking-wider">Historial Médico</h4>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                    <div>
+                                        <p class="text-gray-500 mb-1">Condición</p>
+                                        <p class="font-medium">{{ paciente.condicion.nombre }}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-gray-500 mb-1">Antecedentes</p>
+                                        <p class="font-medium">{{ paciente.antecedentes_personales.descripcion|truncatechars:50 }}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Sección 4: Educación -->
+                            <div class="p-5">
+                                <div class="flex items-center gap-2 mb-3">
+                                    <i data-lucide="graduation-cap" class="w-4 h-4 text-gray-400"></i>
+                                    <h4 class="text-sm font-medium text-gray-500 uppercase tracking-wider">Educación</h4>
+                                </div>
+                                <div class="text-sm">
+                                    <p class="text-gray-500 mb-1">Nivel Académico</p>
+                                    <p class="font-medium">
+                                        {% if paciente.nivel_academico == 'primaria' %}Primaria
+                                        {% elif paciente.nivel_academico == 'secundaria' %}Secundaria
+                                        {% elif paciente.nivel_academico == 'bachillerato' %}Bachillerato
+                                        {% elif paciente.nivel_academico == 'tecnico' %}Técnico
+                                        {% elif paciente.nivel_academico == 'tecnologo' %}Tecnólogo
+                                        {% elif paciente.nivel_academico == 'pregrado' %}Pregrado
+                                        {% elif paciente.nivel_academico == 'licenciatura' %}Licenciatura
+                                        {% elif paciente.nivel_academico == 'especializacion' %}Especialización
+                                        {% elif paciente.nivel_academico == 'maestria' %}Maestría
+                                        {% elif paciente.nivel_academico == 'doctorado' %}Doctorado
+                                        {% elif paciente.nivel_academico == 'postdoctorado' %}Postdoctorado
+                                        {% elif paciente.nivel_academico == 'diplomado' %}Diplomado
+                                        {% elif paciente.nivel_academico == 'curso' %}Curso
+                                        {% else %}No especificado
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Footer - Más minimalista -->
+                        <div class="flex justify-end p-4 border-t border-gray-100">
+                            <button onclick="closeModalHistorialPaciente('{{ paciente.id }}')"
+                                    class="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors">
+                                Cerrar
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
             {% empty %}
             <p class="text-gray-500">No hay pacientes destacados disponibles.</p>
@@ -195,6 +321,21 @@
 
         renderCalendar();
     });
+
+    // Funciones para el modal de historial
+    window.openModalHistorialPaciente = function(id) {
+        const modal = document.getElementById(`modalHistorialPaciente${id}`);
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        document.body.style.overflow = 'hidden';
+    };
+
+    window.closeModalHistorialPaciente = function(id) {
+        const modal = document.getElementById(`modalHistorialPaciente${id}`);
+        modal.classList.remove('flex');
+        modal.classList.add('hidden');
+        document.body.style.overflow = '';
+    };
 
 
 </script>

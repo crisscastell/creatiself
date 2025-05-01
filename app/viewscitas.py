@@ -1,24 +1,22 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404,  redirect
 from django.http import HttpResponse
 from app.models import Cita, DetalleCita, Paciente
 from app.forms import CitaForm, DetalleCitaForm
 from django.contrib import messages
+from django.template.loader import render_to_string
+from django.urls import reverse 
 
 def crear_cita(request):
     if request.method == "POST":
         form = CitaForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('Listar_citas')  # Ajusta según el nombre de tu vista de lista
+            return redirect('Listar_citas')
     else:
         form = CitaForm()
 
-    # Obtener los datos de las ForeignKey manualmente
-    pacientes = Paciente.objects.all()
-
     return render(request, 'citas/crear_cita.html', {
         'form': form,
-        'pacientes': pacientes
     })
 
 def listar_citas(request):
@@ -30,14 +28,21 @@ def editar_cita(request, id):
     cita = get_object_or_404(Cita, id=id)
     
     if request.method == 'POST':
-        form = CitaForm(request.POST, instance=cita)
+        # Creamos una copia mutable del POST
+        post_data = request.POST.copy()
+        # Forzamos el paciente original para evitar modificaciones
+        post_data['paciente'] = cita.paciente.id
+        form = CitaForm(post_data, instance=cita)
+        
         if form.is_valid():
             form.save()
             messages.success(request, "Cita actualizada correctamente")
+            return redirect('Listar_citas')
         else:
-            messages.error(request, "Error al actualizar la cita")
-
-    return redirect('Listar_citas')
+            for error in form.errors.values():
+                messages.error(request, error)
+    
+    return redirect('Listar_citas') 
 
 def eliminar_cita(request, cita_id):
     cita = get_object_or_404(Cita, id=cita_id)

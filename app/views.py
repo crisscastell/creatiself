@@ -7,9 +7,7 @@ from django.http import JsonResponse
 from .models import *
 from .forms import AntecedentesPersonalesForm, CondicionForm
 from django.contrib.auth.hashers import make_password
-
-
-
+from django.views.decorators.http import require_POST
 
 def login(request):
     if request.method == "POST":
@@ -126,13 +124,25 @@ def citas(request):
 def tablas(request):
     return render(request, "tablas.html")
 
+@require_POST
+def ocultar_antecedente(request, pk):
+    antecedente = get_object_or_404(AntecedentesPersonales, pk=pk)
+    antecedente.activo = False
+    antecedente.save()
+    return redirect('Caracteristicas') 
+
+# Vista para ocultar condición
+@require_POST
+def ocultar_condicion(request, pk):
+    condicion = get_object_or_404(Condicion, pk=pk)
+    condicion.activo = False
+    condicion.save()
+    return redirect('Caracteristicas') 
+
 def caracteristicas(request):
     # Obtener todos los antecedentes personales
-    antecedentes = AntecedentesPersonales.objects.all()
-
-    # Obtener todas las condiciones
-    condiciones = Condicion.objects.all()
-    
+    condiciones = Condicion.objects.filter(activo=True) 
+    antecedentes = AntecedentesPersonales.objects.filter(activo=True) 
     # Paginación para antecedentes
     paginator_antecedentes = Paginator(antecedentes, 5)  # 5 antecedentes por página
     page_number_antecedentes = request.GET.get('page_antecedentes')  # Obtener el número de página para antecedentes desde la URL
@@ -168,3 +178,5 @@ def caracteristicas(request):
         'page_obj_antecedentes': page_obj_antecedentes,  # Pasar solo el paginador de antecedentes
         'page_obj_condiciones': page_obj_condiciones,  # Pasar solo el paginador de condiciones
     })
+
+    

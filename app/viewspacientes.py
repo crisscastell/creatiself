@@ -37,28 +37,43 @@ def crear_pacientes(request):
     })
 
 def listar_pacientes(request):
+    # Obtener todos los pacientes inicialmente
     pacientes = Paciente.objects.all()
-    query = request.GET.get('q', '')
     
+    # Búsqueda
+    query = request.GET.get('q', '')
     if query:
         pacientes = pacientes.filter(
-            Q(cedula__icontains=query) | 
-            Q(nombre__icontains=query) | 
-            Q(apellido__icontains=query)
+            Q(cedula__icontains=query) |
+            Q(nombre__icontains=query) |
+            Q(apellido__icontains=query) |
+            Q(telefono__icontains=query)
         )
-
+    
+    # Filtro por tipo de paciente
+    tipo_paciente = request.GET.get('tipo_paciente')
+    if tipo_paciente:
+        pacientes = pacientes.filter(tipo_paciente=tipo_paciente)
+    
+    # Filtro por sexo
+    sexo = request.GET.get('sexo')
+    if sexo:
+        pacientes = pacientes.filter(sexo=sexo)
+    
+    # Paginación
     paginator = Paginator(pacientes, 15)
     page_number = request.GET.get('page')
-    pacientes = paginator.get_page(page_number)
-
+    pacientes_paginados = paginator.get_page(page_number)
+    
     context = {
-        'pacientes': pacientes,
+        'pacientes': pacientes_paginados,
         'query': query,
         'condiciones': Condicion.objects.all(),
         'antecedentes': AntecedentesPersonales.objects.all(),
         'paises': Pais.objects.all(),
         'estados': Estado.objects.all(),
         'ciudades': Ciudad.objects.all(),
+        'request': request,  # Importante para mantener los filtros
     }
     
     return render(request, 'paciente/listar_pacientes.html', context)
@@ -77,7 +92,8 @@ def editar_paciente(request, id):
     
     return redirect('Listar_pacientes')
 
-def crear_relacion(request):
+def listar_relaciones(request):
+    # Procesar creación de relación si el método es POST
     if request.method == "POST":
         form = RelacionPacienteForm(request.POST)
         if form.is_valid():
@@ -86,25 +102,54 @@ def crear_relacion(request):
 
             if paciente1 == paciente2:
                 messages.error(request, "No puedes relacionar un paciente consigo mismo.")
-                return redirect("Crear_relacion")
-
-            # Verificar si la relación ya existe en cualquier orden
-            if RelacionPaciente.objects.filter(
-                paciente1=paciente1, paciente2=paciente2
-            ).exists() or RelacionPaciente.objects.filter(
-                paciente1=paciente2, paciente2=paciente1
+            elif RelacionPaciente.objects.filter(
+                Q(paciente1=paciente1, paciente2=paciente2) |
+                Q(paciente1=paciente2, paciente2=paciente1)
             ).exists():
                 messages.warning(request, "Estos pacientes ya tienen una relación registrada.")
-                return redirect("Crear_relacion")
-
-            form.save()
-            messages.success(request, "Relación creada correctamente.")
-            return redirect("Listar_relaciones")
+            else:
+                form.save()
+                messages.success(request, "Relación creada correctamente.")
+                return redirect("Listar_relaciones")  # Redirigir para evitar reenvío del formulario
+        else:
+            messages.error(request, "Formulario inválido. Verifica los campos.")
     else:
         form = RelacionPacienteForm()
 
-    return render(request, "paciente/crear_relacion.html", {"form": form})
+    # Listado y búsqueda de relaciones
+    query = request.GET.get('q')
+    if query:
+        relaciones = RelacionPaciente.objects.filter(
+            Q(paciente1__nombre__icontains=query) |
+            Q(paciente2__nombre__icontains=query)
+        )
+    else:
+        relaciones = RelacionPaciente.objects.all()
 
-def lista_relaciones(request):
-    relaciones = RelacionPaciente.objects.select_related("paciente1", "paciente2").all()
-    return render(request, "paciente/listar_relaciones.html", {"relaciones": relaciones})
+    paginator = Paginator(relaciones, 10)
+    page = request.GET.get('page')
+    relaciones_pag = paginator.get_page(page)
+
+    pacientes = Paciente.objects.all()
+
+    return render(request, "paciente/listar_relaciones.html", {
+        'relaciones': relaciones_pag,
+        'query': query,
+        'pacientes': pacientes,
+        'form': form  # Por si quieres reutilizarlo en el modal
+    })
+
+
+def editar_relacion(request, id):
+    relacion = get_object_or_404(RelacionPaciente, id=id)
+    
+    if request.method == 'POST':
+        form = RelacionPacienteForm(request.POST, instance=relacion)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "relacion actualizado correctamente")
+            return redirect('Listar_relaciones')
+        else:
+            messages.error(request, "Error al actualizar el relacion")
+    
+    return redirect('Listar_relaciones')

@@ -61,14 +61,18 @@ class PacienteRepresentanteAdmin(admin.ModelAdmin):
 
 @admin.register(AntecedentesPersonales)
 class AntecedentesPersonalesAdmin(admin.ModelAdmin):
-    list_display = ('descripcion',)
+    list_display = ('descripcion', 'activo', 'creado_en', 'actualizado_en')
+    readonly_fields = ('creado_en', 'actualizado_en')
     search_fields = ('descripcion',)
+    list_filter = ('activo',)
 
 
 @admin.register(Condicion)
 class CondicionAdmin(admin.ModelAdmin):
-    list_display = ('nombre', 'descripcion')
+    list_display = ('nombre', 'descripcion', 'activo', 'creado_en', 'actualizado_en')
+    readonly_fields = ('creado_en', 'actualizado_en')
     search_fields = ('nombre', 'descripcion')
+    list_filter = ('activo',)
 
 
 @admin.register(Cita)

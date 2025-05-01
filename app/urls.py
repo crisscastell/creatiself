@@ -14,8 +14,8 @@ urlpatterns = [
     path('editar_paciente/<int:id>/', editar_paciente, name='Editar_paciente'),
     path('pacientes/caracteristicas', caracteristicas, name='Caracteristicas'),
 
-    path('relaciones/crear/', crear_relacion, name='Crear_relacion'),
-    path('relaciones/', lista_relaciones, name='Listar_relaciones'),
+    path('relaciones/', listar_relaciones, name='Listar_relaciones'),
+    path('relaciones/editar/<int:id>/', editar_relacion, name='Editar_relacion'),
     
     path('crear/citas', crear_cita, name='Crear_citas'),
     path('listar/citas', listar_citas, name='Listar_citas'),
@@ -40,9 +40,11 @@ urlpatterns = [
 
     path('antecedentes_personales/crear', crear_antecedente, name='Crear_antecedentes'),
     path('editar_antecedente/<int:id>/', editar_antecedente, name='Editar_antecedente'),
+    path('antecedente/<int:pk>/ocultar/', ocultar_antecedente, name='Ocultar_antecedente'),
 
     path('condicion/crear/', crear_condicion, name='Crear_condicion'),
     path('editar_condicion/<int:id>/', editar_condicion, name='Editar_condicion'),
+    path('condicion/<int:pk>/ocultar/', ocultar_condicion, name='Ocultar_condicion'),
     
 ]
 

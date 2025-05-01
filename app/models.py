@@ -1,5 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import ValidationError
+import datetime
+
 # Rol
 class Rol(models.Model):
     nombre_rol = models.CharField(max_length=50)
@@ -13,6 +16,8 @@ class Usuario(AbstractUser):
     telefono = models.CharField(max_length=20, blank=True, null=True)
     rol = models.ForeignKey('Rol', on_delete=models.CASCADE, null=True, blank=True)
     password = models.CharField(max_length=128, default='123456')
+    creado_en = models.DateTimeField(auto_now_add=True)  # Solo auto_now_add
+    actualizado_en = models.DateTimeField(auto_now=True)
 
 # Define related_name únicos para evitar conflictos
     groups = models.ManyToManyField(
@@ -88,6 +93,8 @@ class Representante(models.Model):
     ],
     default='sin_parentesco'
     )
+    creado_en = models.DateTimeField(auto_now_add=True)  # Solo auto_now_add
+    actualizado_en = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"{self.nombre} {self.apellido}"
@@ -130,6 +137,8 @@ class Paciente(models.Model):
     ciudad = models.ForeignKey('Ciudad', on_delete=models.CASCADE)
     antecedentes_personales = models.ForeignKey('AntecedentesPersonales', on_delete=models.SET_NULL, null=True, blank=True)
     condicion = models.ForeignKey('Condicion', on_delete=models.SET_NULL, null=True, blank=True)
+    creado_en = models.DateTimeField(auto_now_add=True)  # Solo auto_now_add
+    actualizado_en = models.DateTimeField(auto_now=True)
  
     def __str__(self):
         return f"{self.nombre} {self.apellido}"
@@ -142,6 +151,9 @@ class PacienteRepresentante(models.Model):
 # Antecedentes Personales
 class AntecedentesPersonales(models.Model):
     descripcion = models.TextField()
+    activo = models.BooleanField(default=True)
+    creado_en = models.DateTimeField(auto_now_add=True)  # Solo auto_now_add
+    actualizado_en = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.descripcion[:50]
@@ -150,6 +162,9 @@ class AntecedentesPersonales(models.Model):
 class Condicion(models.Model):
     nombre = models.CharField(max_length=100)
     descripcion = models.TextField(max_length=100, default="Sin descripción")
+    activo = models.BooleanField(default=True)
+    creado_en = models.DateTimeField(auto_now_add=True)  # Solo auto_now_add
+    actualizado_en = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.nombre
@@ -157,13 +172,41 @@ class Condicion(models.Model):
 # Cita
 class Cita(models.Model):
     hora = models.TimeField()
-    fecha = models.DateTimeField()
+    fecha = models.DateField()
     modalidad = models.CharField(max_length=50, choices=[('virtual', 'Virtual'), ('presencial', 'Presencial')])
     motivo_consulta = models.TextField()
     paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE)
 
     def __str__(self):
         return f"Cita {self.id} - {self.paciente.nombre}"
+    
+    def clean(self):
+        # Validar que no haya citas en la misma fecha y hora
+        citas_existentes = Cita.objects.filter(
+            fecha=self.fecha,
+            hora=self.hora
+        ).exclude(pk=self.pk)  # Excluye la cita actual en caso de edición
+        
+        if citas_existentes.exists():
+            raise ValidationError('Ya existe una cita programada para esta fecha y hora exacta')
+        
+        # Validar margen de 2 horas entre citas
+        hora_inicio = self.hora
+        hora_fin = (datetime.datetime.combine(datetime.date.today(), hora_inicio) + 
+                   datetime.timedelta(hours=2))
+        
+        citas_solapadas = Cita.objects.filter(
+            fecha=self.fecha,
+            hora__gte=hora_inicio,
+            hora__lt=hora_fin.time()
+        ).exclude(pk=self.pk)
+        
+        if citas_solapadas.exists():
+            raise ValidationError('No se pueden agendar citas con menos de 2 horas de diferencia')
+    
+    def save(self, *args, **kwargs):
+        self.full_clean()  # Ejecuta las validaciones
+        super().save(*args, **kwargs)
 
 # Detalle de Cita
 class DetalleCita(models.Model):
@@ -219,6 +262,8 @@ class Empleado(models.Model):
     estado = models.ForeignKey(Estado, on_delete=models.CASCADE)
     ciudad = models.ForeignKey(Ciudad, on_delete=models.CASCADE)
     status = models.BooleanField(default=True)  
+    creado_en = models.DateTimeField(auto_now_add=True)  # Solo auto_now_add
+    actualizado_en = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"{self.nombre} {self.apellido}"

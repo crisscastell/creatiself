@@ -9,7 +9,6 @@
     <!-- Carga de Tailwind CSS -->
     <link rel="stylesheet" href="{% static 'all.min.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
     <script src="{% static 'tailwind.js' %}"></script>
     <script src="{% static 'sweetalert2@11.js' %}"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -195,9 +194,6 @@
                     </button>
                     <button class="submenu-item" style="width: 100%; text-align: left;" onclick="window.location.href='{% url 'Caracteristicas' %}';">
                         Caracteristicas de los Pacientes
-                    </button>
-                    <button class="submenu-item" style="width: 100%; text-align: left;" onclick="window.location.href='{% url 'Crear_relacion' %}';">
-                        Crear Pareja
                     </button>
                     <button class="submenu-item" style="width: 100%; text-align: left;" onclick="window.location.href='{% url 'Listar_relaciones' %}';">
                         Lista de Parejas
