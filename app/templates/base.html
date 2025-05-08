@@ -13,6 +13,8 @@
     <script src="{% static 'sweetalert2@11.js' %}"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     
     <style>
         /* Sidebar */
@@ -256,12 +258,12 @@
            
             <div class="menu-item">
                 <span>
-                    <i class="fas fa-table"></i> Tablas
+                    <i class="fas fa-table"></i> Lugares
                     <i class="fas fa-chevron-down arrow"></i>
                 </span>
                 <div class="submenu">
                     <button class="submenu-item" style="width: 100%; text-align: left;" onclick="window.location.href='{% url 'Tablas' %}';">
-                        Ver Tablas
+                        Agregar Lugares
                     </button>
                     
                 </div>

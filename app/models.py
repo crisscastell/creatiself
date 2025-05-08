@@ -102,7 +102,7 @@ class Representante(models.Model):
 
 # Paciente
 class Paciente(models.Model):
-    tipo_paciente = models.CharField(max_length=10, choices=[('individual', 'Individual'), ('infantil', 'Infantil'), ('pareja', 'Pareja') ])
+    tipo_paciente = models.CharField(max_length=10, choices=[('individual', 'Individual'), ('infantil', 'Infantil'),])
     cedula = models.CharField(max_length=20, unique=True)
     nombre = models.CharField(max_length=50)
     nombre2 = models.CharField(max_length=50, blank=True, null=True)

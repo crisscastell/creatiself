@@ -1,0 +1,51 @@
+{% for representante in representantes %}
+<div class="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow">
+    <div class="flex justify-between items-start">
+        <div>
+            <h4 class="font-semibold text-lg text-gray-800">
+                {{ representante.nombre }} {{ representante.apellido }}
+            </h4>
+            <p class="text-gray-600 text-sm">Cédula: {{ representante.cedula }}</p>
+            <p class="text-gray-600 text-sm">Teléfono: {{ representante.telefono }}</p>
+            <p class="text-gray-600 text-sm">Parentesco: {{ representante.get_parentesco_display }}</p>
+        </div>
+        <button onclick="seleccionarRepresentante(
+            '{{ representante.id }}', 
+            '{{ representante.nombre }} {{ representante.apellido }}', 
+            '{{ representante.cedula }}', 
+            '{{ representante.get_parentesco_display }}'
+        )" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-lg text-sm">
+            Seleccionar
+        </button>
+    </div>
+</div>
+{% endfor %}
+
+<!-- Paginación -->
+{% if page_obj.has_other_pages %}
+<nav class="flex justify-center mt-6 gap-2">
+    {% if page_obj.has_previous %}
+    <button data-page="{{ page_obj.previous_page_number }}" 
+            class="px-3 py-1 border rounded-lg hover:bg-gray-100">
+        &laquo;
+    </button>
+    {% endif %}
+    
+    {% for num in page_obj.paginator.page_range %}
+        {% if page_obj.number == num %}
+        <span class="px-3 py-1 bg-blue-500 text-white rounded-lg">{{ num }}</span>
+        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+        <button data-page="{{ num }}" class="px-3 py-1 border rounded-lg hover:bg-gray-100">
+            {{ num }}
+        </button>
+        {% endif %}
+    {% endfor %}
+    
+    {% if page_obj.has_next %}
+    <button data-page="{{ page_obj.next_page_number }}" 
+            class="px-3 py-1 border rounded-lg hover:bg-gray-100">
+        &raquo;
+    </button>
+    {% endif %}
+</nav>
+{% endif %}

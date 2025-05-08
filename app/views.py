@@ -5,9 +5,11 @@ from django.contrib import messages
 from django.core.paginator import Paginator
 from django.http import JsonResponse
 from .models import *
-from .forms import AntecedentesPersonalesForm, CondicionForm
+from .forms import AntecedentesPersonalesForm, CondicionForm, PaisForm, EstadoForm, CiudadForm
 from django.contrib.auth.hashers import make_password
 from django.views.decorators.http import require_POST
+from datetime import date, timedelta
+
 
 def login(request):
     if request.method == "POST":
@@ -45,27 +47,46 @@ def login(request):
 
     return render(request, "login.html")  # Ya no se pasan roles
 
-
 def index(request):
     if "usuario_id" not in request.session:
-        return redirect("Login")  # Redirigir al login si no está autenticado
+        return redirect("Login")
 
     # Obtener datos del usuario autenticado
     usuario_id = request.session.get("usuario_id")
-    usuario = Usuario.objects.get(id=usuario_id)  # Obtiene el usuario desde la BD
+    usuario = Usuario.objects.get(id=usuario_id)
     
-    dias_del_mes = range(1, 32)  # Genera los días del mes
-    pacientes_destacados = Paciente.objects.all()[:5]  # Obtiene los primeros 5 pacientes
+    hoy = date.today()
+    inicio_semana = hoy - timedelta(days=hoy.weekday())
+    
+    # Estadísticas
+    stats = {
+        'citas_hoy': Cita.objects.filter(fecha=hoy).count(),
+        'citas_semana': Cita.objects.filter(fecha__range=[inicio_semana, hoy]).count(),
+        'total_pacientes': Paciente.objects.count(),
+        'distribucion_sexo': {
+            'masculino': Paciente.objects.filter(sexo='masculino').count(),
+            'femenino': Paciente.objects.filter(sexo='femenino').count(),
+        },
+        'distribucion_modalidad': {
+            'virtual': Cita.objects.filter(modalidad='virtual').count(),
+            'presencial': Cita.objects.filter(modalidad='presencial').count(),
+        }
+    }
+    
+    # Datos existentes
+    pacientes_destacados = Paciente.objects.all()[:5]
+    proximas_citas = Cita.objects.filter(fecha__gte=hoy).order_by('fecha', 'hora')[:3]
 
     context = {
-        "usuario_nombre": usuario.first_name,  # Pasar el nombre del usuario al template
-        "usuario_rol": usuario.rol.nombre_rol,  # Pasar el rol del usuario al template
-        "dias_del_mes": dias_del_mes,
-        "pacientes": pacientes_destacados
+        "usuario_nombre": usuario.first_name,
+        "usuario_rol": usuario.rol.nombre_rol,
+        "stats": stats,
+        "proximas_citas": proximas_citas,
+        "pacientes": pacientes_destacados,
+        "hoy": hoy
     }
 
-    return render(request, "index.html", context)  # Enviar el contexto al template
-
+    return render(request, "index.html", context)
 
 def crear_antecedente(request):
     if request.method == 'POST':
@@ -113,16 +134,6 @@ def editar_condicion(request, id):
         form = CondicionForm(instance=condicion)
     
     return render(request, 'paciente/caracteristicas.html', {'form': form})
-
-
-def pacientes(request):
-    return render(request, "pacientes.html")
-
-def citas(request):
-    return render(request, "citas.html")
-
-def tablas(request):
-    return render(request, "tablas.html")
 
 @require_POST
 def ocultar_antecedente(request, pk):
@@ -179,4 +190,102 @@ def caracteristicas(request):
         'page_obj_condiciones': page_obj_condiciones,  # Pasar solo el paginador de condiciones
     })
 
+def crear_pais(request):
+    if request.method == 'POST':
+        form = PaisForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "✅ País creado exitosamente")
+        else:
+            errors = form.errors.as_data()
+            for field, error_list in errors.items():
+                for error in error_list:
+                    messages.error(request, f"❌ Error en {field}: {error}")
+        return redirect('Tablas')
     
+    # Si es GET, deberías mostrar el formulario, pero según tu flujo rediriges
+    return redirect('Tablas')
+
+def editar_pais(request, id):
+    pais = get_object_or_404(Pais, id=id)
+    
+    if request.method == 'POST':
+        form = PaisForm(request.POST, instance=pais)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "✅ País actualizado correctamente")
+        else:
+            messages.error(request, "❌ Error al actualizar el país")
+        return redirect('Tablas')
+    
+    # Para GET podrías mostrar formulario de edición
+    return redirect('Tablas')
+
+# Views para Estado
+def crear_estado(request):
+    if request.method == 'POST':
+        form = EstadoForm(request.POST)
+        if form.is_valid():
+            estado = form.save()
+            messages.success(request, f"✅ Estado {estado.nombre_estado} creado exitosamente")
+        else:
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"❌ Error en {field}: {error}")
+        return redirect('Tablas')
+    
+    return redirect('Tablas')
+
+def editar_estado(request, id):
+    estado = get_object_or_404(Estado, id=id)
+    
+    if request.method == 'POST':
+        form = EstadoForm(request.POST, instance=estado)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "✅ Estado actualizado correctamente")
+        else:
+            messages.error(request, "❌ Error al actualizar el estado")
+        return redirect('Tablas')
+    
+    return redirect('Tablas')
+
+# Views para Ciudad
+def crear_ciudad(request):
+    if request.method == 'POST':
+        form = CiudadForm(request.POST)
+        if form.is_valid():
+            ciudad = form.save()
+            messages.success(request, f"✅ Ciudad {ciudad.nombre_ciudad} creada exitosamente")
+        else:
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"❌ Error en {field}: {error}")
+        return redirect('Tablas')
+    
+    return redirect('Tablas')
+
+def editar_ciudad(request, id):
+    ciudad = get_object_or_404(Ciudad, id=id)
+    
+    if request.method == 'POST':
+        form = CiudadForm(request.POST, instance=ciudad)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "✅ Ciudad actualizada correctamente")
+        else:
+            messages.error(request, "❌ Error al actualizar la ciudad")
+        return redirect('Tablas')
+    
+    return redirect('Tablas')
+
+def tablas(request):
+    paises = Pais.objects.all()
+    estados = Estado.objects.all()
+    ciudades = Ciudad.objects.all()
+    
+    return render(request, "tablas.html", {
+        'paises': paises, 
+        'estados': estados, 
+        'ciudades': ciudades
+    })

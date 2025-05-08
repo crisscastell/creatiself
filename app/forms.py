@@ -59,6 +59,7 @@ class PacienteForm(forms.ModelForm):
         model = Paciente
         fields = '__all__'  # Usa todos los campos o especifica campos individuales si es necesario
         widgets = {
+            'tipo_paciente': forms.Select(choices=[('individual', 'Individual'), ('infantil', 'Infantil')]),
             'fecha_nacimiento': forms.DateInput(attrs={'type': 'date'}),
             'sexo': forms.Select(attrs={'class': 'form-control'}),
             'direccion': forms.Textarea(attrs={'rows': 3}),
@@ -170,3 +171,12 @@ class RelacionPacienteForm(forms.ModelForm):
             ('familiar', 'Familiar'),
             ('otro', 'Otro')
         ])
+
+
+class RepresentanteForm(forms.ModelForm):
+    class Meta:
+        model = Representante
+        fields = '__all__'
+        widgets = {
+            'direccion': forms.Textarea(attrs={'rows': 3}),
+        }

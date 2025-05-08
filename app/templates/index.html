@@ -3,14 +3,107 @@
 {% block title %}Inicio{% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-gray-100 py-8">
+<div class="min-h-screen bg-gray-100 py-20">
     <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
         <!-- Contenido principal (izquierda) -->
         <div class="lg:col-span-2 bg-white p-6 rounded-lg shadow-lg">
-            <h1 class="text-3xl font-bold text-gray-700 mb-6">Mis Citas</h1>
-            <!-- Aquí iría el contenido principal de citas -->
+            <h1 class="text-3xl font-bold text-gray-700 mb-6">Panel de Control</h1>
+            
+            <!-- Estadísticas -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                <!-- Citas Hoy -->
+                <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
+                    <div class="flex items-center">
+                        <div class="bg-blue-100 p-3 rounded-full mr-4">
+                            <i data-lucide="calendar" class="w-6 h-6 text-blue-600"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">Citas hoy</p>
+                            <p class="text-2xl font-bold text-gray-800">{{ stats.citas_hoy }}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Citas Semana -->
+                <div class="bg-green-50 p-4 rounded-lg border border-green-100">
+                    <div class="flex items-center">
+                        <div class="bg-green-100 p-3 rounded-full mr-4">
+                            <i data-lucide="calendar-days" class="w-6 h-6 text-green-600"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">Citas esta semana</p>
+                            <p class="text-2xl font-bold text-gray-800">{{ stats.citas_semana }}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Total Pacientes -->
+                <div class="bg-purple-50 p-4 rounded-lg border border-purple-100">
+                    <div class="flex items-center">
+                        <div class="bg-purple-100 p-3 rounded-full mr-4">
+                            <i data-lucide="users" class="w-6 h-6 text-purple-600"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">Total pacientes</p>
+                            <p class="text-2xl font-bold text-gray-800">{{ stats.total_pacientes }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Gráficos -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <!-- Gráfico de distribución por sexo -->
+                <div class="bg-white p-4 rounded-lg border border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-3">Distribución por Sexo</h3>
+                    <div class="h-64">
+                        <canvas id="sexoChart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Gráfico de modalidad de citas -->
+                <div class="bg-white p-4 rounded-lg border border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-3">Modalidad de Citas</h3>
+                    <div class="h-64">
+                        <canvas id="modalidadChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Próximas citas -->
+            <div>
+                <h2 class="text-xl font-bold text-gray-700 mb-4">Próximas citas</h2>
+                <div class="space-y-3">
+                    {% for cita in proximas_citas %}
+                    <div class="bg-gray-50 p-4 rounded-lg flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                                <i data-lucide="user" class="w-5 h-5 text-blue-600"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-800">{{ cita.paciente.nombre }} {{ cita.paciente.apellido }}</p>
+                                <p class="text-sm text-gray-500">
+                                    {{ cita.fecha|date:"d M" }} a las {{ cita.hora|time:"H:i" }}
+                                    <span class="ml-2 px-2 py-1 rounded-full text-xs 
+                                        {% if cita.modalidad == 'virtual' %}bg-purple-100 text-purple-800
+                                        {% else %}bg-green-100 text-green-800{% endif %}">
+                                        {{ cita.get_modalidad_display }}
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                        <button class="text-blue-500 hover:text-blue-700">
+                            <i data-lucide="more-horizontal" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                    {% empty %}
+                    <p class="text-gray-500 py-4 text-center">No hay citas próximas</p>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
 
+        <!-- Calendario -->
         <div class="bg-white p-6 rounded-lg shadow-lg">
             <h2 class="text-2xl font-bold text-gray-700 mb-6">Calendario</h2>
             <div class="text-center">
@@ -20,7 +113,6 @@
                     <button id="nextMonth" class="text-gray-500 hover:text-gray-700">&gt;</button>
                 </div>
                 <div class="grid grid-cols-7 gap-2 mb-2">
-                    <!-- Días de la semana -->
                     <div class="text-sm font-semibold text-gray-600">Lun</div>
                     <div class="text-sm font-semibold text-gray-600">Mar</div>
                     <div class="text-sm font-semibold text-gray-600">Mié</div>
@@ -29,9 +121,7 @@
                     <div class="text-sm font-semibold text-gray-600">Sáb</div>
                     <div class="text-sm font-semibold text-gray-600">Dom</div>
                 </div>
-                <div id="calendarDays" class="grid grid-cols-7 gap-2">
-                    <!-- Aquí se renderizan los días dinámicamente -->
-                </div>
+                <div id="calendarDays" class="grid grid-cols-7 gap-2"></div>
             </div>
         </div>
     </div>
@@ -44,7 +134,7 @@
             <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                 <div class="flex items-center">
                     <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
-                        {{ paciente.nombre.0|upper }} <!-- Inicial del nombre -->
+                        {{ paciente.nombre.0|upper }}
                     </div>
                     <div class="ml-4">
                         <p class="font-semibold text-gray-700">{{ paciente.nombre }} {{ paciente.apellido }}</p>
@@ -57,28 +147,25 @@
                     Ver detalles
                 </button>
                 
-                <!-- Modal de Historial del Paciente Mejorado -->
+                <!-- Modal de Historial del Paciente -->
                 <div id="modalHistorialPaciente{{ paciente.id }}" class="fixed inset-0 bg-black/30 hidden flex items-center justify-center z-50 p-4">
                     <div class="bg-white rounded-xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
-                        
-                        <!-- Header - Más limpio y minimalista -->
+                        <!-- Header -->
                         <div class="flex items-center justify-between p-5 border-b border-gray-100">
                             <div>
                                 <h3 class="text-lg font-medium text-gray-900 flex items-center gap-2">
                                     <i data-lucide="user" class="w-5 h-5 text-blue-500"></i>
                                     <span>{{ paciente.nombre }} {{ paciente.apellido }}</span>
                                 </h3>
-                                <p class="text-s text-gray-500 mt-1">cedula: {{ paciente.cedula }}</p>
+                                <p class="text-sm text-gray-500 mt-1">Cédula: {{ paciente.cedula }}</p>
                             </div>
-                            <button onclick="closeModalHistorialPaciente('{{ paciente.id }}')" 
-                                    class="text-gray-400 hover:text-gray-600 transition-colors">
+                            <button onclick="closeModalHistorialPaciente('{{ paciente.id }}')" class="text-gray-400 hover:text-gray-600 transition-colors">
                                 <i data-lucide="x" class="w-5 h-5"></i>
                             </button>
                         </div>
 
-                        <!-- Body - Mejor organización visual -->
+                        <!-- Body -->
                         <div class="overflow-y-auto divide-y divide-gray-100">
-                            
                             <!-- Sección 1: Datos Personales -->
                             <div class="p-5">
                                 <div class="flex items-center gap-2 mb-3">
@@ -112,10 +199,7 @@
                                         <p class="text-gray-500 mb-1">Teléfono</p>
                                         <p class="font-medium">{{ paciente.telefono }}</p>
                                     </div>
-                                    <div>
-                                        <p class="text-gray-500 mb-1">Email</p>
-                                        <p class="font-medium">{{ paciente.email|default:"-" }}</p>
-                                    </div>
+                                    
                                     <div class="md:col-span-2">
                                         <p class="text-gray-500 mb-1">Dirección</p>
                                         <p class="font-medium">
@@ -173,10 +257,9 @@
                             </div>
                         </div>
 
-                        <!-- Footer - Más minimalista -->
+                        <!-- Footer -->
                         <div class="flex justify-end p-4 border-t border-gray-100">
-                            <button onclick="closeModalHistorialPaciente('{{ paciente.id }}')"
-                                    class="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors">
+                            <button onclick="closeModalHistorialPaciente('{{ paciente.id }}')" class="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors">
                                 Cerrar
                             </button>
                         </div>
@@ -229,9 +312,79 @@
     </div>
 </div>
 
+<!-- Scripts -->
+
 <script>
+    // Inicializar iconos
+    lucide.createIcons();
 
+    // Gráfico de distribución por sexo
+    const sexoCtx = document.getElementById('sexoChart').getContext('2d');
+    new Chart(sexoCtx, {
+        type: 'pie',
+        data: {
+            labels: ['Masculino', 'Femenino'],
+            datasets: [{
+                data: [
+                    {{ stats.distribucion_sexo.masculino }},
+                    {{ stats.distribucion_sexo.femenino }}
+                ],
+                backgroundColor: [
+                    'rgba(59, 130, 246, 0.7)',
+                    'rgba(244, 114, 182, 0.7)'
+                ],
+                borderColor: [
+                    'rgba(59, 130, 246, 1)',
+                    'rgba(244, 114, 182, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right'
+                }
+            }
+        }
+    });
 
+    // Gráfico de modalidad de citas
+    const modalidadCtx = document.getElementById('modalidadChart').getContext('2d');
+    new Chart(modalidadCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Virtual', 'Presencial'],
+            datasets: [{
+                data: [
+                    {{ stats.distribucion_modalidad.virtual }},
+                    {{ stats.distribucion_modalidad.presencial }}
+                ],
+                backgroundColor: [
+                    'rgba(139, 92, 246, 0.7)',
+                    'rgba(16, 185, 129, 0.7)'
+                ],
+                borderColor: [
+                    'rgba(139, 92, 246, 1)',
+                    'rgba(16, 185, 129, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right'
+                }
+            }
+        }
+    });
+
+    // Calendario
     document.addEventListener("DOMContentLoaded", function () {
         const currentMonthElement = document.getElementById("currentMonth");
         const calendarDaysElement = document.getElementById("calendarDays");
@@ -245,17 +398,13 @@
         let currentMonth = today.getMonth();
 
         function renderCalendar() {
-            calendarDaysElement.innerHTML = ""; // Limpiar el contenido antes de renderizar
+            calendarDaysElement.innerHTML = "";
 
-            // Obtener primer día del mes y número total de días
             const firstDay = new Date(currentYear, currentMonth, 1).getDay();
             const lastDate = new Date(currentYear, currentMonth + 1, 0).getDate();
             const prevLastDate = new Date(currentYear, currentMonth, 0).getDate();
-
-            // Ajuste del primer día (para que empiece en lunes)
             const firstDayIndex = firstDay === 0 ? 6 : firstDay - 1;
 
-            // Días del mes anterior (gris)
             for (let i = firstDayIndex; i > 0; i--) {
                 const dayElement = document.createElement("div");
                 dayElement.className = "p-2 text-center text-gray-400";
@@ -263,29 +412,24 @@
                 calendarDaysElement.appendChild(dayElement);
             }
 
-            // Días del mes actual
             for (let i = 1; i <= lastDate; i++) {
                 const dayElement = document.createElement("div");
-                dayElement.className =
-                    "p-2 text-center rounded-lg cursor-pointer hover:bg-blue-100 text-gray-700";
+                dayElement.className = "p-2 text-center rounded-lg cursor-pointer hover:bg-blue-100 text-gray-700";
                 
-                // Resaltar el día actual
                 if (i === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear()) {
                     dayElement.classList.add("bg-blue-500", "text-white");
                 }
 
                 dayElement.textContent = i;
                 dayElement.addEventListener("click", function () {
-                    // Abrir el modal y establecer la fecha seleccionada
                     const fechaSeleccionada = new Date(currentYear, currentMonth, i);
-                    document.getElementById("modalFecha").value = fechaSeleccionada.toISOString();
+                    document.getElementById("modalFecha").value = fechaSeleccionada.toISOString().split('T')[0];
                     citaModal.classList.remove("hidden");
                 });
 
                 calendarDaysElement.appendChild(dayElement);
             }
 
-            // Días del mes siguiente (gris)
             const totalBoxes = firstDayIndex + lastDate;
             const remainingDays = totalBoxes % 7 === 0 ? 0 : 7 - (totalBoxes % 7);
 
@@ -296,8 +440,10 @@
                 calendarDaysElement.appendChild(dayElement);
             }
 
-            // Mostrar mes y año
-            currentMonthElement.textContent = new Date(currentYear, currentMonth).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+            currentMonthElement.textContent = new Date(currentYear, currentMonth).toLocaleDateString('es-ES', { 
+                month: 'long', 
+                year: 'numeric' 
+            });
         }
 
         function changeMonth(step) {
@@ -314,10 +460,7 @@
 
         prevMonthButton.addEventListener("click", () => changeMonth(-1));
         nextMonthButton.addEventListener("click", () => changeMonth(1));
-
-        closeModalButton.addEventListener("click", function () {
-            citaModal.classList.add("hidden");
-        });
+        closeModalButton.addEventListener("click", () => citaModal.classList.add("hidden"));
 
         renderCalendar();
     });
@@ -336,7 +479,5 @@
         modal.classList.add('hidden');
         document.body.style.overflow = '';
     };
-
-
 </script>
 {% endblock %}

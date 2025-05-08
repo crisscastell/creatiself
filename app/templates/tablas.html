@@ -1,60 +1,338 @@
 {% extends 'base.html' %}
 
-{% block title %}Tablas{% endblock %}
+{% block title %}Lugares{% endblock %}
 
 {% block content %}
 
 <div class="flex flex-col flex-grow ml-20">
     <main class="p-8">
         <div class="max-w-6xl mx-auto p-8 mt-8 bg-white rounded-lg shadow-lg">
-            <h2 class="text-3xl font-bold text-gray-900 mb-6 text-center">Tablas</h2>
+            <h2 class="text-3xl font-bold text-gray-900 mb-6 text-center">Lugares</h2>
 
-            <!-- Contenedor de botones organizados en 3 columnas -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Mostrar mensajes -->
+            {% if messages %}
+            <div class="mb-6">
+                {% for message in messages %}
+                <div class="px-4 py-2 rounded-md {% if message.tags == 'success' %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
 
-                <!-- Botón Condición -->
-                <a href="{%url 'Crear_condicion'%}" class="flex flex-col items-center justify-center bg-teal-600 text-white font-semibold py-6 px-6 rounded-2xl shadow-lg text-center text-xl hover:bg-teal-700 transition transform hover:scale-105">
-                    <i data-lucide="heart-pulse" class="w-10 h-10 mb-2"></i>
-                    Condición
-                </a>
+            <div class="flex flex-col md:flex-row gap-8">
+                <!-- Columna izquierda para los botones - Versión mejorada -->
+                <div class="w-full md:w-1/4 space-y-6">
+                    <!-- Botón País (teal) -->
+                    <button onclick="openModal('pais-modal')" class="w-full flex flex-col items-center justify-center bg-gradient-to-br from-teal-500 to-teal-600 text-white font-semibold py-6 px-4 rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02]">
+                        <div class="bg-white/20 p-3 rounded-full mb-2">
+                            <i data-lucide="globe" class="w-8 h-8"></i>
+                        </div>
+                        <span class="text-lg">País</span>
+                        <span class="text-sm font-normal opacity-80 mt-1">Administrar países</span>
+                    </button>
 
-                <!-- Botón Parentesco -->
-                <a href="#" class="flex flex-col items-center justify-center bg-blue-600 text-white font-semibold py-6 px-6 rounded-2xl shadow-lg text-center text-xl hover:bg-blue-700 transition transform hover:scale-105">
-                    <i data-lucide="book-open" class="w-10 h-10 mb-2"></i>
-                    Parentesco
-                </a>
+                    <!-- Botón Estado (blue) -->
+                    <button onclick="openModal('estado-modal')" class="w-full flex flex-col items-center justify-center bg-gradient-to-br from-blue-500 to-blue-600 text-white font-semibold py-6 px-4 rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02]">
+                        <div class="bg-white/20 p-3 rounded-full mb-2">
+                            <i data-lucide="map" class="w-8 h-8"></i>
+                        </div>
+                        <span class="text-lg">Estado</span>
+                        <span class="text-sm font-normal opacity-80 mt-1">Administrar estados</span>
+                    </button>
 
-                <!-- Botón Antecedentes Personales -->
-                <a href="{%url 'Crear_antecedentes'%}" class="flex flex-col items-center justify-center bg-purple-600 text-white font-semibold py-6 px-6 rounded-2xl shadow-lg text-center text-xl hover:bg-purple-700 transition transform hover:scale-105">
-                    <i data-lucide="clipboard-list" class="w-10 h-10 mb-2"></i>
-                    Antecedentes Personales
-                </a>
+                    <!-- Botón Ciudad (purple) -->
+                    <button onclick="openModal('ciudad-modal')" class="w-full flex flex-col items-center justify-center bg-gradient-to-br from-purple-500 to-purple-600 text-white font-semibold py-6 px-4 rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02]">
+                        <div class="bg-white/20 p-3 rounded-full mb-2">
+                            <i data-lucide="building" class="w-8 h-8"></i>
+                        </div>
+                        <span class="text-lg">Ciudad</span>
+                        <span class="text-sm font-normal opacity-80 mt-1">Administrar ciudades</span>
+                    </button>
+                </div>
 
-                <!-- Botón País -->
-                <a href="#" class="flex flex-col items-center justify-center bg-green-600 text-white font-semibold py-6 px-6 rounded-2xl shadow-lg text-center text-xl hover:bg-green-700 transition transform hover:scale-105">
-                    <i data-lucide="globe" class="w-10 h-10 mb-2"></i>
-                    País
-                </a>
+                <!-- Columna derecha para el listado -->
+                <div class="w-full md:w-3/4">
+                    <!-- Listado de Países -->
+                    <div class="mb-8">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                            <i data-lucide="globe" class="w-5 h-5 mr-2 text-teal-600"></i>
+                            Países
+                        </h3>
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            {% if paises %}
+                                <ul class="divide-y divide-gray-200">
+                                    {% for pais in paises %}
+                                        <li class="py-3 flex justify-between items-center">
+                                            <span>{{ pais.nombre_pais }}</span>
+                                            <div class="flex space-x-2">
+                                                <button onclick="openEditModal('pais', {{ pais.id }}, '{{ pais.nombre_pais }}')" class="text-blue-500 hover:text-blue-700">
+                                                    <i data-lucide="edit" class="w-5 h-5"></i>
+                                                </button>
+                                                
+                                            </div>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <p class="text-gray-500">No hay países registrados</p>
+                            {% endif %}
+                        </div>
+                    </div>
 
-                <!-- Botón Estado -->
-                <a href="#" class="flex flex-col items-center justify-center bg-orange-600 text-white font-semibold py-6 px-6 rounded-2xl shadow-lg text-center text-xl hover:bg-orange-700 transition transform hover:scale-105">
-                    <i data-lucide="map" class="w-10 h-10 mb-2"></i>
-                    Estado
-                </a>
+                    <!-- Listado de Estados -->
+                    <div class="mb-8">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                            <i data-lucide="map" class="w-5 h-5 mr-2 text-blue-600"></i>
+                            Estados
+                        </h3>
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            {% if estados %}
+                                <ul class="divide-y divide-gray-200">
+                                    {% for estado in estados %}
+                                        <li class="py-3 flex justify-between items-center">
+                                            <span>{{ estado.nombre_estado }} ({{ estado.pais.nombre_pais }})</span>
+                                            <div class="flex space-x-2">
+                                                <button onclick="openEditModal('estado', {{ estado.id }}, '{{ estado.nombre_estado }}', {{ estado.pais.id }})" class="text-blue-500 hover:text-blue-700">
+                                                    <i data-lucide="edit" class="w-5 h-5"></i>
+                                                </button>
+                                                
+                                            </div>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <p class="text-gray-500">No hay estados registrados</p>
+                            {% endif %}
+                        </div>
+                    </div>
 
-                <!-- Botón Ciudad -->
-                <a href="#" class="flex flex-col items-center justify-center bg-red-600 text-white font-semibold py-6 px-6 rounded-2xl shadow-lg text-center text-xl hover:bg-red-700 transition transform hover:scale-105">
-                    <i data-lucide="building" class="w-10 h-10 mb-2"></i>
-                    Ciudad
-                </a>
-
+                    <!-- Listado de Ciudades -->
+                    <div>
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                            <i data-lucide="building" class="w-5 h-5 mr-2 text-purple-600"></i>
+                            Ciudades
+                        </h3>
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            {% if ciudades %}
+                                <ul class="divide-y divide-gray-200">
+                                    {% for ciudad in ciudades %}
+                                        <li class="py-3 flex justify-between items-center">
+                                            <span>{{ ciudad.nombre_ciudad }} ({{ ciudad.estado.nombre_estado }})</span>
+                                            <div class="flex space-x-2">
+                                                <button onclick="openEditModal('ciudad', {{ ciudad.id }}, '{{ ciudad.nombre_ciudad }}', {{ ciudad.estado.id }})" class="text-blue-500 hover:text-blue-700">
+                                                    <i data-lucide="edit" class="w-5 h-5"></i>
+                                                </button>
+                                                
+                                            </div>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <p class="text-gray-500">No hay ciudades registradas</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </main>
 </div>
 
+<!-- Modal para País -->
+<div id="pais-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg p-6 w-full max-w-md">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-semibold text-gray-800">Agregar País</h3>
+            <button onclick="closeModal('pais-modal')" class="text-gray-500 hover:text-gray-700">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+        </div>
+        <form method="POST" action="{% url 'Crear_pais' %}">
+            {% csrf_token %}
+            <div class="mb-4">
+                <label for="nombre_pais" class="block text-gray-700 mb-2">Nombre del País</label>
+                <input type="text" id="nombre_pais" name="nombre_pais" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500" required>
+            </div>
+            <div class="flex justify-end space-x-3">
+                <button type="button" onclick="closeModal('pais-modal')" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400">Cancelar</button>
+                <button type="submit" class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700">Guardar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal para Estado -->
+<div id="estado-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg p-6 w-full max-w-md">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-semibold text-gray-800">Agregar Estado</h3>
+            <button onclick="closeModal('estado-modal')" class="text-gray-500 hover:text-gray-700">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+        </div>
+        <form method="POST" action="{% url 'Crear_estado' %}">
+            {% csrf_token %}
+            <div class="mb-4">
+                <label for="nombre_estado" class="block text-gray-700 mb-2">Nombre del Estado</label>
+                <input type="text" id="nombre_estado" name="nombre_estado" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+            </div>
+            <div class="mb-4">
+                <label for="pais" class="block text-gray-700 mb-2">País</label>
+                <select id="pais" name="pais" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    <option value="">Seleccione un país</option>
+                    {% for pais in paises %}
+                        <option value="{{ pais.id }}">{{ pais.nombre_pais }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="flex justify-end space-x-3">
+                <button type="button" onclick="closeModal('estado-modal')" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400">Cancelar</button>
+                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Guardar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal para Ciudad -->
+<div id="ciudad-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg p-6 w-full max-w-md">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-semibold text-gray-800">Agregar Ciudad</h3>
+            <button onclick="closeModal('ciudad-modal')" class="text-gray-500 hover:text-gray-700">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+        </div>
+        <form method="POST" action="{% url 'Crear_ciudad' %}">
+            {% csrf_token %}
+            <div class="mb-4">
+                <label for="nombre_ciudad" class="block text-gray-700 mb-2">Nombre de la Ciudad</label>
+                <input type="text" id="nombre_ciudad" name="nombre_ciudad" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500" required>
+            </div>
+            <div class="mb-4">
+                <label for="estado" class="block text-gray-700 mb-2">Estado</label>
+                <select id="estado" name="estado" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500" required>
+                    <option value="">Seleccione un estado</option>
+                    {% for estado in estados %}
+                        <option value="{{ estado.id }}">{{ estado.nombre_estado }} ({{ estado.pais.nombre_pais }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="flex justify-end space-x-3">
+                <button type="button" onclick="closeModal('ciudad-modal')" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400">Cancelar</button>
+                <button type="submit" class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700">Guardar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal para Editar -->
+<div id="edit-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg p-6 w-full max-w-md">
+        <div class="flex justify-between items-center mb-4">
+            <h3 id="edit-modal-title" class="text-xl font-semibold text-gray-800">Editar</h3>
+            <button onclick="closeModal('edit-modal')" class="text-gray-500 hover:text-gray-700">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+        </div>
+        <form id="edit-form" method="POST" action="">
+            {% csrf_token %}
+            <div class="mb-4">
+                <label for="edit-nombre" class="block text-gray-700 mb-2">Nombre</label>
+                <input type="text" id="edit-nombre" name="nombre" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+            </div>
+            <div id="edit-extra-fields" class="mb-4 hidden">
+                <!-- Aquí se agregarán campos adicionales dinámicamente -->
+            </div>
+            <div class="flex justify-end space-x-3">
+                <button type="button" onclick="closeModal('edit-modal')" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400">Cancelar</button>
+                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Actualizar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
     // Renderiza los íconos Lucide
     lucide.createIcons();
+    
+    // Funciones para manejar los modales
+    function openModal(modalId) {
+        document.getElementById(modalId).classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+    }
+    
+    function closeModal(modalId) {
+        document.getElementById(modalId).classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+    }
+    
+    // Función para abrir el modal de edición
+    function openEditModal(tipo, id, nombre, relacionId = null) {
+        const modal = document.getElementById('edit-modal');
+        const title = document.getElementById('edit-modal-title');
+        const form = document.getElementById('edit-form');
+        const nombreInput = document.getElementById('edit-nombre');
+        const extraFields = document.getElementById('edit-extra-fields');
+        
+        // Configurar según el tipo
+        switch(tipo) {
+            case 'pais':
+                title.textContent = 'Editar País';
+                form.action = `/editar_pais/${id}/`;
+                nombreInput.name = 'nombre_pais';
+                break;
+            case 'estado':
+                title.textContent = 'Editar Estado';
+                form.action = `/editar_estado/${id}/`;
+                nombreInput.name = 'nombre_estado';
+                // Agregar campo de país
+                extraFields.innerHTML = `
+                    <label for="edit-pais" class="block text-gray-700 mb-2">País</label>
+                    <select id="edit-pais" name="pais" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        {% for pais in paises %}
+                            <option value="{{ pais.id }}" ${pais.id == relacionId ? 'selected' : ''}>{{ pais.nombre_pais }}</option>
+                        {% endfor %}
+                    </select>
+                `;
+                extraFields.classList.remove('hidden');
+                break;
+            case 'ciudad':
+                title.textContent = 'Editar Ciudad';
+                form.action = `/editar_ciudad/${id}/`;
+                nombreInput.name = 'nombre_ciudad';
+                // Agregar campo de estado
+                extraFields.innerHTML = `
+                    <label for="edit-estado" class="block text-gray-700 mb-2">Estado</label>
+                    <select id="edit-estado" name="estado" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        {% for estado in estados %}
+                            <option value="{{ estado.id }}" ${estado.id == relacionId ? 'selected' : ''}>{{ estado.nombre_estado }} ({{ estado.pais.nombre_pais }})</option>
+                        {% endfor %}
+                    </select>
+                `;
+                extraFields.classList.remove('hidden');
+                break;
+        }
+        
+        nombreInput.value = nombre;
+        modal.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+        
+        // Volver a renderizar íconos
+        lucide.createIcons();
+    }
+    
+    // Cerrar modal al hacer clic fuera del contenido
+    window.onclick = function(event) {
+        if (event.target.classList.contains('fixed')) {
+            const modals = document.querySelectorAll('.fixed');
+            modals.forEach(modal => {
+                if (!modal.classList.contains('hidden')) {
+                    modal.classList.add('hidden');
+                    document.body.classList.remove('overflow-hidden');
+                }
+            });
+        }
+    }
 </script>
 {% endblock %}

@@ -3,341 +3,640 @@
 {% block title %}Registrar Paciente{% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-gradient-to-r from-blue-50 to-purple-50 py-16 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
-        <!-- Encabezado con degradado -->
-        <div class="bg-gradient-to-r from-teal-600 to-teal-800 p-6 text-white">
-            <h1 class="text-3xl font-bold text-center">
-                <i class="fas fa-user-plus mr-2"></i>Registrar Nuevo Paciente
-            </h1>
-            <p class="text-center text-blue-100 mt-2">Complete todos los campos requeridos</p>
-        </div>
-        
-        <form method="POST" action="{% url 'Crear_pacientes' %}" class="p-8">
-            {% csrf_token %}
-            
-            <!-- Sección 1: Información Básica -->
-            <div class="mb-8">
-                <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-                    <i class="fas fa-id-card mr-2 text-blue-600"></i> Información Básica
-                </h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Tipo de Paciente -->
-                    <div>
-                        <label for="tipo_paciente" class="block text-sm font-medium text-gray-700 mb-1">Tipo de Paciente <span class="text-red-500">*</span></label>
-                        <div class="relative">
-                            <select id="tipo_paciente" name="tipo_paciente" class="w-full pl-3 pr-10 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
-                                <option value="individual">Individual</option>
-                                <option value="infantil">Infantil</option>
-                                <option value="pareja">Pareja</option>
-                            </select>
-                            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                <i class="fas fa-user-tag text-gray-400"></i>
-                            </div>
-                        </div>
+<div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 py-20 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-6xl mx-auto">
+        <!-- Tarjeta principal -->
+        <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
+            <!-- Encabezado con gradiente mejorado -->
+            <div class="bg-gradient-to-r from-teal-600 to-teal-800 p-8 text-white">
+                <div class="flex items-center justify-center space-x-4">
+                    <div class="bg-white/20 p-3 rounded-full backdrop-blur-sm">
+                        <i class="fas fa-user-plus text-2xl"></i>
                     </div>
-                    
-                    <!-- Cédula -->
                     <div>
-                        <label for="cedula" class="block text-sm font-medium text-gray-700 mb-1">Cédula <span class="text-red-500">*</span></label>
-                        <div class="relative">
-                            <input type="text" id="cedula" name="cedula" class="w-full pl-3 pr-10 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" placeholder="Ej: 123456789" required>
-                            <div class="absolute inset-y-0 right-0 flex items-center pr-3">
-                                <i class="fas fa-id-card text-gray-400"></i>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Nombres -->
-                    <div>
-                        <label for="nombre" class="block text-sm font-medium text-gray-700 mb-1">Primer Nombre <span class="text-red-500">*</span></label>
-                        <div class="relative">
-                            <input type="text" id="nombre" name="nombre" class="w-full pl-3 pr-10 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" placeholder="Ej: Juan" required>
-                            <div class="absolute inset-y-0 right-0 flex items-center pr-3">
-                                <i class="fas fa-signature text-gray-400"></i>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div>
-                        <label for="nombre2" class="block text-sm font-medium text-gray-700 mb-1">Segundo Nombre</label>
-                        <input type="text" id="nombre2" name="nombre2" class="w-full pl-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" placeholder="Ej: Carlos">
-                    </div>
-                    
-                    <!-- Apellidos -->
-                    <div>
-                        <label for="apellido" class="block text-sm font-medium text-gray-700 mb-1">Primer Apellido <span class="text-red-500">*</span></label>
-                        <div class="relative">
-                            <input type="text" id="apellido" name="apellido" class="w-full pl-3 pr-10 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" placeholder="Ej: Pérez" required>
-                            <div class="absolute inset-y-0 right-0 flex items-center pr-3">
-                                <i class="fas fa-signature text-gray-400"></i>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div>
-                        <label for="apellido2" class="block text-sm font-medium text-gray-700 mb-1">Segundo Apellido</label>
-                        <input type="text" id="apellido2" name="apellido2" class="w-full pl-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" placeholder="Ej: González">
+                        <h1 class="text-3xl font-bold">Registrar Nuevo Paciente</h1>
+                        <p class="text-blue-100 mt-1">Complete todos los campos requeridos para el registro</p>
                     </div>
                 </div>
             </div>
             
-            <!-- Sección 2: Contacto y Demográficos -->
-            <div class="mb-8">
-                <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-                    <i class="fas fa-address-book mr-2 text-blue-600"></i> Información de Contacto
-                </h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Teléfono -->
-                    <div>
-                        <label for="telefono" class="block text-sm font-medium text-gray-700 mb-1">Teléfono <span class="text-red-500">*</span></label>
-                        <div class="relative">
-                            <input type="text" id="telefono" name="telefono" class="w-full pl-3 pr-10 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" placeholder="Ej: 04121234567" required>
-                            <div class="absolute inset-y-0 right-0 flex items-center pr-3">
-                                <i class="fas fa-phone text-gray-400"></i>
-                            </div>
-                        </div>
+            <!-- Formulario principal -->
+            <form method="POST" action="{% url 'Crear_pacientes' %}" class="p-8" id="pacienteForm">
+                {% csrf_token %}
+                
+                <!-- Sección 1: Información Básica -->
+                <div class="mb-12">
+                    <div class="flex items-center mb-6">
+                        <div class="h-px flex-1 bg-gradient-to-r from-transparent via-teal-400 to-transparent"></div>
+                        <h2 class="mx-4 text-xl font-semibold text-gray-800 flex items-center">
+                            <span class="bg-teal-100 text-teal-800 p-2 rounded-full mr-3">
+                                <i class="fas fa-id-card"></i>
+                            </span>
+                            Información Básica
+                        </h2>
+                        <div class="h-px flex-1 bg-gradient-to-r from-transparent via-teal-400 to-transparent"></div>
                     </div>
                     
-                    <!-- Edad -->
-                    <div>
-                        <label for="edad" class="block text-sm font-medium text-gray-700 mb-1">Edad <span class="text-red-500">*</span></label>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- Tipo de Paciente -->
                         <div class="relative">
-                            <input type="number" id="edad" name="edad" class="w-full pl-3 pr-10 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" placeholder="Ej: 35" required>
-                            <div class="absolute inset-y-0 right-0 flex items-center pr-3">
-                                <i class="fas fa-birthday-cake text-gray-400"></i>
+                            <label for="tipo_paciente" class="block text-sm font-medium text-gray-700 mb-2">Tipo de Paciente <span class="text-red-500">*</span></label>
+                            <div class="relative">
+                                <select id="tipo_paciente" name="tipo_paciente" class="appearance-none w-full pl-4 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white">
+                                    <option value="individual">Individual</option>
+                                    <option value="infantil">Infantil</option>
+                                </select>
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <i class="fas fa-chevron-down text-gray-400"></i>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    
-                    <!-- Sexo -->
-                    <div>
-                        <label for="sexo" class="block text-sm font-medium text-gray-700 mb-1">Sexo <span class="text-red-500">*</span></label>
+
+                        <!-- Contenedor del representante -->
+                        <div id="representanteContainer" class="hidden col-span-2">
+                            <!-- Tarjeta del representante seleccionado -->
+                            <div id="representante-info-display" class="hidden bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-200 shadow-sm mb-6 transition-all duration-300 hover:shadow-md">
+                                <div class="flex justify-between items-start">
+                                    <div class="flex items-start space-x-5">
+                                        <!-- Icono de usuario -->
+                                        <div class="bg-blue-100 p-3 rounded-full shadow-inner">
+                                            <i class="fas fa-user-tie text-blue-600 text-xl"></i>
+                                        </div>
+                                        
+                                        <!-- Información del representante -->
+                                        <div>
+                                            <h4 class="text-lg font-semibold text-gray-800 mb-2">
+                                                <span id="rep-nombre-completo"></span>
+                                            </h4>
+                                            <div class="flex flex-wrap gap-3">
+                                                <span class="inline-flex items-center bg-blue-100 px-3 py-1 rounded-full text-xs font-medium text-blue-800 shadow-sm">
+                                                    <i class="fas fa-id-card mr-1.5"></i>
+                                                    <span id="rep-cedula"></span>
+                                                </span>
+                                                <span class="inline-flex items-center bg-indigo-100 px-3 py-1 rounded-full text-xs font-medium text-indigo-800 shadow-sm">
+                                                    <i class="fas fa-users mr-1.5"></i>
+                                                    <span id="rep-parentesco"></span>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Botón de edición -->
+                                    <button type="button" onclick="editarRepresentante()" 
+                                            class="text-blue-600 hover:text-blue-800 transition-colors duration-200 flex items-center space-x-2 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg">
+                                        <i class="fas fa-pencil-alt"></i>
+                                        <span class="text-sm font-medium">Editar</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Botón para agregar representante -->
+                            <button type="button" onclick="abrirModalRepresentante()" id="btnAgregarRepresentante" 
+                                    class="hidden w-full md:w-auto bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-medium py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center space-x-3">
+                                <i class="fas fa-user-plus"></i>
+                                <span>Agregar Representante</span>
+                            </button>
+                        </div>
+                        
+                        <!-- Cédula -->
                         <div class="relative">
-                            <select id="sexo" name="sexo" class="w-full pl-3 pr-10 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" required>
-                                <option value="masculino">Masculino</option>
-                                <option value="femenino">Femenino</option>
-                                <option value="otro">Otro</option>
-                            </select>
-                            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                <i class="fas fa-venus-mars text-gray-400"></i>
+                            <label for="cedula" class="block text-sm font-medium text-gray-700 mb-2">Cédula <span class="text-red-500">*</span></label>
+                            <div class="relative">
+                                <input type="text" id="cedula" name="cedula" class="w-full pl-4 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white" placeholder="Ej: 123456789" required>
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                                    <i class="fas fa-id-card text-gray-400"></i>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    
-                    <!-- Nivel Académico -->
-                    <div>
-                        <label for="nivel_academico" class="block text-sm font-medium text-gray-700 mb-1">Nivel Académico <span class="text-red-500">*</span></label>
+                        
+                        <!-- Nombres -->
                         <div class="relative">
-                            <select id="nivel_academico" name="nivel_academico" class="w-full pl-3 pr-10 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" required>
-                                {% for value, label in form.nivel_academico.field.choices %}
-                                    <option value="{{ value }}" {% if form.nivel_academico.value == value %}selected{% endif %}>
-                                        {{ label }}
-                                    </option>
-                                {% endfor %}
-                            </select>
-                            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                <i class="fas fa-graduation-cap text-gray-400"></i>
+                            <label for="nombre" class="block text-sm font-medium text-gray-700 mb-2">Primer Nombre <span class="text-red-500">*</span></label>
+                            <div class="relative">
+                                <input type="text" id="nombre" name="nombre" class="w-full pl-4 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white" placeholder="Ej: Juan" required>
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                                    <i class="fas fa-signature text-gray-400"></i>
+                                </div>
                             </div>
+                        </div>
+                        
+                        <div>
+                            <label for="nombre2" class="block text-sm font-medium text-gray-700 mb-2">Segundo Nombre</label>
+                            <input type="text" id="nombre2" name="nombre2" class="w-full pl-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white" placeholder="Ej: Carlos">
+                        </div>
+                        
+                        <!-- Apellidos -->
+                        <div class="relative">
+                            <label for="apellido" class="block text-sm font-medium text-gray-700 mb-2">Primer Apellido <span class="text-red-500">*</span></label>
+                            <div class="relative">
+                                <input type="text" id="apellido" name="apellido" class="w-full pl-4 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white" placeholder="Ej: Pérez" required>
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                                    <i class="fas fa-signature text-gray-400"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label for="apellido2" class="block text-sm font-medium text-gray-700 mb-2">Segundo Apellido</label>
+                            <input type="text" id="apellido2" name="apellido2" class="w-full pl-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white" placeholder="Ej: González">
                         </div>
                     </div>
                 </div>
-            </div>
-            
-            <!-- Sección 3: Información Personal -->
-            <div class="mb-8">
-                <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-                    <i class="fas fa-heartbeat mr-2 text-blue-600"></i> Información Personal
-                </h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Condición -->
-                    <div>
-                        <label for="condicion" class="block text-sm font-medium text-gray-700 mb-1">Condición <span class="text-red-500">*</span></label>
-                        <div class="flex items-center">
-                            <div class="relative flex-grow">
-                                <select id="condicion" name="condicion" class="w-full pl-3 pr-10 py-2.5 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" required>
-                                    {% for condicion in condiciones %}
-                                        <option value="{{ condicion.id }}">{{ condicion.nombre }}</option>
+                
+                <!-- Sección 2: Contacto y Demográficos -->
+                <div class="mb-12">
+                    <div class="flex items-center mb-6">
+                        <div class="h-px flex-1 bg-gradient-to-r from-transparent via-teal-400 to-transparent"></div>
+                        <h2 class="mx-4 text-xl font-semibold text-gray-800 flex items-center">
+                            <span class="bg-teal-100 text-teal-800 p-2 rounded-full mr-3">
+                                <i class="fas fa-address-book"></i>
+                            </span>
+                            Información de Contacto
+                        </h2>
+                        <div class="h-px flex-1 bg-gradient-to-r from-transparent via-teal-400 to-transparent"></div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- Teléfono -->
+                        <div class="relative">
+                            <label for="telefono" class="block text-sm font-medium text-gray-700 mb-2">Teléfono <span class="text-red-500">*</span></label>
+                            <div class="relative">
+                                <input type="text" id="telefono" name="telefono" class="w-full pl-4 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white" placeholder="Ej: 04121234567" required>
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                                    <i class="fas fa-phone text-gray-400"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Edad -->
+                        <div class="relative">
+                            <label for="edad" class="block text-sm font-medium text-gray-700 mb-2">Edad <span class="text-red-500">*</span></label>
+                            <div class="relative">
+                                <input type="number" id="edad" name="edad" class="w-full pl-4 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white" placeholder="Ej: 35" required>
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                                    <i class="fas fa-birthday-cake text-gray-400"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Sexo -->
+                        <div class="relative">
+                            <label for="sexo" class="block text-sm font-medium text-gray-700 mb-2">Sexo <span class="text-red-500">*</span></label>
+                            <div class="relative">
+                                <select id="sexo" name="sexo" class="appearance-none w-full pl-4 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white" required>
+                                    <option value="masculino">Masculino</option>
+                                    <option value="femenino">Femenino</option>
+                                </select>
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <i class="fas fa-chevron-down text-gray-400"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Nivel Académico -->
+                        <div class="relative">
+                            <label for="nivel_academico" class="block text-sm font-medium text-gray-700 mb-2">Nivel Académico <span class="text-red-500">*</span></label>
+                            <div class="relative">
+                                <select id="nivel_academico" name="nivel_academico" class="appearance-none w-full pl-4 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white" required>
+                                    {% for value, label in form.nivel_academico.field.choices %}
+                                        <option value="{{ value }}" {% if form.nivel_academico.value == value %}selected{% endif %}>
+                                            {{ label }}
+                                        </option>
                                     {% endfor %}
                                 </select>
                                 <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                    <i class="fas fa-stethoscope text-gray-400"></i>
+                                    <i class="fas fa-chevron-down text-gray-400"></i>
                                 </div>
-                            </div>
-                            <button type="button" onclick="abrirModalCondicion()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2.5 rounded-r-lg transition-all">
-                                <i class="fas fa-plus"></i>
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <!-- Antecedentes Personales -->
-                    <div>
-                        <label for="antecedentes_personales" class="block text-sm font-medium text-gray-700 mb-1">Antecedentes Personales</label>
-                        <div class="flex items-center">
-                            <div class="relative flex-grow">
-                                <select id="antecedentes_personales" name="antecedentes_personales" class="w-full pl-3 pr-10 py-2.5 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
-                                    {% for antecedente in antecedentes %}
-                                        <option value="{{ antecedente.id }}">{{ antecedente.descripcion }}</option>
-                                    {% endfor %}
-                                </select>
-                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                    <i class="fas fa-file-medical text-gray-400"></i>
-                                </div>
-                            </div>
-                            <button type="button" onclick="abrirModalAntecedente()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2.5 rounded-r-lg transition-all">
-                                <i class="fas fa-plus"></i>
-                            </button>
-                        </div>
-
-
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Sección 4: Ubicación -->
-            <div class="mb-8">
-                <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-                    <i class="fas fa-map-marker-alt mr-2 text-blue-600"></i> Ubicación
-                </h2>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <!-- País -->
-                    <div>
-                        <label for="pais" class="block text-sm font-medium text-gray-700 mb-1">País <span class="text-red-500">*</span></label>
-                        <div class="relative">
-                            <select id="pais" name="pais" class="w-full pl-3 pr-10 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" required>
-                                <option value="">Seleccione un país</option>
-                                {% for pais in paises %}
-                                    <option value="{{ pais.id }}">{{ pais.nombre_pais }}</option>
-                                {% endfor %}
-                            </select>
-                            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                <i class="fas fa-globe-americas text-gray-400"></i>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Estado -->
-                    <div>
-                        <label for="estado" class="block text-sm font-medium text-gray-700 mb-1">Estado <span class="text-red-500">*</span></label>
-                        <div class="relative">
-                            <select id="estado" name="estado" class="w-full pl-3 pr-10 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" required>
-                                <option value="">Seleccione un estado</option>
-                                {% for estado in estados %}
-                                    <option value="{{ estado.id }}">{{ estado.nombre_estado }}</option>
-                                {% endfor %}
-                            </select>
-                            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                <i class="fas fa-map-marked-alt text-gray-400"></i>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Ciudad -->
-                    <div>
-                        <label for="ciudad" class="block text-sm font-medium text-gray-700 mb-1">Ciudad <span class="text-red-500">*</span></label>
-                        <div class="relative">
-                            <select id="ciudad" name="ciudad" class="w-full pl-3 pr-10 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" required>
-                                <option value="">Seleccione una ciudad</option>
-                                {% for ciudad in ciudades %}
-                                    <option value="{{ ciudad.id }}">{{ ciudad.nombre_ciudad }}</option>
-                                {% endfor %}
-                            </select>
-                            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                <i class="fas fa-city text-gray-400"></i>
                             </div>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Dirección -->
-                <div class="mt-6">
-                    <label for="direccion" class="block text-sm font-medium text-gray-700 mb-1">Dirección <span class="text-red-500">*</span></label>
-                    <div class="relative">
-                        <textarea id="direccion" name="direccion" rows="3" class="w-full pl-3 pr-10 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" placeholder="Ingrese la dirección completa" required></textarea>
-                        <div class="absolute top-3 right-3">
-                            <i class="fas fa-home text-gray-400"></i>
+                <!-- Sección 3: Información Personal -->
+                <div class="mb-12">
+                    <div class="flex items-center mb-6">
+                        <div class="h-px flex-1 bg-gradient-to-r from-transparent via-teal-400 to-transparent"></div>
+                        <h2 class="mx-4 text-xl font-semibold text-gray-800 flex items-center">
+                            <span class="bg-teal-100 text-teal-800 p-2 rounded-full mr-3">
+                                <i class="fas fa-heartbeat"></i>
+                            </span>
+                            Información Personal
+                        </h2>
+                        <div class="h-px flex-1 bg-gradient-to-r from-transparent via-teal-400 to-transparent"></div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- Condición -->
+                        <div>
+                            <label for="condicion" class="block text-sm font-medium text-gray-700 mb-2">Condición <span class="text-red-500">*</span></label>
+                            <div class="flex items-center">
+                                <div class="relative flex-grow">
+                                    <select id="condicion" name="condicion" class="appearance-none w-full pl-4 pr-10 py-3 border border-gray-300 rounded-l-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white" required>
+                                        <option value="" selected disabled>Seleccione una condición</option>
+                                        {% for condicion in condiciones %}
+                                            <option value="{{ condicion.id }}">{{ condicion.nombre }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                        <i class="fas fa-chevron-down text-gray-400"></i>
+                                    </div>
+                                </div>
+                                <button type="button" onclick="abrirModalCondicion()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-r-xl transition-all shadow-md hover:shadow-lg">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Antecedentes Personales -->
+                        <div>
+                            <label for="antecedentes_personales" class="block text-sm font-medium text-gray-700 mb-2">Antecedentes Personales</label>
+                            <div class="flex items-center">
+                                <div class="relative flex-grow">
+                                    <select id="antecedentes_personales" name="antecedentes_personales" class="appearance-none w-full pl-4 pr-10 py-3 border border-gray-300 rounded-l-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white">
+                                        <option value="" selected>Seleccione un antecedente</option>
+                                        {% for antecedente in antecedentes %}
+                                            <option value="{{ antecedente.id }}">{{ antecedente.descripcion }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                        <i class="fas fa-chevron-down text-gray-400"></i>
+                                    </div>
+                                </div>
+                                <button type="button" onclick="abrirModalAntecedente()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-r-xl transition-all shadow-md hover:shadow-lg">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
+                
+                <!-- Sección 4: Ubicación -->
+                <div class="mb-12">
+                    <div class="flex items-center mb-6">
+                        <div class="h-px flex-1 bg-gradient-to-r from-transparent via-teal-400 to-transparent"></div>
+                        <h2 class="mx-4 text-xl font-semibold text-gray-800 flex items-center">
+                            <span class="bg-teal-100 text-teal-800 p-2 rounded-full mr-3">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </span>
+                            Ubicación
+                        </h2>
+                        <div class="h-px flex-1 bg-gradient-to-r from-transparent via-teal-400 to-transparent"></div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <!-- País -->
+                        <div class="relative">
+                            <label for="pais" class="block text-sm font-medium text-gray-700 mb-2">País <span class="text-red-500">*</span></label>
+                            <div class="relative">
+                                <select id="pais" name="pais" class="appearance-none w-full pl-4 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white" required>
+                                    <option value="">Seleccione un país</option>
+                                    {% for pais in paises %}
+                                        <option value="{{ pais.id }}">{{ pais.nombre_pais }}</option>
+                                    {% endfor %}
+                                </select>
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <i class="fas fa-chevron-down text-gray-400"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Estado -->
+                        <div class="relative">
+                            <label for="estado" class="block text-sm font-medium text-gray-700 mb-2">Estado <span class="text-red-500">*</span></label>
+                            <div class="relative">
+                                <select id="estado" name="estado" class="appearance-none w-full pl-4 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white" required>
+                                    <option value="">Seleccione un estado</option>
+                                    {% for estado in estados %}
+                                        <option value="{{ estado.id }}">{{ estado.nombre_estado }}</option>
+                                    {% endfor %}
+                                </select>
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <i class="fas fa-chevron-down text-gray-400"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Ciudad -->
+                        <div class="relative">
+                            <label for="ciudad" class="block text-sm font-medium text-gray-700 mb-2">Ciudad <span class="text-red-500">*</span></label>
+                            <div class="relative">
+                                <select id="ciudad" name="ciudad" class="appearance-none w-full pl-4 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white" required>
+                                    <option value="">Seleccione una ciudad</option>
+                                    {% for ciudad in ciudades %}
+                                        <option value="{{ ciudad.id }}">{{ ciudad.nombre_ciudad }}</option>
+                                    {% endfor %}
+                                </select>
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <i class="fas fa-chevron-down text-gray-400"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Dirección -->
+                    <div class="mt-8">
+                        <label for="direccion" class="block text-sm font-medium text-gray-700 mb-2">Dirección <span class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <textarea id="direccion" name="direccion" rows="3" class="w-full pl-4 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white" placeholder="Ingrese la dirección completa" required></textarea>
+                            <div class="absolute top-3 right-3">
+                                <i class="fas fa-home text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Campos ocultos para el representante -->
+                <input type="hidden" id="representante_id" name="representante_id">
+                
+                <!-- Botón de Envío -->
+                <div class="mt-12 text-center">
+                    <button type="submit" class="inline-flex items-center justify-center bg-gradient-to-r from-teal-600 to-blue-600 hover:from-teal-700 hover:to-blue-700 text-white py-4 px-8 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02] active:scale-100">
+                        <i class="fas fa-save mr-3"></i> Registrar Paciente
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para listar Representantes - Versión mejorada -->
+<div id="modalRepresentantes" class="hidden fixed inset-0 bg-gray-900/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col transform transition-all duration-300 scale-95 group-hover:scale-100">
+        <!-- Encabezado -->
+        <div class="bg-gradient-to-r from-teal-600 to-blue-700 p-6 text-white">
+            <div class="flex justify-between items-center">
+                <h3 class="text-2xl font-semibold">Seleccionar Representante</h3>
+                <button onclick="cerrarModalRepresentante()" class="text-white hover:text-blue-100 transition-colors">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Cuerpo -->
+        <div class="p-6 overflow-y-auto flex-grow">
+            <!-- Barra de búsqueda -->
+            <div class="mb-6">
+                <form id="search-form-representantes" class="flex gap-3">
+                    <div class="relative flex-grow">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-search text-gray-400"></i>
+                        </div>
+                        <input type="text" id="search-input-representantes" 
+                               class="block w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                               placeholder="Buscar por nombre, cédula, teléfono...">
+                    </div>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl shadow-md transition-all">
+                        Buscar
+                    </button>
+                </form>
             </div>
             
-            <!-- Botón de Envío -->
-            <div class="mt-8">
-                <button type="submit" class="w-full bg-teal-700 hover:bg-teal-800 text-white py-3 px-6 rounded-xl font-semibold shadow-md hover:shadow-lg transition-all transform hover:scale-[1.01]">
-                    <i class="fas fa-save mr-2"></i> Registrar Paciente
+            <!-- Resultados -->
+            <div id="representantes-container" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <!-- Contenido dinámico -->
+            </div>
+        </div>
+        
+        <!-- Pie -->
+        <div class="p-6 border-t flex justify-between bg-gray-50">
+            <button onclick="abrirModalCrearRepresentante()" 
+                    class="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-6 py-3 rounded-xl shadow-md transition-all flex items-center">
+                <i class="fas fa-plus mr-2"></i> Nuevo Representante
+            </button>
+            <button onclick="cerrarModalRepresentante()" 
+                    class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-3 rounded-xl shadow-md transition-all">
+                Cerrar
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para crear un nuevo Representante - Versión mejorada -->
+<div id="modalCrearRepresentante" class="hidden fixed inset-0 bg-gray-900/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden transform transition-all duration-300">
+        <!-- Encabezado -->
+        <div class="bg-gradient-to-r from-teal-600 to-blue-700 p-6 text-white">
+            <div class="flex justify-between items-center">
+                <h3 class="text-2xl font-semibold">Registrar Representante</h3>
+                <button onclick="cerrarModalCrearRepresentante()" class="text-white hover:text-blue-100 transition-colors">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Formulario -->
+        <form method="POST" action="{% url 'Crear_representante' %}" id="formRepresentante" class="p-6">
+            {% csrf_token %}
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Cédula -->
+                <div class="col-span-1">
+                    <label for="cedula" class="block text-sm font-medium text-gray-700 mb-2">Cédula <span class="text-red-500">*</span></label>
+                    <input type="text" name="cedula" id="cedula" placeholder="Cédula del Representante" required 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                </div>
+                
+                <!-- Nombre -->
+                <div class="col-span-1">
+                    <label for="nombre" class="block text-sm font-medium text-gray-700 mb-2">Nombre <span class="text-red-500">*</span></label>
+                    <input type="text" name="nombre" id="nombre" placeholder="Nombre del Representante" required 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                </div>
+                
+                <!-- Apellido -->
+                <div class="col-span-1">
+                    <label for="apellido" class="block text-sm font-medium text-gray-700 mb-2">Apellido <span class="text-red-500">*</span></label>
+                    <input type="text" name="apellido" id="apellido" placeholder="Apellido del Representante" required 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                </div>
+                
+                <!-- Teléfono -->
+                <div class="col-span-1">
+                    <label for="telefono" class="block text-sm font-medium text-gray-700 mb-2">Teléfono <span class="text-red-500">*</span></label>
+                    <input type="text" name="telefono" id="telefono" placeholder="Teléfono del Representante" required 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                </div>
+                
+                <!-- Dirección -->
+                <div class="col-span-2">
+                    <label for="direccion" class="block text-sm font-medium text-gray-700 mb-2">Dirección <span class="text-red-500">*</span></label>
+                    <textarea name="direccion" id="direccion" placeholder="Dirección del Representante" required 
+                              class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" rows="3"></textarea>
+                </div>
+                
+                <!-- Edad -->
+                <div class="col-span-1">
+                    <label for="edad" class="block text-sm font-medium text-gray-700 mb-2">Edad <span class="text-red-500">*</span></label>
+                    <input type="number" name="edad" id="edad" placeholder="Edad del Representante" required 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" min="1">
+                </div>
+                
+                <!-- Sexo -->
+                <div class="col-span-1">
+                    <label for="sexo" class="block text-sm font-medium text-gray-700 mb-2">Sexo <span class="text-red-500">*</span></label>
+                    <select name="sexo" id="sexo" required 
+                            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all appearance-none">
+                        <option value="masculino">Masculino</option>
+                        <option value="femenino">Femenino</option>
+                    </select>
+                </div>
+                
+                <!-- Parentesco -->
+                <div class="col-span-2">
+                    <label for="parentesco" class="block text-sm font-medium text-gray-700 mb-2">Parentesco <span class="text-red-500">*</span></label>
+                    <select name="parentesco" id="parentesco" required 
+                            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all appearance-none">
+                        <option value="padre">Padre</option>
+                        <option value="madre">Madre</option>
+                        <option value="abuelo">Abuelo</option>
+                        <option value="abuela">Abuela</option>
+                        <option value="bisabuelo">Bisabuelo</option>
+                        <option value="bisabuela">Bisabuela</option>
+                        <option value="hermano">Hermano</option>
+                        <option value="hermana">Hermana</option>
+                        <option value="tio">Tío</option>
+                        <option value="tia">Tía</option>
+                        <option value="primo">Primo</option>
+                        <option value="prima">Prima</option>
+                        <option value="padrino">Padrino</option>
+                        <option value="madrina">Madrina</option>
+                        <option value="sin_parentesco">Sin parentesco</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Botones -->
+            <div class="mt-8 flex justify-end space-x-4">
+                <button type="button" onclick="cerrarModalCrearRepresentante()" 
+                        class="px-6 py-3 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-all shadow-sm">
+                    Cancelar
+                </button>
+                <button type="submit" 
+                        class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-all shadow-lg">
+                    Guardar Representante
                 </button>
             </div>
         </form>
     </div>
 </div>
 
-
-<!-- Modal Antecendentes -->
-
-<div id="modalAntecedente" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-    <form method="POST" action="{% url 'Crear_antecedentes' %}" class="bg-white rounded-xl p-6 w-full max-w-md">
-        {% csrf_token %}
-        <div class="flex justify-between items-center mb-4">
-            <h3 class="text-xl font-semibold text-gray-800">Agregar Antecedente Personal</h3>
-            <button type="button" onclick="cerrarModalAntecedente()" class="text-gray-500 hover:text-gray-700">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-
-        <div class="mb-4">
-            <label for="descripcion" class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
-            <textarea name="descripcion" required rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"></textarea>
-        </div>
-
-        <div class="flex items-center">
-            <input type="checkbox" id="activo" name="activo" value="true" checked
-                class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded">
-            <label for="activo" class="ml-2 block text-sm text-gray-700">Activo</label>
+<!-- Modal Condición - Versión mejorada -->
+<div id="modalCondicion" class="hidden fixed inset-0 bg-gray-900/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all duration-300">
+        <!-- Encabezado -->
+        <div class="bg-gradient-to-r from-teal-600 to-blue-700 p-6 text-white">
+            <div class="flex justify-between items-center">
+                <h3 class="text-2xl font-semibold">Agregar Nueva Condición</h3>
+                <button onclick="cerrarModalCondicion()" class="text-white hover:text-blue-100 transition-colors">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
         </div>
         
-        <div class="flex justify-end space-x-3">
-            <button type="button" onclick="cerrarModalAntecedente()" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">Cancelar</button>
-            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Guardar</button>
-        </div>
-    </form>
+        <!-- Formulario -->
+        <form method="POST" action="{% url 'Crear_condicion' %}" class="p-6">
+            {% csrf_token %}
+            
+            <div class="mb-6">
+                <label for="nombre" class="block text-sm font-medium text-gray-700 mb-2">Nombre <span class="text-red-500">*</span></label>
+                <input type="text" name="nombre" required 
+                       class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" 
+                       placeholder="Nombre de la condición">
+            </div>
+
+            <div class="mb-6">
+                <label for="descripcion" class="block text-sm font-medium text-gray-700 mb-2">Descripción</label>
+                <textarea name="descripcion" rows="4" 
+                          class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                          placeholder="Descripción de la condición">Sin descripción</textarea>
+            </div>
+
+            <div class="flex items-center mb-8">
+                <input type="checkbox" id="activo" name="activo" value="true" checked
+                    class="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                <label for="activo" class="ml-3 block text-sm text-gray-700">Activo</label>
+            </div>
+            
+            <!-- Botones -->
+            <div class="flex justify-end space-x-4">
+                <button type="button" onclick="cerrarModalCondicion()" 
+                        class="px-6 py-3 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-all shadow-sm">
+                    Cancelar
+                </button>
+                <button type="submit" 
+                        class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-all shadow-lg">
+                    Guardar
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
 
-<!-- Modal Condicion -->
-
-<div id="modalCondicion" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-    <form method="POST" action="{% url 'Crear_condicion' %}" class="bg-white rounded-xl p-6 w-full max-w-md">
-        {% csrf_token %}
-        <div class="flex justify-between items-center mb-4">
-            <h3 class="text-xl font-semibold text-gray-800">Agregar Nueva Condición</h3>
-            <button type="button" onclick="cerrarModalCondicion()" class="text-gray-500 hover:text-gray-700">
-                <i class="fas fa-times"></i>
-            </button>
+<!-- Modal Antecedente - Versión mejorada -->
+<div id="modalAntecedente" class="hidden fixed inset-0 bg-gray-900/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all duration-300">
+        <!-- Encabezado -->
+        <div class="bg-gradient-to-r from-teal-600 to-blue-700 p-6 text-white">
+            <div class="flex justify-between items-center">
+                <h3 class="text-2xl font-semibold">Agregar Antecedente Personal</h3>
+                <button onclick="cerrarModalAntecedente()" class="text-white hover:text-blue-100 transition-colors">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
         </div>
+        
+        <!-- Formulario -->
+        <form method="POST" action="{% url 'Crear_antecedentes' %}" class="p-6">
+            {% csrf_token %}
+            
+            <div class="mb-6">
+                <label for="descripcion" class="block text-sm font-medium text-gray-700 mb-2">Descripción <span class="text-red-500">*</span></label>
+                <textarea name="descripcion" id="descripcion" required rows="4" 
+                          class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                          placeholder="Descripción del antecedente personal"></textarea>
+            </div>
 
-        <div class="mb-4">
-            <label for="nombre" class="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
-            <input type="text" name="nombre" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-        </div>
-
-        <div class="mb-4">
-            <label for="descripcion" class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
-            <textarea name="descripcion" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">Sin descripción</textarea>
-        </div>
-
-        <div class="flex items-center">
-            <input type="checkbox" id="activo" name="activo" value="true" checked
-                class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded">
-            <label for="activo" class="ml-2 block text-sm text-gray-700">Activo</label>
-        </div>
-
-        <div class="flex justify-end space-x-3">
-            <button type="button" onclick="cerrarModalCondicion()" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">Cancelar</button>
-            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Guardar</button>
-        </div>
-    </form>
+            <div class="flex items-center mb-8">
+                <input type="checkbox" id="activo" name="activo" value="true" checked
+                    class="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                <label for="activo" class="ml-3 block text-sm text-gray-700">Activo</label>
+            </div>
+            
+            <!-- Botones -->
+            <div class="flex justify-end space-x-4">
+                <button type="button" onclick="cerrarModalAntecedente()" 
+                        class="px-6 py-3 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-all shadow-sm">
+                    Cancelar
+                </button>
+                <button type="submit" 
+                        class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-all shadow-lg">
+                    Guardar Antecedente
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
 
 <script>
+    // Funciones para mostrar/ocultar modales
+    function abrirModalRepresentante() {
+        cargarRepresentantes(1);
+        document.getElementById('modalRepresentantes').classList.remove('hidden');
+    }
+
+    function cerrarModalRepresentante() {
+        document.getElementById('modalRepresentantes').classList.add('hidden');
+    }
+
+    function abrirModalCrearRepresentante() {
+        document.getElementById('modalCrearRepresentante').classList.remove('hidden');
+        cerrarModalRepresentante();
+    }
+
+    function cerrarModalCrearRepresentante() {
+        document.getElementById('modalCrearRepresentante').classList.add('hidden');
+    }
+
     function abrirModalCondicion() {
         document.getElementById('modalCondicion').classList.remove('hidden');
     }
@@ -353,7 +652,146 @@
     function cerrarModalAntecedente() {
         document.getElementById('modalAntecedente').classList.add('hidden');
     }
+
+    function editarRepresentante() {
+        abrirModalRepresentante();
+    }
+
+    // Manejar cambio en tipo de paciente
+    document.getElementById('tipo_paciente')?.addEventListener('change', function() {
+        const tipoPaciente = this.value;
+        const representanteContainer = document.getElementById('representanteContainer');
+        const btnAgregarRepresentante = document.getElementById('btnAgregarRepresentante');
+    
+        if (!representanteContainer || !btnAgregarRepresentante) {
+            console.error('Elementos del representante no encontrados');
+            return;
+        }
+    
+        if (tipoPaciente === 'infantil') {
+            representanteContainer.classList.remove('hidden');
+            btnAgregarRepresentante.classList.remove('hidden');
+        } else {
+            representanteContainer.classList.add('hidden');
+            btnAgregarRepresentante.classList.add('hidden');
+            document.getElementById('representante_id').value = '';
+        }
+    });
+
+    // Función para cargar representantes con paginación y búsqueda
+    function cargarRepresentantes(page = 1) {
+        try {
+            const query = document.getElementById('search-input-representantes')?.value || '';
+            const url = `{% url 'Listar_representantes' %}?page=${page}&q=${encodeURIComponent(query)}`;
+            
+            fetch(url, {
+                headers: { 
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'text/html'
+                }
+            })
+            .then(response => {
+                if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+                return response.text();
+            })
+            .then(html => {
+                const container = document.getElementById('representantes-container');
+                if (!container) throw new Error('Contenedor no encontrado');
+                
+                container.innerHTML = html;
+                
+                // Agrega eventos a los botones de paginación
+                document.querySelectorAll('[data-page]').forEach(btn => {
+                    btn.onclick = (e) => {
+                        e.preventDefault();
+                        cargarRepresentantes(btn.dataset.page);
+                    };
+                });
+            })
+            .catch(error => {
+                console.error('Error en cargarRepresentantes:', error);
+                alert('Error al cargar representantes. Ver consola para detalles.');
+            });
+        } catch (error) {
+            console.error('Error inesperado:', error);
+        }
+    }
+
+    // Función para seleccionar un representante de la lista
+    function seleccionarRepresentante(id, nombreCompleto, cedula, parentesco) {
+        document.getElementById('representante_id').value = id;
+        document.getElementById('rep-nombre-completo').textContent = nombreCompleto;
+        document.getElementById('rep-cedula').textContent = `Cédula: ${cedula}`;
+        document.getElementById('rep-parentesco').textContent = `Parentesco: ${parentesco}`;
+        document.getElementById('representante-info-display').classList.remove('hidden');
+        document.getElementById('btnAgregarRepresentante').classList.add('hidden');
+        cerrarModalRepresentante();
+    }
+
+    // Función para guardar representante (versión modificada)
+    function guardarRepresentante() {
+        const form = document.getElementById('formRepresentante');
+        const formData = new FormData(form);
+        
+        // Validación del campo 'edad'
+        if (!formData.get('edad')) {
+            alert('El campo Edad es obligatorio');
+            return false;
+        }
+        
+        // Enviar el formulario tradicionalmente
+        form.submit();
+        return false; // Previene el comportamiento por defecto del submit
+    }
+
+    // Función para manejar el éxito después del guardado
+    function manejarRepresentanteGuardado() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const representanteGuardado = urlParams.get('representante_guardado');
+        
+        if (representanteGuardado === 'true') {
+            // Cierra el modal de creación
+            cerrarModalCrearRepresentante();
+            
+            // Opcional: Muestra un mensaje de éxito
+            alert('Representante guardado correctamente');
+            
+            // Limpia los parámetros de la URL
+            window.history.replaceState({}, document.title, window.location.pathname);
+            
+            // Aquí puedes agregar lógica para seleccionar automáticamente el representante
+            // si tu backend envía los datos necesarios
+        }
+    }
+
+    // Inicializar eventos cuando se carga el DOM
+    document.addEventListener('DOMContentLoaded', function() {
+        // Manejar representante recién guardado
+        manejarRepresentanteGuardado();
+        
+        // Evento para el formulario de búsqueda de representantes
+        document.getElementById('search-form-representantes')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            cargarRepresentantes(1);
+        });
+        
+        // Evento para el formulario de creación de representante
+        document.getElementById('formRepresentante')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            guardarRepresentante();
+        });
+        
+        // Validar formulario de paciente
+        document.getElementById('pacienteForm')?.addEventListener('submit', function(e) {
+            const tipoPaciente = document.getElementById('tipo_paciente').value;
+            const representanteId = document.getElementById('representante_id').value;
+            
+            if (tipoPaciente === 'infantil' && !representanteId) {
+                e.preventDefault();
+                alert('Para pacientes infantiles es necesario registrar un representante');
+                abrirModalRepresentante();
+            }
+        });
+    });
 </script>
-
-
 {% endblock %}
