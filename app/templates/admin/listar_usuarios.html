@@ -1,208 +1,237 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Gestión de Usuarios{% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-gray-50 py-20 px-4">
-    <div class="max-w-7xl mx-auto">
-        <!-- Header -->
-        <div class="mb-8">
-            <h1 class="text-2xl font-semibold text-gray-800">Gestión de Usuarios</h1>
-            <p class="text-gray-500 mt-1">Administra los usuarios registrados en el sistema</p>
+<div class="container mx-auto px-4 py-20">
+    <!-- Encabezado y botón de creación -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800">Gestión de Usuarios</h1>
+            <p class="text-gray-600">Administra los usuarios del sistema</p>
         </div>
-
-        <!-- Search and Filters -->
-        <div class="bg-white rounded-lg shadow-xs p-4 mb-6">
-            <form method="GET" action="{% url 'Listar_usuarios' %}" class="flex flex-col md:flex-row gap-3">
-                <!-- Barra de búsqueda (ahora con name="q" para el filtro) -->
-                <div class="relative flex-grow">
-                    <i data-lucide="search" class="absolute left-3 top-3 text-gray-500"></i>
-                    <input 
-                        type="text" 
-                        id="searchInput"
-                        placeholder="Buscar por nombre, cédula, teléfono..." 
-                        class="pl-10 pr-4 py-2 w-full border border-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        onkeyup="filterCards()"
-                    />
+        <div class="flex gap-4">
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <i class="fas fa-search text-gray-400"></i>
                 </div>
-                
-                <!-- Filtros -->
-                <div class="flex gap-2">
-                    <!-- Filtro por rol -->
-                    <select name="rol" class="p-2 border border-gray-200 rounded-lg text-sm focus:ring-blue-200 focus:border-blue-400">
-                        <option value="">Todos los roles</option>
-                        {% for rol in roles %}
-                            <option value="{{ rol.id }}" 
-                                {% if request.GET.rol == rol.id|stringformat:"s" %}selected{% endif %}>
-                                {{ rol.nombre_rol }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                    
-                    <!-- Filtro por estado -->
-                    <select name="status" class="p-2 border border-gray-200 rounded-lg text-sm focus:ring-blue-200 focus:border-blue-400">
-                        <option value="">Todos los estados</option>
-                        <option value="1" {% if request.GET.status == "1" %}selected{% endif %}>Activos</option>
-                        <option value="0" {% if request.GET.status == "0" %}selected{% endif %}>Inactivos</option>
-                    </select>
-                    
-                    <!-- Botón de filtrar -->
-                    <button type="submit" class="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                        <i data-lucide="filter" class="w-4 h-4"></i>
-                        Filtrar
-                    </button>
-                </div>
-            </form>
-        </div
+                <input type="text" placeholder="Buscar usuarios..." class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+            </div>
+            <a href="{% url 'Crear_usuario' %}" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center transition-colors">
+                <i class="fas fa-plus mr-2"></i> Nuevo Usuario
+            </a>
+        </div>
+    </div>
 
-        <!-- Users Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {% for usuario in usuarios %}
-            <div class="usuario-card bg-white rounded-lg shadow-xs p-6 hover:shadow-md transition-shadow cursor-pointer" onclick="openModalEditarUsuario('{{ usuario.id }}')">
-                <!-- Header -->
-                <div class="flex justify-between items-start mb-4">
-                    <div class="flex items-center space-x-4">
-                        <div class="w-12 h-12 rounded-full bg-gradient-to-r from-blue-400 to-purple-400 flex items-center justify-center text-white font-bold text-xl">
-                            {{ usuario.username|slice:":2"|upper }}
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-semibold text-gray-800">{{ usuario.username }}</h3>
-                            <p class="text-sm text-gray-500">{{ usuario.email }}</p>
-                        </div>
+    <!-- Filtros -->
+    <div class="bg-white rounded-lg shadow-sm p-4 mb-6 border border-gray-100">
+        <form method="GET" action="{% url 'Listar_usuarios' %}" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="md:col-span-2">
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-search text-gray-400"></i>
                     </div>
-                    <div>
-                        {% if usuario.is_active %}
-                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-200 text-green-800">Activo</span>
-                        {% else %}
-                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-200 text-red-800">Inactivo</span>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <!-- Details -->
-                <div class="space-y-2 text-sm text-gray-700 mb-4">
-                    <div class="flex items-center">
-                        <i data-lucide="id-card" class="w-4 h-4 text-gray-500 mr-2"></i>
-                        <span>Cédula: {{ usuario.cedula }}</span>
-                    </div>
-                    <div class="flex items-center">
-                        <i data-lucide="phone" class="w-4 h-4 text-gray-500 mr-2"></i>
-                        <span>Teléfono: {{ usuario.telefono }}</span>
-                    </div>
-                    <div class="flex items-center">
-                        <i data-lucide="shield" class="w-4 h-4 text-gray-500 mr-2"></i>
-                        <span>Rol: {{ usuario.rol.nombre_rol }}</span>
-                    </div>
-                </div>
-
-                <!-- Actions -->
-                <div class="flex justify-end">
-                    <button onclick="event.stopPropagation(); openModalEditarUsuario('{{ usuario.id }}')" class="p-2 text-blue-500 hover:text-blue-700 rounded-full hover:bg-blue-50 transition-colors">
-                        <i data-lucide="edit" class="w-5 h-5"></i>
-                    </button>
+                    <input type="text" name="q" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" 
+                           placeholder="Buscar por nombre, email..." value="{{ request.GET.q }}">
                 </div>
             </div>
+            <div>
+                <select name="rol" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    <option value="">Todos los roles</option>
+                    {% for rol in roles %}
+                        <option value="{{ rol.id }}" {% if request.GET.rol == rol.id|stringformat:"s" %}selected{% endif %}>
+                            {{ rol.nombre_rol }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="flex gap-2">
+                <select name="status" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    <option value="">Todos</option>
+                    <option value="1" {% if request.GET.status == "1" %}selected{% endif %}>Activos</option>
+                    <option value="0" {% if request.GET.status == "0" %}selected{% endif %}>Inactivos</option>
+                </select>
+                <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg">
+                    <i class="fas fa-filter"></i>
+                </button>
+            </div>
+        </form>
+    </div>
 
-            <!-- Modal -->
-            <div id="modalEditarUsuario{{ usuario.id }}" class="fixed inset-0 bg-black bg-opacity-40 hidden justify-center items-center z-50">
-                <div class="bg-white rounded-2xl p-8 w-full max-w-3xl relative overflow-y-auto max-h-[90vh]">
-                    <h3 class="text-2xl font-bold mb-6 text-center text-gray-800">Editar Usuario</h3>
-                    <form method="POST" action="{% url 'Editar_usuario' usuario.id %}">
-                        {% csrf_token %}
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label for="username" class="block mb-2 text-sm font-semibold text-gray-700">Nombre de Usuario</label>
-                                <input type="text" id="username" name="username" value="{{ usuario.username }}" class="w-full p-3 border-2 rounded-lg focus:ring-2 focus:ring-blue-300">
-                            </div>
-                            <div>
-                                <label for="email" class="block mb-2 text-sm font-semibold text-gray-700">Email</label>
-                                <input type="email" id="email" name="email" value="{{ usuario.email }}" class="w-full p-3 border-2 rounded-lg focus:ring-2 focus:ring-blue-300">
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                            <div>
-                                <label for="first_name" class="block mb-2 text-sm font-semibold text-gray-700">Nombre</label>
-                                <input type="text" id="first_name" name="first_name" value="{{ usuario.first_name }}" class="w-full p-3 border-2 rounded-lg focus:ring-2 focus:ring-blue-300">
-                            </div>
-                            <div>
-                                <label for="last_name" class="block mb-2 text-sm font-semibold text-gray-700">Apellido</label>
-                                <input type="text" id="last_name" name="last_name" value="{{ usuario.last_name }}" class="w-full p-3 border-2 rounded-lg focus:ring-2 focus:ring-blue-300">
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                            <div>
-                                <label for="cedula" class="block mb-2 text-sm font-semibold text-gray-700">Cédula</label>
-                                <input type="text" id="cedula" name="cedula" value="{{ usuario.cedula }}" class="w-full p-3 border-2 rounded-lg focus:ring-2 focus:ring-blue-300">
-                            </div>
-                            <div>
-                                <label for="telefono" class="block mb-2 text-sm font-semibold text-gray-700">Teléfono</label>
-                                <input type="text" id="telefono" name="telefono" value="{{ usuario.telefono }}" class="w-full p-3 border-2 rounded-lg focus:ring-2 focus:ring-blue-300">
-                            </div>
-                        </div>
-
-                        <div class="mt-6">
-                            <label for="rol" class="block mb-2 text-sm font-semibold text-gray-700">Rol</label>
-                            <select id="rol" name="rol" class="w-full p-3 border-2 rounded-lg focus:ring-2 focus:ring-blue-300">
-                                {% for rol in roles %}
-                                    <option value="{{ rol.id }}" {% if usuario.rol.id == rol.id %}selected{% endif %}>{{ rol.nombre_rol }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-
-                        <div class="mt-6 flex items-center gap-2">
-                            <input type="checkbox" id="is_active" name="is_active" class="h-5 w-5 text-blue-600" {% if usuario.is_active %}checked{% endif %}>
-                            <label for="is_active" class="text-gray-800 font-semibold">Activo</label>
-                        </div>
-
-                        <div class="mt-6">
-                            <label for="password" class="block mb-2 text-sm font-semibold text-gray-700">Contraseña (opcional)</label>
-                            <input type="password" id="password" name="password" placeholder="Nueva contraseña (opcional)" class="w-full p-3 border-2 rounded-lg focus:ring-2 focus:ring-blue-300">
-                        </div>
-
-                        <div class="flex justify-center gap-4 mt-8">
-                            <button type="button" onclick="closeModalEditarUsuario('{{ usuario.id }}')" class="bg-gray-400 hover:bg-gray-500 text-white px-6 py-3 rounded-lg font-semibold">
-                                Cancelar
-                            </button>
-                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-bold">
-                                Guardar Cambios
-                            </button>
-                        </div>
-                    </form>
+    <!-- Tarjetas de Usuarios -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for usuario in usuarios %}
+        <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-100 hover:shadow-md transition-shadow">
+            <div class="flex items-start justify-between mb-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 h-12 w-12 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-xl">
+                        {{ usuario.username|slice:":1"|upper }}
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="text-lg font-semibold text-gray-800">{{ usuario.username }}</h3>
+                        <p class="text-sm text-gray-500">{{ usuario.email }}</p>
+                    </div>
+                </div>
+                <span class="px-2 py-1 text-xs font-medium rounded-full 
+                    {% if usuario.is_active %}bg-green-100 text-green-800
+                    {% else %}bg-red-100 text-red-800{% endif %}">
+                    {% if usuario.is_active %}Activo{% else %}Inactivo{% endif %}
+                </span>
+            </div>
+            
+            <div class="mb-4">
+                <h4 class="text-sm font-medium text-gray-500 mb-2">Información:</h4>
+                <div class="space-y-2">
+                    <div class="flex justify-between">
+                        <span class="text-sm text-gray-600">Rol:</span>
+                        <span class="text-sm font-medium">
+                            {% if usuario.rol %}{{ usuario.rol.nombre_rol }}{% else %}Sin rol{% endif %}
+                        </span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-sm text-gray-600">Creado:</span>
+                        <span class="text-sm font-medium">{{ usuario.creado_en|date:"d/m/Y" }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-sm text-gray-600">Actualizado:</span>
+                        <span class="text-sm font-medium">{{ usuario.actualizado_en|date:"d/m/Y" }}</span>
+                    </div>
                 </div>
             </div>
-            {% empty %}
-            <div class="col-span-full text-center text-gray-500 font-semibold">No hay usuarios registrados.</div>
-            {% endfor %}
+            
+            <div class="flex justify-between items-center pt-4 border-t border-gray-100">
+                <button onclick="openModal('editUserModal{{ usuario.id }}')" class="text-indigo-600 hover:text-indigo-800 flex items-center">
+                    <i class="fas fa-edit mr-1"></i> Editar
+                </button>
+                <span class="text-xs text-gray-500">ID: {{ usuario.id }}</span>
+            </div>
         </div>
+        {% empty %}
+        <div class="col-span-full text-center py-12">
+            <i class="fas fa-user-slash text-4xl text-gray-300 mb-4"></i>
+            <p class="text-gray-500">No se encontraron usuarios</p>
+        </div>
+        {% endfor %}
     </div>
 </div>
 
+<!-- Modals de Edición -->
+{% for usuario in usuarios %}
+<div id="editUserModal{{ usuario.id }}" class="fixed inset-0 z-50 hidden overflow-y-auto">
+    <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <!-- Fondo oscuro -->
+        <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+            <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+        </div>
+        
+        <!-- Contenido del modal -->
+        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+            <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div class="sm:flex sm:items-start">
+                    <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Editar Usuario: {{ usuario.username }}</h3>
+                        <form method="POST" action="{% url 'Editar_usuario' usuario.id %}">
+                            {% csrf_token %}
+                            <div class="grid grid-cols-1 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Nombre de usuario</label>
+                                    <input type="text" name="username" value="{{ usuario.username }}" 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                                    <input type="email" name="email" value="{{ usuario.email }}" 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Rol</label>
+                                    <select name="rol" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" required>
+                                        {% for rol in roles %}
+                                            <option value="{{ rol.id }}" {% if usuario.rol and usuario.rol.id == rol.id %}selected{% endif %}>{{ rol.nombre_rol }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="checkbox" name="is_active" id="is_active{{ usuario.id }}" 
+                                           class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" {% if usuario.is_active %}checked{% endif %}>
+                                    <label for="is_active{{ usuario.id }}" class="ml-2 block text-sm text-gray-700">Usuario activo</label>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Nueva contraseña (opcional)</label>
+                                    <input type="password" name="new_password" 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" 
+                                           placeholder="Dejar en blanco para no cambiar">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Confirmar contraseña</label>
+                                    <input type="password" name="confirm_password" 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" 
+                                           placeholder="Confirmar nueva contraseña">
+                                </div>
+                            </div>
+                            <div class="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
+                                <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm">
+                                    Guardar cambios
+                                </button>
+                                <button type="button" onclick="closeModal('editUserModal{{ usuario.id }}')" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                                    Cancelar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<!-- Mensajes -->
+{% if messages %}
+<div class="fixed bottom-0 right-0 m-4 space-y-2" style="z-index: 1000">
+    {% for message in messages %}
+    <div class="bg-{% if message.tags == 'error' %}red{% else %}green{% endif %}-500 text-white px-4 py-2 rounded-md shadow-lg flex justify-between items-center max-w-md">
+        <span>{{ message }}</span>
+        <button onclick="this.parentElement.remove()" class="ml-4 text-white hover:text-gray-200">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        lucide.createIcons();
+// Funciones para manejar modales
+function openModal(id) {
+    document.getElementById(id).classList.remove('hidden');
+    document.body.classList.add('overflow-hidden');
+}
 
-        window.openModalEditarUsuario = function(id) {
-            document.getElementById(`modalEditarUsuario${id}`).classList.remove('hidden');
-            document.getElementById(`modalEditarUsuario${id}`).classList.add('flex');
-        }
+function closeModal(id) {
+    document.getElementById(id).classList.add('hidden');
+    document.body.classList.remove('overflow-hidden');
+}
 
-        window.closeModalEditarUsuario = function(id) {
-            document.getElementById(`modalEditarUsuario${id}`).classList.remove('flex');
-            document.getElementById(`modalEditarUsuario${id}`).classList.add('hidden');
+// Cerrar modal al hacer clic fuera
+window.onclick = function(event) {
+    document.querySelectorAll('[id^="editUserModal"]').forEach(modal => {
+        if (event.target === modal) {
+            const id = modal.id;
+            closeModal(id);
         }
     });
+}
 
-    // Función para filtrar empleados
-    window.filterCards = function() {
-        const input = document.getElementById("searchInput").value.toLowerCase();
-        const cards = document.querySelectorAll(".usuario-card");
-        
-        cards.forEach(card => {
-            const text = card.textContent.toLowerCase();
-            card.style.display = text.includes(input) ? "" : "none";
-        });
-    };
+// Cerrar mensajes después de 5 segundos
+setTimeout(function() {
+    document.querySelectorAll('[class*="bg-"]').forEach(el => {
+        if (el.classList.contains('fixed')) {
+            el.remove();
+        }
+    });
+}, 5000);
 </script>
 {% endblock %}

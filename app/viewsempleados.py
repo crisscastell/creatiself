@@ -149,10 +149,7 @@ def listar_usuarios(request):
     if query:
         usuarios = usuarios.filter(
             Q(username__icontains=query) |
-            Q(email__icontains=query) |
-            Q(first_name__icontains=query) |
-            Q(last_name__icontains=query) |
-            Q(cedula__icontains=query)  # Asumiendo que tienes campo cedula
+            Q(email__icontains=query)
         )
     
     # Filtro por rol
@@ -188,16 +185,25 @@ def editar_usuario(request, id):
     if request.method == 'POST':
         form = UsuarioForm(request.POST, instance=usuario)
         if form.is_valid():
-            form.save()
+            user = form.save(commit=False)
+            
+            # Manejo especial de la contraseña
+            new_password = request.POST.get('new_password')
+            confirm_password = request.POST.get('confirm_password')
+            
+            if new_password and new_password == confirm_password:
+                user.set_password(new_password)
+            elif new_password and new_password != confirm_password:
+                messages.error(request, "Las contraseñas no coinciden")
+                return render(request, 'admin/listar_usuarios.html', {
+                    'usuarios': Usuario.objects.all(),
+                    'roles': Rol.objects.all()
+                })
+            
+            user.save()
             messages.success(request, "Usuario actualizado correctamente")
-            return redirect('Listar_usuarios')  # Ajusta este nombre a tu URL
-        else:
-            messages.error(request, "Error al actualizar el usuario")
-    
-    else:
-        form = UsuarioForm(instance=usuario)
+            return redirect('Listar_usuarios')
     
     return redirect('Listar_usuarios')
-
 
 

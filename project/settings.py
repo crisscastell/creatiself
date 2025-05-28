@@ -41,8 +41,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',
-    
     'app',
 ]
 
@@ -84,7 +82,7 @@ WSGI_APPLICATION = 'project.wsgi.application'
 DATABASES = {
       'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'creatiself',
+        'NAME': 'creatiself1',
         'USER': 'miusuario',
         'PASSWORD': '1234',
         'HOST': 'localhost',  # o la IP de tu servidor

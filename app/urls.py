@@ -41,6 +41,9 @@ urlpatterns = [
 
     path('caracteristicas/listar', caracteristicas, name='Caracteristicas'),
 
+    path('historial/listar', historial, name='Historial'),
+
+
     path('antecedentes_personales/crear', crear_antecedente, name='Crear_antecedentes'),
     path('editar_antecedente/<int:id>/', editar_antecedente, name='Editar_antecedente'),
     path('antecedente/<int:pk>/ocultar/', ocultar_antecedente, name='Ocultar_antecedente'),

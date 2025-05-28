@@ -12,34 +12,31 @@ class Rol(models.Model):
 
 # Usuario
 class Usuario(AbstractUser):
-    cedula = models.CharField(max_length=20, unique=True)
-    telefono = models.CharField(max_length=20, blank=True, null=True)
     rol = models.ForeignKey('Rol', on_delete=models.CASCADE, null=True, blank=True)
     password = models.CharField(max_length=128, default='123456')
-    creado_en = models.DateTimeField(auto_now_add=True)  # Solo auto_now_add
+    creado_en = models.DateTimeField(auto_now_add=True)
     actualizado_en = models.DateTimeField(auto_now=True)
-
-# Define related_name únicos para evitar conflictos
+    
+    # Eliminar estos campos
+    first_name = None
+    last_name = None
+    
+    # Configuración de grupos y permisos
     groups = models.ManyToManyField(
         'auth.Group',
-        verbose_name='groups',
-        blank=True,
-        help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.',
-        related_name='usuario_set',  # related_name único
+        related_name='usuario_set',
         related_query_name='usuario',
+        blank=True,
     )
     user_permissions = models.ManyToManyField(
         'auth.Permission',
-        verbose_name='user permissions',
-        blank=True,
-        help_text='Specific permissions for this user.',
-        related_name='usuario_set',  # related_name único
+        related_name='usuario_set',
         related_query_name='usuario',
+        blank=True,
     )
 
     def __str__(self):
         return self.username
-
 # País
 class Pais(models.Model):
     nombre_pais = models.CharField(max_length=50)
@@ -175,12 +172,23 @@ class Cita(models.Model):
     fecha = models.DateField()
     modalidad = models.CharField(max_length=50, choices=[('virtual', 'Virtual'), ('presencial', 'Presencial')])
     motivo_consulta = models.TextField()
-    paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE)
+    paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE, null=True, blank=True)
+    pareja = models.ForeignKey('RelacionPaciente', on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
-        return f"Cita {self.id} - {self.paciente.nombre}"
+        if self.paciente:
+            return f"Cita {self.id} - {self.paciente.nombre}"
+        elif self.pareja:
+            return f"Cita {self.id} - Pareja {self.pareja.id}"
+        return f"Cita {self.id} - Sin asignar"
     
     def clean(self):
+        # Validar que se asigne paciente o pareja, pero no ambos
+        if not self.paciente and not self.pareja:
+            raise ValidationError('Debe asignar un paciente o una pareja a la cita')
+        if self.paciente and self.pareja:
+            raise ValidationError('No puede asignar tanto un paciente como una pareja a la misma cita')
+
         # Validar que no haya citas en la misma fecha y hora
         citas_existentes = Cita.objects.filter(
             fecha=self.fecha,

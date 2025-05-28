@@ -45,7 +45,11 @@
                                 <div class="flex-1 min-w-0">
                                     <div class="flex items-center">
                                         <p class="text-lg font-semibold text-gray-900 truncate">
-                                            {{ cita.paciente.nombre }} {{ cita.paciente.apellido }}
+                                            {% if cita.paciente %}
+                                                {{ cita.paciente.nombre }} {{ cita.paciente.apellido }}
+                                            {% elif cita.pareja %}
+                                                Pareja: {{ cita.pareja.paciente1.nombre }} & {{ cita.pareja.paciente2.nombre }}
+                                            {% endif %}
                                         </p>
                                         <span class="ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
                                             {% if cita.modalidad == 'virtual' %}bg-blue-200 text-blue-800
@@ -98,6 +102,77 @@
                     </li>
                     {% endfor %}
                 </ul>
+
+                {% if citas.paginator.num_pages > 1 %}
+                    <div class="px-4 py-4 bg-gray-50 border-t border-gray-200 sm:px-6">
+                        <div class="flex-1 flex justify-between sm:hidden">
+                            {% if citas.has_previous %}
+                            <a href="?page={{ citas.previous_page_number }}{% if query %}&q={{ query }}{% endif %}" 
+                            class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                Anterior
+                            </a>
+                            {% endif %}
+                            {% if citas.has_next %}
+                            <a href="?page={{ citas.next_page_number }}{% if query %}&q={{ query }}{% endif %}" 
+                            class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                Siguiente
+                            </a>
+                            {% endif %}
+                        </div>
+                        <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                            <div>
+                                <p class="text-sm text-gray-700">
+                                    Mostrando <span class="font-medium">{{ citas.start_index }}</span> a 
+                                    <span class="font-medium">{{ citas.end_index }}</span> de 
+                                    <span class="font-medium">{{ citas.paginator.count }}</span> resultados
+                                </p>
+                            </div>
+                            <div>
+                                <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                                    {% if citas.has_previous %}
+                                    <a href="?page=1{% if query %}&q={{ query }}{% endif %}" 
+                                    class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                        <span class="sr-only">Primera</span>
+                                        <i data-lucide="chevrons-left" class="h-5 w-5"></i>
+                                    </a>
+                                    <a href="?page={{ citas.previous_page_number }}{% if query %}&q={{ query }}{% endif %}" 
+                                    class="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                        <span class="sr-only">Anterior</span>
+                                        <i data-lucide="chevron-left" class="h-5 w-5"></i>
+                                    </a>
+                                    {% endif %}
+                                    
+                                    {% for num in citas.paginator.page_range %}
+                                        {% if citas.number == num %}
+                                        <a href="#" aria-current="page" 
+                                        class="z-10 bg-teal-600 border-teal-500 text-white relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+                                            {{ num }}
+                                        </a>
+                                        {% elif num > citas.number|add:'-3' and num < citas.number|add:'3' %}
+                                        <a href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}" 
+                                        class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+                                            {{ num }}
+                                        </a>
+                                        {% endif %}
+                                    {% endfor %}
+                                    
+                                    {% if citas.has_next %}
+                                    <a href="?page={{ citas.next_page_number }}{% if query %}&q={{ query }}{% endif %}" 
+                                    class="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                        <span class="sr-only">Siguiente</span>
+                                        <i data-lucide="chevron-right" class="h-5 w-5"></i>
+                                    </a>
+                                    <a href="?page={{ citas.paginator.num_pages }}{% if query %}&q={{ query }}{% endif %}" 
+                                    class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                        <span class="sr-only">Última</span>
+                                        <i data-lucide="chevrons-right" class="h-5 w-5"></i>
+                                    </a>
+                                    {% endif %}
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
             {% else %}
                 <div class="px-4 py-12 text-center">
                     <i data-lucide="calendar-x" class="mx-auto h-12 w-12 text-gray-400"></i>
@@ -216,7 +291,13 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <p class="text-sm text-gray-500">Paciente</p>
-                            <p class="font-medium">{{ cita.paciente.nombre }} {{ cita.paciente.apellido }}</p>
+                            <p class="text-lg font-semibold text-gray-900 truncate">
+                                {% if cita.paciente %}
+                                    {{ cita.paciente.nombre }} {{ cita.paciente.apellido }}
+                                {% elif cita.pareja %}
+                                    {{ cita.pareja.paciente1.nombre }} & {{ cita.pareja.paciente2.nombre }}
+                                {% endif %}
+                            </p>
                         </div>
                         <div>
                             <p class="text-sm text-gray-500">Fecha y Hora</p>
@@ -377,5 +458,19 @@
     }
 
 </script>
+
+{% if mostrar_alerta %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        Swal.fire({
+            icon: 'success',
+            title: '¡La cita ha sido registrada exitosamente!',
+            showConfirmButton: true,
+            timer: 3000
+        });
+    });
+</script>
+{% endif %}
+
 
 {% endblock %}

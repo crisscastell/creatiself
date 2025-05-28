@@ -4,6 +4,8 @@ from .models import *
 from django.contrib.auth.forms import UserChangeForm
 from django import forms
 from .models import Cita
+from datetime import datetime, date, time, timedelta
+import datetime as dt
 
 class AntecedentesPersonalesForm(forms.ModelForm):
     class Meta:
@@ -79,43 +81,140 @@ class EmpleadoForm(forms.ModelForm):
         }
        
 class UsuarioForm(UserChangeForm):
+    new_password = forms.CharField(
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control', 
+            'placeholder': 'Nueva contraseña (dejar en blanco para no cambiar)'
+        }),
+        required=False,
+        label="Nueva contraseña"
+    )
+    confirm_password = forms.CharField(
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control', 
+            'placeholder': 'Confirmar nueva contraseña'
+        }),
+        required=False,
+        label="Confirmar contraseña"
+    )
+
     class Meta:
         model = Usuario
-        fields = ['username', 'email', 'cedula', 'telefono', 'rol', 'first_name', 'last_name', 'is_active']
+        fields = ['username', 'email', 'rol', 'is_active']
         widgets = {
-            'username': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre de usuario'}),
-            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Correo electrónico'}),
-            'cedula': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Cédula'}),
-            'telefono': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Teléfono'}),
+            'username': forms.TextInput(attrs={
+                'class': 'form-control', 
+                'placeholder': 'Nombre de usuario'
+            }),
+            'email': forms.EmailInput(attrs={
+                'class': 'form-control', 
+                'placeholder': 'Correo electrónico'
+            }),
             'rol': forms.Select(attrs={'class': 'form-control'}),
-            'first_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre'}),
-            'last_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Apellido'}),
-            'is_active': forms.CheckboxInput(attrs={'class': 'form-checkbox h-5 w-5 text-blue-600'})
+            'is_active': forms.CheckboxInput(attrs={
+                'class': 'form-checkbox h-5 w-5 text-blue-600'
+            })
         }
 
     def __init__(self, *args, **kwargs):
-        super(UsuarioForm, self).__init__(*args, **kwargs)
-        self.fields['rol'].queryset = Rol.objects.all()  # <- Esto soluciona el problema
+        super().__init__(*args, **kwargs)
+        self.fields['rol'].queryset = Rol.objects.all()
+        
+        # Eliminamos el campo password original del formulario
+        if 'password' in self.fields:
+            del self.fields['password']
 
+    def clean(self):
+        cleaned_data = super().clean()
+        new_password = cleaned_data.get('new_password')
+        confirm_password = cleaned_data.get('confirm_password')
+
+        if new_password or confirm_password:
+            if new_password != confirm_password:
+                self.add_error('confirm_password', "Las contraseñas no coinciden")
+            elif len(new_password) < 8:
+                self.add_error('new_password', "La contraseña debe tener al menos 8 caracteres")
+        
+        return cleaned_data
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        new_password = self.cleaned_data.get('new_password')
+        
+        if new_password:
+            user.set_password(new_password)
+        
+        if commit:
+            user.save()
+            self.save_m2m()
+        
+        return user
 
 class CitaForm(forms.ModelForm):
     class Meta:
         model = Cita
-        fields = ['paciente', 'hora', 'fecha', 'modalidad', 'motivo_consulta']  # Agregué 'paciente'
+        fields = ['paciente', 'pareja', 'hora', 'fecha', 'modalidad', 'motivo_consulta']
         widgets = {
             'hora': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
             'fecha': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'modalidad': forms.Select(attrs={'class': 'form-control'}),
             'motivo_consulta': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
             'paciente': forms.Select(attrs={'class': 'form-control'}),
+            'pareja': forms.Select(attrs={'class': 'form-control'}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Filtramos solo las relaciones de tipo pareja
+        self.fields['pareja'].queryset = RelacionPaciente.objects.filter(tipo_relacion='pareja')
+        
+        # Si estamos editando, establecer el campo correspondiente como requerido
+        if self.instance and self.instance.pk:
+            if self.instance.paciente:
+                self.fields['paciente'].required = True
+                self.fields['pareja'].required = False
+            elif self.instance.pareja:
+                self.fields['pareja'].required = True
+                self.fields['paciente'].required = False
+
+    def clean_fecha(self):
+        fecha = self.cleaned_data.get('fecha')
+        hoy = date.today()
+        
+        if fecha and fecha < hoy:
+            raise ValidationError("La fecha de la cita no puede ser anterior a la fecha actual.")
+        return fecha
+
+    def clean_hora(self):
+        hora = self.cleaned_data.get('hora')
+        if hora:
+            # Validar que esté en horario laboral (ejemplo: 8am a 6pm)
+            if hora < time(8, 0) or hora > time(18, 0):
+                raise ValidationError("El horario de atención es de 8:00 AM a 6:00 PM.")
+        return hora
     
     def clean(self):
         cleaned_data = super().clean()
+        paciente = cleaned_data.get('paciente')
+        pareja = cleaned_data.get('pareja')
         fecha = cleaned_data.get('fecha')
         hora = cleaned_data.get('hora')
         
+        # Validar selección de paciente o pareja
+        if not paciente and not pareja:
+            raise ValidationError('Debe seleccionar un paciente o una pareja')
+        if paciente and pareja:
+            raise ValidationError('Solo puede seleccionar un paciente o una pareja, no ambos')
+
+        # Validaciones de fecha y hora
         if fecha and hora:
+            # Validar que no sea una cita en el pasado (fecha y hora)
+            ahora = datetime.now()
+            fecha_hora_cita = datetime.combine(fecha, hora)
+            
+            if fecha_hora_cita < ahora:
+                raise ValidationError("La fecha y hora de la cita no pueden ser en el pasado.")
+
             # Validar que no haya citas en la misma fecha y hora
             citas_existentes = Cita.objects.filter(fecha=fecha, hora=hora)
             
@@ -127,8 +226,8 @@ class CitaForm(forms.ModelForm):
             
             # Validar margen de 2 horas
             hora_inicio = hora
-            hora_fin = (datetime.datetime.combine(datetime.date.today(), hora_inicio) + 
-                       datetime.timedelta(hours=2)).time()
+            hora_fin = (datetime.combine(date.today(), hora_inicio) + timedelta(hours=2))
+            hora_fin = hora_fin.time()
             
             citas_solapadas = Cita.objects.filter(
                 fecha=fecha,
@@ -144,6 +243,18 @@ class CitaForm(forms.ModelForm):
         
         return cleaned_data
 
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        
+        # Asegurarse de que solo uno de los dos campos esté establecido
+        if instance.paciente:
+            instance.pareja = None
+        elif instance.pareja:
+            instance.paciente = None
+        
+        if commit:
+            instance.save()
+        return instance
 
 class DetalleCitaForm(forms.ModelForm):
     class Meta:

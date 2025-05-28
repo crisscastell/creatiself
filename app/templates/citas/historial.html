@@ -1,0 +1,403 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Detalles de Citas{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-20 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header compacto pero profesional -->
+        <div class="mb-6">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-800">HISTORIAL CLÍNICO</h1>
+                    <h2 class="text-lg font-semibold text-gray-600">Detalles de sesiones</h2>
+                </div>
+                
+                <!-- Barra de búsqueda -->
+                <div class="w-full md:w-auto">
+                    <div class="relative flex-1 min-w-[200px]">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </div>
+                        <input 
+                            type="text" 
+                            id="searchInput"
+                            placeholder="Buscar paciente, cédula..." 
+                            class="block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 shadow-sm"
+                            onkeyup="filterCards()"
+                        />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grid de citas -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {% for detalle in detalles_citas %}
+            <div class="detalle-card bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden border border-gray-100 hover:border-teal-100"
+                 onclick="openModalDetalle({{ detalle.id }})"
+                 data-cedula="{% if detalle.cita.paciente %}{{ detalle.cita.paciente.cedula }}{% elif detalle.cita.pareja %}{{ detalle.cita.pareja.paciente1.cedula }}|{{ detalle.cita.pareja.paciente2.cedula }}{% endif %}"
+                 data-nombre="{% if detalle.cita.paciente %}{{ detalle.cita.paciente.nombre }} {{ detalle.cita.paciente.apellido }}{% else %}{{ detalle.cita.pareja.paciente1.nombre }} & {{ detalle.cita.pareja.paciente2.nombre }}{% endif %}"
+                 data-estado="{{ detalle.cita.estado }}"
+                 data-modalidad="{{ detalle.cita.modalidad }}">
+                
+                <!-- Header compacto -->
+                <div class="bg-teal-600 px-4 py-2 flex justify-between items-center">
+                    <div>
+                        <h3 class="text-white font-medium text-sm">{{ detalle.cita.fecha|date:"d M" }}</h3>
+                        <p class="text-teal-100 text-xs">{{ detalle.cita.hora|time:"H:i" }}</p>
+                    </div>
+                    <span class="px-2 py-1 text-xs font-medium rounded 
+                        {% if detalle.cita.modalidad == 'virtual' %}bg-blue-100 text-blue-800
+                        {% else %}bg-green-100 text-green-800{% endif %}">
+                        {{ detalle.cita.modalidad|slice:":3"|upper }}
+                    </span>
+                </div>
+                
+                <!-- Contenido compacto -->
+                <div class="p-3">
+                    <div class="flex items-start mb-3">
+                        <div class="flex-shrink-0 h-8 w-8 rounded-full bg-teal-100 flex items-center justify-center text-teal-600 font-bold text-sm">
+                            {% if detalle.cita.paciente %}
+                                {{ detalle.cita.paciente.nombre|slice:":1" }}{{ detalle.cita.paciente.apellido|slice:":1" }}
+                            {% else %}
+                                PP
+                            {% endif %}
+                        </div>
+                        <div class="ml-3">
+                            <h4 class="text-sm font-medium text-gray-900 leading-tight">
+                                {% if detalle.cita.paciente %}
+                                    {{ detalle.cita.paciente.nombre }} {{ detalle.cita.paciente.apellido|truncatechars:12 }}
+                                {% else %}
+                                    {{ detalle.cita.pareja.paciente1.nombre|slice:":1" }}. & {{ detalle.cita.pareja.paciente2.nombre|slice:":1" }}.
+                                {% endif %}
+                            </h4>
+                            <p class="text-xs text-gray-500">
+                                {% if detalle.cita.paciente %}
+                                    {{ detalle.cita.paciente.cedula }}
+                                {% else %}
+                                    {{ detalle.cita.pareja.paciente1.cedula|slice:":6" }}.../{{ detalle.cita.pareja.paciente2.cedula|slice:":6" }}...
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-2">
+                        <h5 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Título</h5>
+                        <p class="text-xs font-medium text-gray-800 line-clamp-1">{{ detalle.titulo }}</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h5 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Motivo</h5>
+                        <p class="text-xs text-gray-600 line-clamp-2">{{ detalle.cita.motivo_consulta }}</p>
+                    </div>
+                    
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="px-2 py-0.5 rounded-full 
+                            {% if detalle.cita.estado == 'completada' %}bg-green-100 text-green-800
+                            {% elif detalle.cita.estado == 'cancelada' %}bg-red-100 text-red-800
+                            {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                            {{ detalle.cita.get_estado_display|slice:":3" }}
+                        </span>
+                        <span class="text-gray-400 text-xs">{{ detalle.created_at|date:"d M" }}</span>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="md:col-span-4 bg-white p-8 text-center rounded-xl shadow-sm border border-gray-100">
+                <div class="mx-auto h-16 w-16 bg-gray-100 rounded-full flex items-center justify-center text-gray-400 mb-4">
+                    <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900">No hay sesiones registradas</h3>
+                <p class="mt-2 text-sm text-gray-500">No se encontraron registros de sesiones terapéuticas.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+{% for detalle in detalles_citas %}
+<div id="modalDetalle{{ detalle.id }}" class="fixed inset-0 z-50 hidden overflow-y-auto">
+    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+        <!-- Fondo oscuro -->
+        <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+            <div class="absolute inset-0 bg-gray-900 bg-opacity-75"></div>
+        </div>
+        
+        <!-- Contenido del modal -->
+        <div class="inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+            <div class="bg-teal-600 px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xl font-bold text-white">Detalle Completo de la Sesión</h2>
+                    <button onclick="closeModalDetalle({{ detalle.id }})" class="text-white hover:text-teal-100">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                <p class="text-teal-100 text-sm mt-1">{{ detalle.cita.fecha|date:"d F Y" }} a las {{ detalle.cita.hora|time:"H:i" }}</p>
+            </div>
+            
+            <div class="px-6 py-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <!-- Datos del paciente -->
+                    <div class="md:col-span-2">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 h-12 w-12 rounded-full bg-teal-100 flex items-center justify-center text-teal-600 font-bold text-lg">
+                                {% if detalle.cita.paciente %}
+                                    {{ detalle.cita.paciente.nombre|slice:":1" }}{{ detalle.cita.paciente.apellido|slice:":1" }}
+                                {% else %}
+                                    PP
+                                {% endif %}
+                            </div>
+                            <div class="ml-4">
+                                <h3 class="text-lg font-semibold text-gray-900">
+                                    {% if detalle.cita.paciente %}
+                                        {{ detalle.cita.paciente.nombre }} {{ detalle.cita.paciente.apellido }}
+                                    {% else %}
+                                        {{ detalle.cita.pareja.paciente1.nombre }} & {{ detalle.cita.pareja.paciente2.nombre }}
+                                    {% endif %}
+                                </h3>
+                                <p class="text-sm text-gray-500">
+                                    {% if detalle.cita.paciente %}
+                                        C.C. {{ detalle.cita.paciente.cedula }}
+                                    {% else %}
+                                        C.C. {{ detalle.cita.pareja.paciente1.cedula }} / {{ detalle.cita.pareja.paciente2.cedula }}
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Datos de la cita -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span class="text-sm text-gray-500">Modalidad:</span>
+                            <span class="text-sm font-medium capitalize">{{ detalle.cita.modalidad }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-sm text-gray-500">Estado:</span>
+                            <span class="text-sm font-medium">{{ detalle.cita.get_estado_display }}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Contenido del detalle -->
+                <div class="space-y-6">
+                    <!-- Motivo de consulta -->
+                    <div>
+                        <h4 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Motivo de Consulta</h4>
+                        <p class="text-gray-700">{{ detalle.cita.motivo_consulta }}</p>
+                    </div>
+                    
+                    <!-- Detalle específico -->
+                    <div>
+                        <h4 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">{{ detalle.titulo }}</h4>
+                        <div class="prose max-w-none">
+                            <p class="text-gray-700 whitespace-pre-line">{{ detalle.anotacion }}</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Conclusión (si existe) -->
+                    {% if detalle.conclusion %}
+                    <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
+                        <h4 class="text-sm font-semibold text-blue-800 uppercase tracking-wider mb-2">Conclusión</h4>
+                        <p class="text-blue-700 whitespace-pre-line">{{ detalle.conclusion }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    <button onclick="exportToPDF({{ detalle.id }})"
+                            class="px-4 py-2 mr-2 border border-teal-600 rounded-lg shadow-sm text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
+                        Exportar PDF
+                    </button>
+                    
+                </div>
+            </div>
+            
+            <!-- Footer del modal -->
+            <div class="bg-gray-50 px-6 py-4 flex justify-end rounded-b-xl">
+                <button onclick="closeModalDetalle({{ detalle.id }})" 
+                        class="px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<!-- Incluir librerías para PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script>
+    // Configuración de jsPDF
+    const { jsPDF } = window.jspdf;
+
+    // Función para exportar a PDF
+    function exportToPDF(id) {
+        const modal = document.getElementById(`modalDetalle${id}`);
+        if (!modal) {
+            alert('No se pudo encontrar la información de la sesión');
+            return;
+        }
+
+        // Extraer datos del modal
+        const nombre = modal.querySelector('h3.text-gray-900')?.textContent || 'Nombre no disponible';
+        const cedula = modal.querySelector('p.text-sm.text-gray-500')?.textContent.replace('C.C.', '').trim() || 'Cédula no disponible';
+        const fechaHora = modal.querySelector('.text-teal-100.text-sm')?.textContent.split(' a las ') || [];
+        const fecha = fechaHora[0] || 'Fecha no disponible';
+        const hora = fechaHora[1] || 'Hora no disponible';
+        
+        // Buscar modalidad y estado
+        const infoItems = modal.querySelectorAll('.flex.justify-between');
+        let modalidad = 'Modalidad no disponible';
+        let estado = 'Estado no disponible';
+        
+        infoItems.forEach(item => {
+            if (item.textContent.includes('Modalidad:')) {
+                modalidad = item.querySelector('span:last-child')?.textContent || modalidad;
+            }
+            if (item.textContent.includes('Estado:')) {
+                estado = item.querySelector('span:last-child')?.textContent || estado;
+            }
+        });
+        
+        const motivo = modal.querySelector('div > h4:first-child + p')?.textContent || 'Motivo no disponible';
+        const titulo = modal.querySelector('h4 + .prose')?.previousElementSibling?.textContent.replace('TÍTULO', '').trim() || 'Título no disponible';
+        const anotacion = modal.querySelector('.prose p')?.textContent || 'Anotaciones no disponibles';
+        
+        // Verificar si hay conclusión
+        const conclusionBox = modal.querySelector('.bg-blue-50');
+        let conclusion = '';
+        if (conclusionBox) {
+            conclusion = conclusionBox.querySelector('p')?.textContent || '';
+        }
+
+        // Crear PDF
+        const doc = new jsPDF();
+        
+        // Configuración inicial
+        doc.setFont('helvetica');
+        doc.setFontSize(20);
+        doc.setTextColor(15, 118, 110); // Color teal-600
+        doc.text('HISTORIAL CLÍNICO', 105, 30, { align: 'center' });
+        
+        // Línea divisoria
+        doc.setDrawColor(15, 118, 110);
+        doc.setLineWidth(0.5);
+        doc.line(40, 40, 170, 40);
+        
+        // Datos del paciente
+        doc.setFontSize(14);
+        doc.setTextColor(0, 0, 0);
+        doc.text('Datos del Paciente', 40, 60);
+        
+        doc.setFontSize(12);
+        doc.text(`Nombre: ${nombre}`, 40, 75);
+        doc.text(`Cédula: ${cedula}`, 40, 85);
+        
+        // Información de la cita
+        doc.setFontSize(14);
+        doc.text('Información de la Cita', 40, 105);
+        
+        doc.setFontSize(12);
+        doc.text(`Fecha: ${fecha}`, 40, 120);
+        doc.text(`Hora: ${hora}`, 40, 130);
+        doc.text(`Modalidad: ${modalidad}`, 40, 140);
+        doc.text(`Estado: ${estado}`, 40, 150);
+        doc.text(`Motivo de Consulta: ${motivo}`, 40, 160);
+        
+        // Anotaciones
+        doc.setFontSize(14);
+        doc.text('Anotaciones', 40, 180);
+        
+        doc.setFontSize(12);
+        doc.text(`Título: ${titulo}`, 40, 195);
+        
+        // Texto con formato (manejo de múltiples líneas)
+        const splitAnotacion = doc.splitTextToSize(anotacion, 150);
+        doc.text(splitAnotacion, 40, 210);
+        
+        // Conclusión si existe
+        if (conclusion) {
+            const yPosition = 210 + (splitAnotacion.length * 7) + 20;
+            
+            doc.setFontSize(14);
+            doc.text('Conclusión', 40, yPosition);
+            
+            doc.setFontSize(12);
+            const splitConclusion = doc.splitTextToSize(conclusion, 150);
+            doc.text(splitConclusion, 40, yPosition + 15);
+        }
+        
+        // Guardar el PDF
+        doc.save(`sesion_${id}_${fecha.replace(/ /g, '_')}.pdf`);
+    }
+
+    // Funciones para manejar modales
+    function openModalDetalle(id) {
+        document.getElementById(`modalDetalle${id}`).classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+    }
+    
+    function closeModalDetalle(id) {
+        document.getElementById(`modalDetalle${id}`).classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+    }
+
+    // Función de filtrado
+    function filterCards() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        
+        document.querySelectorAll('.detalle-card').forEach(card => {
+            const text = card.textContent.toLowerCase();
+            const cedula = card.getAttribute('data-cedula').toLowerCase();
+            const nombre = card.getAttribute('data-nombre').toLowerCase();
+            
+            const matchesSearch = text.includes(searchTerm) || cedula.includes(searchTerm) || nombre.includes(searchTerm);
+            
+            card.style.display = matchesSearch ? '' : 'none';
+        });
+    }
+</script>
+
+<style>
+    .detalle-card {
+        transition: all 0.2s ease;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        cursor: pointer;
+    }
+    
+    .detalle-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+    
+    .line-clamp-1 {
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    
+    .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    
+    .prose {
+        max-width: none;
+        white-space: pre-line;
+    }
+</style>
+{% endblock %}

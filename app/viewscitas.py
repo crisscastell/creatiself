@@ -1,28 +1,78 @@
 from django.shortcuts import render, redirect, get_object_or_404,  redirect
 from django.http import HttpResponse
-from app.models import Cita, DetalleCita, Paciente
+from app.models import Cita, DetalleCita, Paciente, RelacionPaciente
 from app.forms import CitaForm, DetalleCitaForm
 from django.contrib import messages
-from django.template.loader import render_to_string
-from django.urls import reverse 
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.db.models import Q
+import datetime 
+
+
 
 def crear_cita(request):
     if request.method == "POST":
         form = CitaForm(request.POST)
         if form.is_valid():
             form.save()
+            request.session['mostrar_alerta'] = True
+            request.session.save()
             return redirect('Listar_citas')
+        else:
+            # Pasar el formulario con errores al template
+            return render(request, 'citas/crear_cita.html', {
+                'form': form,
+                'form_errors': form.errors
+            })
     else:
-        form = CitaForm()
+        # Establecer fecha mínima como hoy por defecto
+        form = CitaForm(initial={'fecha': datetime.date.today()})
 
-    return render(request, 'citas/crear_cita.html', {
-        'form': form,
-    })
+    return render(request, 'citas/crear_cita.html', { 'form': form,
+    'pacientes': Paciente.objects.all(),
+    'parejas': RelacionPaciente.objects.filter(tipo_relacion='pareja'),
+    'horas_disponibles': [datetime.time(h, 0) for h in range(8, 18)],  # Ajusta según tus necesidades
+    'form_errors': form.errors if form.errors else None})
 
 def listar_citas(request):
-    citas = Cita.objects.all()
+    # Obtener el parámetro de búsqueda si existe
+    query = request.GET.get('q')
     
-    return render(request, 'citas/listar_citas.html', {'citas': citas})
+    # Obtener todas las citas ordenadas
+    citas_list = Cita.objects.all().order_by('-fecha', '-hora')
+    
+    # Filtrar si hay una búsqueda
+    if query:
+        citas_list = citas_list.filter(
+            Q(paciente__nombre__icontains=query) |
+            Q(paciente__apellido__icontains=query) |
+            Q(fecha__icontains=query) |
+            Q(hora__icontains=query) |
+            Q(modalidad__icontains=query) |
+            Q(motivo_consulta__icontains=query)
+        )
+    
+    # Configurar la paginación (10 items por página)
+    paginator = Paginator(citas_list, 10)
+    page = request.GET.get('page')
+    
+    try:
+        citas = paginator.page(page)
+    except PageNotAnInteger:
+        # Si la página no es un entero, mostrar la primera página
+        citas = paginator.page(1)
+    except EmptyPage:
+        # Si la página está fuera de rango, mostrar la última página
+        citas = paginator.page(paginator.num_pages)
+    
+    # Manejar la alerta de creación exitosa
+    mostrar_alerta = request.session.pop('mostrar_alerta', False) if 'mostrar_alerta' in request.session else False
+    
+    return render(request, 'citas/listar_citas.html', {
+        'citas': citas,
+        'mostrar_alerta': mostrar_alerta,
+        'query': query  # Pasar el término de búsqueda al template
+    })
+
 
 def editar_cita(request, id):
     cita = get_object_or_404(Cita, id=id)
@@ -44,14 +94,6 @@ def editar_cita(request, id):
     
     return redirect('Listar_citas') 
 
-def eliminar_cita(request, cita_id):
-    cita = get_object_or_404(Cita, id=cita_id)
-    
-    if request.method == "POST":
-        cita.delete()
-        return redirect('Listar_citas')  
-    
-    return render(request, 'citas/eliminar_cita.html', {'cita': cita})
 
 def crear_detalle_cita(request, cita_id):
     cita = get_object_or_404(Cita, id=cita_id)  # Obtén la cita relacionada
@@ -87,3 +129,7 @@ def editar_detalle_cita(request, detalle_cita_id):
         form = DetalleCitaForm(instance=detalle_cita)
 
     return redirect('Listar_citas')
+
+def historial(request):
+    detalles_citas = DetalleCita.objects.all().order_by('titulo')
+    return render(request, 'citas/historial.html', {'detalles_citas': detalles_citas})
