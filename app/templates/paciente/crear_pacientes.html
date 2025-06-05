@@ -102,7 +102,16 @@
                         <div class="relative">
                             <label for="cedula" class="block text-sm font-medium text-gray-700 mb-2">Cédula <span class="text-red-500">*</span></label>
                             <div class="relative">
-                                <input type="text" id="cedula" name="cedula" class="w-full pl-4 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white" placeholder="Ej: 123456789" required>
+                                <input 
+                                    type="text" 
+                                    id="cedula" 
+                                    name="cedula" 
+                                    class="w-full pl-4 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white" 
+                                    placeholder="Ej: 123456789" 
+                                    required
+                                    pattern="[0-9]+" 
+                                    title="Solo se permiten números (0-9)."
+                                >
                                 <div class="absolute inset-y-0 right-0 flex items-center pr-3">
                                     <i class="fas fa-id-card text-gray-400"></i>
                                 </div>
@@ -113,23 +122,47 @@
                         <div class="relative">
                             <label for="nombre" class="block text-sm font-medium text-gray-700 mb-2">Primer Nombre <span class="text-red-500">*</span></label>
                             <div class="relative">
-                                <input type="text" id="nombre" name="nombre" class="w-full pl-4 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white" placeholder="Ej: Juan" required>
-                                <div class="absolute inset-y-0 right-0 flex items-center pr-3">
-                                    <i class="fas fa-signature text-gray-400"></i>
-                                </div>
+                                <input 
+                                    type="text" 
+                                    id="nombre" 
+                                    name="nombre" 
+                                    class="w-full pl-4 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white" 
+                                    placeholder="Ej: Juan" 
+                                    required
+                                    pattern="[A-Za-zÁÉÍÓÚáéíóúñÑ\s]+" 
+                                    title="Solo se permiten letras (a-z, A-Z) y espacios."
+                                >
                             </div>
                         </div>
                         
                         <div>
                             <label for="nombre2" class="block text-sm font-medium text-gray-700 mb-2">Segundo Nombre</label>
-                            <input type="text" id="nombre2" name="nombre2" class="w-full pl-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white" placeholder="Ej: Carlos">
+                            <input 
+                                type="text" 
+                                id="nombre2" 
+                                name="nombre2" 
+                                class="w-full pl-4 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white" 
+                                placeholder="Ej: Juan" 
+                                required
+                                pattern="[A-Za-zÁÉÍÓÚáéíóúñÑ\s]+" 
+                                title="Solo se permiten letras (a-z, A-Z) y espacios."
+                            >
                         </div>
                         
                         <!-- Apellidos -->
                         <div class="relative">
                             <label for="apellido" class="block text-sm font-medium text-gray-700 mb-2">Primer Apellido <span class="text-red-500">*</span></label>
                             <div class="relative">
-                                <input type="text" id="apellido" name="apellido" class="w-full pl-4 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white" placeholder="Ej: Pérez" required>
+                                <input 
+                                    type="text" 
+                                    id="apellido" 
+                                    name="apellido" 
+                                    class="w-full pl-4 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white" 
+                                    placeholder="Ej: Juan" 
+                                    required
+                                    pattern="[A-Za-zÁÉÍÓÚáéíóúñÑ\s]+" 
+                                    title="Solo se permiten letras (a-z, A-Z) y espacios."
+                                >
                                 <div class="absolute inset-y-0 right-0 flex items-center pr-3">
                                     <i class="fas fa-signature text-gray-400"></i>
                                 </div>
@@ -138,7 +171,16 @@
                         
                         <div>
                             <label for="apellido2" class="block text-sm font-medium text-gray-700 mb-2">Segundo Apellido</label>
-                            <input type="text" id="apellido2" name="apellido2" class="w-full pl-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white" placeholder="Ej: González">
+                            <input 
+                                type="text" 
+                                id="apellido2" 
+                                name="apellido2" 
+                                class="w-full pl-4 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white" 
+                                placeholder="Ej: Juan" 
+                                required
+                                pattern="[A-Za-zÁÉÍÓÚáéíóúñÑ\s]+" 
+                                title="Solo se permiten letras (a-z, A-Z) y espacios."
+                            >
                         </div>
                     </div>
                 </div>
@@ -670,6 +712,35 @@
     function editarRepresentante() {
         abrirModalRepresentante();
     }
+
+    document.getElementById('nombre').addEventListener('input', function(e) {
+        // Elimina caracteres no permitidos (solo letras y espacios)
+        this.value = this.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúñÑ\s]/g, '');
+    });
+    document.getElementById('nombre2').addEventListener('input', function(e) {
+        // Elimina caracteres no permitidos (solo letras y espacios)
+        this.value = this.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúñÑ\s]/g, '');
+    });
+    
+    document.getElementById('apellido').addEventListener('input', function(e) {
+        // Elimina caracteres no permitidos (solo letras y espacios)
+        this.value = this.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúñÑ\s]/g, '');
+    });
+
+    document.getElementById('apellido2').addEventListener('input', function(e) {
+        // Elimina caracteres no permitidos (solo letras y espacios)
+        this.value = this.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúñÑ\s]/g, '');
+    });
+
+    document.getElementById('cedula').addEventListener('input', function(e) {
+        // Elimina todo lo que no sea número
+        this.value = this.value.replace(/[^0-9]/g, '');
+    });
+
+    document.getElementById('telefono').addEventListener('input', function(e) {
+        // Elimina todo lo que no sea número
+        this.value = this.value.replace(/[^0-9]/g, '');
+    });
 
     document.addEventListener('DOMContentLoaded', function() {
         const paisSelect = document.getElementById('pais');
