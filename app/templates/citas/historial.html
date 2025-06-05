@@ -1,21 +1,19 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Detalles de Citas{% endblock %}
+{% block title %}Historial Clínico{% endblock %}
 
-{% block content %}
-<div class="min-h-screen bg-gray-50 py-20 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-7xl mx-auto">
-        <!-- Header compacto pero profesional -->
-        <div class="mb-6">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+{% block content %} estado
+<div class="min-h-screen bg-gray-50">
+    <!-- Header -->
+    <div class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-800">HISTORIAL CLÍNICO</h1>
-                    <h2 class="text-lg font-semibold text-gray-600">Detalles de sesiones</h2>
+                    <h1 class="text-2xl font-bold text-gray-900">Historial Clínico</h1>
+                    <p class="mt-1 text-sm text-gray-500">Registro completo de sesiones terapéuticas</p>
                 </div>
-                
-                <!-- Barra de búsqueda -->
-                <div class="w-full md:w-auto">
+                <div class="w-full md:w-auto flex flex-col sm:flex-row gap-3">
                     <div class="relative flex-1 min-w-[200px]">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -26,98 +24,206 @@
                             type="text" 
                             id="searchInput"
                             placeholder="Buscar paciente, cédula..." 
-                            class="block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 shadow-sm"
-                            onkeyup="filterCards()"
+                            class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm"
                         />
                     </div>
+                    <a href="{% url 'Crear_citas' %}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
+                        <svg class="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                        </svg>
+                        Nueva sesión
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenido principal -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Filtros y estadísticas -->
+        <div class="mb-6 bg-white rounded-lg shadow-xs p-4">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-2">
+                        <label for="filterStatus" class="text-sm font-medium text-gray-700">Estado:</label>
+                        <select id="filterStatus" class="mt-1 block pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm rounded-md">
+                            <option value="">Todos</option>
+                            <option value="completada">Completadas</option>
+                            <option value="cancelada">Canceladas</option>
+                            <option value="pendiente">Pendientes</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4 text-sm">
+                    <span class="text-gray-500">Total: <span class="font-medium text-gray-900">{{ detalles_citas.paginator.count }}</span></span>
+                    <span class="text-green-600">Completadas: <span class="font-medium">{{ completadas_count }}</span></span>
+                    <span class="text-blue-600">Este mes: <span class="font-medium">{{ este_mes_count }}</span></span>
                 </div>
             </div>
         </div>
 
-        <!-- Grid de citas -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {% for detalle in detalles_citas %}
-            <div class="detalle-card bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden border border-gray-100 hover:border-teal-100"
-                 onclick="openModalDetalle({{ detalle.id }})"
-                 data-cedula="{% if detalle.cita.paciente %}{{ detalle.cita.paciente.cedula }}{% elif detalle.cita.pareja %}{{ detalle.cita.pareja.paciente1.cedula }}|{{ detalle.cita.pareja.paciente2.cedula }}{% endif %}"
-                 data-nombre="{% if detalle.cita.paciente %}{{ detalle.cita.paciente.nombre }} {{ detalle.cita.paciente.apellido }}{% else %}{{ detalle.cita.pareja.paciente1.nombre }} & {{ detalle.cita.pareja.paciente2.nombre }}{% endif %}"
-                 data-estado="{{ detalle.cita.estado }}"
-                 data-modalidad="{{ detalle.cita.modalidad }}">
-                
-                <!-- Header compacto -->
-                <div class="bg-teal-600 px-4 py-2 flex justify-between items-center">
-                    <div>
-                        <h3 class="text-white font-medium text-sm">{{ detalle.cita.fecha|date:"d M" }}</h3>
-                        <p class="text-teal-100 text-xs">{{ detalle.cita.hora|time:"H:i" }}</p>
-                    </div>
-                    <span class="px-2 py-1 text-xs font-medium rounded 
-                        {% if detalle.cita.modalidad == 'virtual' %}bg-blue-100 text-blue-800
-                        {% else %}bg-green-100 text-green-800{% endif %}">
-                        {{ detalle.cita.modalidad|slice:":3"|upper }}
-                    </span>
-                </div>
-                
-                <!-- Contenido compacto -->
-                <div class="p-3">
-                    <div class="flex items-start mb-3">
-                        <div class="flex-shrink-0 h-8 w-8 rounded-full bg-teal-100 flex items-center justify-center text-teal-600 font-bold text-sm">
-                            {% if detalle.cita.paciente %}
-                                {{ detalle.cita.paciente.nombre|slice:":1" }}{{ detalle.cita.paciente.apellido|slice:":1" }}
-                            {% else %}
-                                PP
-                            {% endif %}
-                        </div>
-                        <div class="ml-3">
-                            <h4 class="text-sm font-medium text-gray-900 leading-tight">
-                                {% if detalle.cita.paciente %}
-                                    {{ detalle.cita.paciente.nombre }} {{ detalle.cita.paciente.apellido|truncatechars:12 }}
-                                {% else %}
-                                    {{ detalle.cita.pareja.paciente1.nombre|slice:":1" }}. & {{ detalle.cita.pareja.paciente2.nombre|slice:":1" }}.
-                                {% endif %}
-                            </h4>
-                            <p class="text-xs text-gray-500">
-                                {% if detalle.cita.paciente %}
-                                    {{ detalle.cita.paciente.cedula }}
-                                {% else %}
-                                    {{ detalle.cita.pareja.paciente1.cedula|slice:":6" }}.../{{ detalle.cita.pareja.paciente2.cedula|slice:":6" }}...
-                                {% endif %}
-                            </p>
-                        </div>
-                    </div>
-                    
-                    <div class="mb-2">
-                        <h5 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Título</h5>
-                        <p class="text-xs font-medium text-gray-800 line-clamp-1">{{ detalle.titulo }}</p>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <h5 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Motivo</h5>
-                        <p class="text-xs text-gray-600 line-clamp-2">{{ detalle.cita.motivo_consulta }}</p>
-                    </div>
-                    
-                    <div class="flex justify-between items-center text-xs">
-                        <span class="px-2 py-0.5 rounded-full 
-                            {% if detalle.cita.estado == 'completada' %}bg-green-100 text-green-800
-                            {% elif detalle.cita.estado == 'cancelada' %}bg-red-100 text-red-800
-                            {% else %}bg-yellow-100 text-yellow-800{% endif %}">
-                            {{ detalle.cita.get_estado_display|slice:":3" }}
-                        </span>
-                        <span class="text-gray-400 text-xs">{{ detalle.created_at|date:"d M" }}</span>
-                    </div>
-                </div>
+        <!-- Tabla de sesiones -->
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Paciente</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha/Hora</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Modalidad</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Motivo</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200" id="sessionsTable">
+                        {% for detalle in detalles_citas %}
+                        <tr class="hover:bg-gray-50 transition-colors duration-150 session-row"
+                            data-nombre="{% if detalle.cita.paciente %}{{ detalle.cita.paciente.nombre }} {{ detalle.cita.paciente.apellido }}{% else %}{{ detalle.cita.pareja.paciente1.nombre }} & {{ detalle.cita.pareja.paciente2.nombre }}{% endif %}"
+                            data-cedula="{% if detalle.cita.paciente %}{{ detalle.cita.paciente.cedula }}{% elif detalle.cita.pareja %}{{ detalle.cita.pareja.paciente1.cedula }}|{{ detalle.cita.pareja.paciente2.cedula }}{% endif %}"
+                            data-estatus="{{ detalle.cita.estatus }}">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-teal-100 flex items-center justify-center text-teal-600 font-bold">
+                                        {% if detalle.cita.paciente %}
+                                            {{ detalle.cita.paciente.nombre|slice:":1" }}{{ detalle.cita.paciente.apellido|slice:":1" }}
+                                        {% else %}
+                                            PP
+                                        {% endif %}
+                                    </div>
+                                    <div class="ml-4">
+                                        <div class="text-sm font-medium text-gray-900">
+                                            {% if detalle.cita.paciente %}
+                                                {{ detalle.cita.paciente.nombre }} {{ detalle.cita.paciente.apellido }}
+                                            {% else %}
+                                                {{ detalle.cita.pareja.paciente1.nombre }} & {{ detalle.cita.pareja.paciente2.nombre }}
+                                            {% endif %}
+                                        </div>
+                                        <div class="text-sm text-gray-500">
+                                            {% if detalle.cita.paciente %}
+                                                {{ detalle.cita.paciente.cedula }}
+                                            {% else %}
+                                                {{ detalle.cita.pareja.paciente1.cedula }} / {{ detalle.cita.pareja.paciente2.cedula }}
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">{{ detalle.cita.fecha|date:"d M Y" }}</div>
+                                <div class="text-sm text-gray-500">{{ detalle.cita.hora|time:"H:i" }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 py-1 text-xs font-medium rounded-full 
+                                    {% if detalle.cita.modalidad == 'virtual' %}bg-blue-100 text-blue-800
+                                    {% else %}bg-green-100 text-green-800{% endif %}">
+                                    {{ detalle.cita.modalidad|upper }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="text-sm text-gray-900 font-medium">{{ detalle.titulo }}</div>
+                                <div class="text-sm text-gray-500 line-clamp-1">{{ detalle.cita.motivo_consulta }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 py-1 text-xs font-medium rounded-full 
+                                    {% if detalle.cita.estatus == 'completada' %}bg-green-100 text-green-800
+                                    {% elif detalle.cita.estatus == 'cancelada' %}bg-red-100 text-red-800
+                                    {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                                    {{ detalle.cita.get_estatus_display }}
+                                </span> 
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <button onclick="openModalDetalle({{ detalle.id }})" class="text-teal-600 hover:text-teal-900 mr-3">Ver</button>
+                                <button onclick="exportToPDF({{ detalle.id }})" class="text-gray-600 hover:text-gray-900">PDF</button>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="px-6 py-12 text-center">
+                                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                                </svg>
+                                <h3 class="mt-2 text-lg font-medium text-gray-900">No hay sesiones registradas</h3>
+                                <p class="mt-1 text-sm text-gray-500">No se encontraron registros de sesiones terapéuticas.</p>
+                                <div class="mt-6">
+                                    <a href="{% url 'crear_cita' %}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
+                                        <svg class="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                        </svg>
+                                        Nueva sesión
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
-            {% empty %}
-            <div class="md:col-span-4 bg-white p-8 text-center rounded-xl shadow-sm border border-gray-100">
-                <div class="mx-auto h-16 w-16 bg-gray-100 rounded-full flex items-center justify-center text-gray-400 mb-4">
-                    <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                    </svg>
-                </div>
-                <h3 class="text-lg font-medium text-gray-900">No hay sesiones registradas</h3>
-                <p class="mt-2 text-sm text-gray-500">No se encontraron registros de sesiones terapéuticas.</p>
-            </div>
-            {% endfor %}
         </div>
+
+        <!-- Paginación -->
+        {% if detalles_citas.has_other_pages %}
+        <div class="mt-6 flex items-center justify-between">
+            <div class="flex-1 flex justify-between sm:hidden">
+                {% if detalles_citas.has_previous %}
+                <a href="?page={{ detalles_citas.previous_page_number }}" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                    Anterior
+                </a>
+                {% endif %}
+                {% if detalles_citas.has_next %}
+                <a href="?page={{ detalles_citas.next_page_number }}" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                    Siguiente
+                </a>
+                {% endif %}
+            </div>
+            <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                <div>
+                    <p class="text-sm text-gray-700">
+                        Mostrando <span class="font-medium">{{ detalles_citas.start_index }}</span> a <span class="font-medium">{{ detalles_citas.end_index }}</span> de <span class="font-medium">{{ detalles_citas.paginator.count }}</span> resultados
+                    </p>
+                </div>
+                <div>
+                    <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                        {% if detalles_citas.has_previous %}
+                        <a href="?page=1" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                            <span class="sr-only">Primera</span>
+                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                            </svg>
+                        </a>
+                        <a href="?page={{ detalles_citas.previous_page_number }}" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                            Anterior
+                        </a>
+                        {% endif %}
+
+                        {% for num in detalles_citas.paginator.page_range %}
+                            {% if num == detalles_citas.number %}
+                            <a href="#" aria-current="page" class="relative inline-flex items-center px-4 py-2 border border-teal-500 bg-teal-50 text-sm font-medium text-teal-600">
+                                {{ num }}
+                            </a>
+                            {% elif num > detalles_citas.number|add:'-3' and num < detalles_citas.number|add:'3' %}
+                            <a href="?page={{ num }}" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                {{ num }}
+                            </a>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if detalles_citas.has_next %}
+                        <a href="?page={{ detalles_citas.next_page_number }}" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                            Siguiente
+                        </a>
+                        <a href="?page={{ detalles_citas.paginator.num_pages }}" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                            <span class="sr-only">Última</span>
+                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                            </svg>
+                        </a>
+                        {% endif %}
+                    </nav>
+                </div>
+            </div>
+        </div>
+        {% endif %}
     </div>
 </div>
 
@@ -131,11 +237,11 @@
         </div>
         
         <!-- Contenido del modal -->
-        <div class="inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
             <div class="bg-teal-600 px-6 py-4">
                 <div class="flex items-center justify-between">
-                    <h2 class="text-xl font-bold text-white">Detalle Completo de la Sesión</h2>
-                    <button onclick="closeModalDetalle({{ detalle.id }})" class="text-white hover:text-teal-100">
+                    <h2 class="text-xl font-bold text-white">Detalle de Sesión Terapéutica</h2>
+                    <button onclick="closeModalDetalle({{ detalle.id }})" class="text-white hover:text-teal-200">
                         <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
@@ -183,7 +289,11 @@
                         </div>
                         <div class="flex justify-between">
                             <span class="text-sm text-gray-500">Estado:</span>
-                            <span class="text-sm font-medium">{{ detalle.cita.get_estado_display }}</span>
+                            <span class="text-sm font-medium">{{ detalle.cita.get_estatus_display }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-sm text-gray-500">Duración:</span>
+                            <span class="text-sm font-medium">50 min</span>
                         </div>
                     </div>
                 </div>
@@ -212,20 +322,42 @@
                     </div>
                     {% endif %}
                     
-                    <button onclick="exportToPDF({{ detalle.id }})"
-                            class="px-4 py-2 mr-2 border border-teal-600 rounded-lg shadow-sm text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
-                        Exportar PDF
-                    </button>
-                    
+                    <!-- Tareas asignadas (si existen) -->
+                    {% if detalle.tareas %}
+                    <div class="bg-purple-50 p-4 rounded-lg border border-purple-100">
+                        <h4 class="text-sm font-semibold text-purple-800 uppercase tracking-wider mb-2">Tareas Asignadas</h4>
+                        <ul class="list-disc pl-5 text-purple-700">
+                            {% for tarea in detalle.tareas %}
+                            <li>{{ tarea }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
             
             <!-- Footer del modal -->
-            <div class="bg-gray-50 px-6 py-4 flex justify-end rounded-b-xl">
-                <button onclick="closeModalDetalle({{ detalle.id }})" 
-                        class="px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
-                    Cerrar
+            <div class="bg-gray-50 px-6 py-4 flex justify-between items-center rounded-b-lg border-t border-gray-200">
+                <button onclick="exportToPDF({{ detalle.id }})"
+                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
+                    <svg class="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>
+                    </svg>
+                    Exportar PDF
                 </button>
+                <div class="flex space-x-3">
+                    <button onclick="window.location.href='{% url 'Editar_cita' detalle.cita.id %}'"
+                            class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
+                        <svg class="-ml-1 mr-2 h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                        </svg>
+                        Editar
+                    </button>
+                    <button onclick="closeModalDetalle({{ detalle.id }})" 
+                            class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
+                        Cerrar
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -258,6 +390,7 @@
         const infoItems = modal.querySelectorAll('.flex.justify-between');
         let modalidad = 'Modalidad no disponible';
         let estado = 'Estado no disponible';
+        let duracion = 'Duración no disponible';
         
         infoItems.forEach(item => {
             if (item.textContent.includes('Modalidad:')) {
@@ -266,10 +399,13 @@
             if (item.textContent.includes('Estado:')) {
                 estado = item.querySelector('span:last-child')?.textContent || estado;
             }
+            if (item.textContent.includes('Duración:')) {
+                duracion = item.querySelector('span:last-child')?.textContent || duracion;
+            }
         });
         
         const motivo = modal.querySelector('div > h4:first-child + p')?.textContent || 'Motivo no disponible';
-        const titulo = modal.querySelector('h4 + .prose')?.previousElementSibling?.textContent.replace('TÍTULO', '').trim() || 'Título no disponible';
+        const titulo = modal.querySelector('h4 + .prose')?.previousElementSibling?.textContent || 'Título no disponible';
         const anotacion = modal.querySelector('.prose p')?.textContent || 'Anotaciones no disponibles';
         
         // Verificar si hay conclusión
@@ -277,6 +413,16 @@
         let conclusion = '';
         if (conclusionBox) {
             conclusion = conclusionBox.querySelector('p')?.textContent || '';
+        }
+        
+        // Verificar si hay tareas
+        const tareasBox = modal.querySelector('.bg-purple-50');
+        let tareas = [];
+        if (tareasBox) {
+            const tareasItems = tareasBox.querySelectorAll('li');
+            tareasItems.forEach(item => {
+                tareas.push(item.textContent);
+            });
         }
 
         // Crear PDF
@@ -286,58 +432,90 @@
         doc.setFont('helvetica');
         doc.setFontSize(20);
         doc.setTextColor(15, 118, 110); // Color teal-600
-        doc.text('HISTORIAL CLÍNICO', 105, 30, { align: 'center' });
+        doc.text('HISTORIAL CLÍNICO', 105, 20, { align: 'center' });
         
         // Línea divisoria
         doc.setDrawColor(15, 118, 110);
         doc.setLineWidth(0.5);
-        doc.line(40, 40, 170, 40);
+        doc.line(15, 30, 195, 30);
         
         // Datos del paciente
         doc.setFontSize(14);
         doc.setTextColor(0, 0, 0);
-        doc.text('Datos del Paciente', 40, 60);
+        doc.text('Datos del Paciente', 15, 45);
         
         doc.setFontSize(12);
-        doc.text(`Nombre: ${nombre}`, 40, 75);
-        doc.text(`Cédula: ${cedula}`, 40, 85);
+        doc.text(`Nombre: ${nombre}`, 15, 55);
+        doc.text(`Cédula: ${cedula}`, 15, 65);
         
         // Información de la cita
         doc.setFontSize(14);
-        doc.text('Información de la Cita', 40, 105);
+        doc.text('Información de la Sesión', 15, 85);
         
         doc.setFontSize(12);
-        doc.text(`Fecha: ${fecha}`, 40, 120);
-        doc.text(`Hora: ${hora}`, 40, 130);
-        doc.text(`Modalidad: ${modalidad}`, 40, 140);
-        doc.text(`Estado: ${estado}`, 40, 150);
-        doc.text(`Motivo de Consulta: ${motivo}`, 40, 160);
+        doc.text(`Fecha: ${fecha}`, 15, 95);
+        doc.text(`Hora: ${hora}`, 15, 105);
+        doc.text(`Duración: ${duracion}`, 15, 115);
+        doc.text(`Modalidad: ${modalidad}`, 15, 125);
+        doc.text(`Estado: ${estado}`, 15, 135);
+        doc.text(`Motivo de Consulta: ${motivo}`, 15, 145);
         
         // Anotaciones
         doc.setFontSize(14);
-        doc.text('Anotaciones', 40, 180);
+        doc.text('Anotaciones de la Sesión', 15, 165);
         
         doc.setFontSize(12);
-        doc.text(`Título: ${titulo}`, 40, 195);
+        doc.text(`Título: ${titulo}`, 15, 175);
         
         // Texto con formato (manejo de múltiples líneas)
-        const splitAnotacion = doc.splitTextToSize(anotacion, 150);
-        doc.text(splitAnotacion, 40, 210);
+        const splitAnotacion = doc.splitTextToSize(anotacion, 170);
+        doc.text(splitAnotacion, 15, 185);
         
         // Conclusión si existe
         if (conclusion) {
-            const yPosition = 210 + (splitAnotacion.length * 7) + 20;
+            const yPosition = 185 + (splitAnotacion.length * 7) + 15;
             
             doc.setFontSize(14);
-            doc.text('Conclusión', 40, yPosition);
+            doc.text('Conclusión', 15, yPosition);
             
             doc.setFontSize(12);
-            const splitConclusion = doc.splitTextToSize(conclusion, 150);
-            doc.text(splitConclusion, 40, yPosition + 15);
+            const splitConclusion = doc.splitTextToSize(conclusion, 170);
+            doc.text(splitConclusion, 15, yPosition + 10);
+        }
+        
+        // Tareas si existen
+        if (tareas.length > 0) {
+            let yPosition = doc.lastAutoTable.finalY || 200;
+            yPosition += 15;
+            
+            doc.setFontSize(14);
+            doc.text('Tareas Asignadas', 15, yPosition);
+            
+            doc.setFontSize(12);
+            yPosition += 10;
+            
+            tareas.forEach((tarea, index) => {
+                if (yPosition > 250) {
+                    doc.addPage();
+                    yPosition = 20;
+                }
+                doc.text(`• ${tarea}`, 20, yPosition);
+                yPosition += 7;
+            });
+        }
+        
+        // Pie de página
+        const pageCount = doc.internal.getNumberOfPages();
+        for(let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+            doc.setFontSize(10);
+            doc.setTextColor(100, 100, 100);
+            doc.text(`Página ${i} de ${pageCount}`, 105, 285, { align: 'center' });
+            doc.text('Generado el: ' + new Date().toLocaleDateString(), 15, 285);
         }
         
         // Guardar el PDF
-        doc.save(`sesion_${id}_${fecha.replace(/ /g, '_')}.pdf`);
+        doc.save(`historial_sesion_${id}_${fecha.replace(/ /g, '_')}.pdf`);
     }
 
     // Funciones para manejar modales
@@ -351,53 +529,70 @@
         document.body.classList.remove('overflow-hidden');
     }
 
-    // Función de filtrado
-    function filterCards() {
+    // Función de filtrado para la tabla
+    function filterTable() {
         const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const filterStatus = document.getElementById('filterStatus').value;
         
-        document.querySelectorAll('.detalle-card').forEach(card => {
-            const text = card.textContent.toLowerCase();
-            const cedula = card.getAttribute('data-cedula').toLowerCase();
-            const nombre = card.getAttribute('data-nombre').toLowerCase();
+        const rows = document.querySelectorAll('.session-row');
+        let visibleRows = 0;
+        
+        rows.forEach(row => {
+            const nombre = row.getAttribute('data-nombre').toLowerCase();
+            const cedula = row.getAttribute('data-cedula').toLowerCase();
+            const estatus = row.getAttribute('data-estatus');
             
-            const matchesSearch = text.includes(searchTerm) || cedula.includes(searchTerm) || nombre.includes(searchTerm);
+            // Filtro de búsqueda
+            const matchesSearch = searchTerm === '' || 
+                                nombre.includes(searchTerm) || 
+                                cedula.includes(searchTerm);
             
-            card.style.display = matchesSearch ? '' : 'none';
+            // Filtro de estado
+            const matchesStatus = filterStatus === '' || estatus === filterStatus;
+            
+            if (matchesSearch && matchesStatus) {
+                row.style.display = '';
+                visibleRows++;
+            } else {
+                row.style.display = 'none';
+            }
         });
-    }
-</script>
 
-<style>
-    .detalle-card {
-        transition: all 0.2s ease;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        cursor: pointer;
+        // Mostrar mensaje si no hay resultados
+        const noResults = document.getElementById('noResultsMessage');
+        if (visibleRows === 0 && rows.length > 0) {
+            if (!noResults) {
+                const tableBody = document.getElementById('sessionsTable');
+                const messageRow = document.createElement('tr');
+                messageRow.id = 'noResultsMessage';
+                messageRow.innerHTML = `
+                    <td colspan="6" class="px-6 py-12 text-center">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002                         </svg>
+                        <h3 class="mt-2 text-lg font-medium text-gray-900">No se encontraron resultados</h3>
+                        <p class="mt-1 text-sm text-gray-500">Intenta ajustar tus filtros de búsqueda.</p>
+                    </td>
+                `;
+                tableBody.appendChild(messageRow);
+            }
+        } else if (noResults) {
+            noResults.remove();
+        }
     }
-    
-    .detalle-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    }
-    
-    .line-clamp-1 {
-        display: -webkit-box;
-        -webkit-line-clamp: 1;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-    }
-    
-    .line-clamp-2 {
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-    }
-    
-    .prose {
-        max-width: none;
-        white-space: pre-line;
-    }
-</style>
+
+    // Event listeners para los filtros
+    document.getElementById('searchInput').addEventListener('input', filterTable);
+    document.getElementById('filterStatus').addEventListener('change', filterTable);
+
+    // Cerrar modal al hacer clic fuera del contenido
+    window.addEventListener('click', function(event) {
+        const modals = document.querySelectorAll('[id^="modalDetalle"]');
+        modals.forEach(modal => {
+            if (event.target === modal) {
+                const id = modal.id.replace('modalDetalle', '');
+                closeModalDetalle(id);
+            }
+        });
+    });
+</script>
 {% endblock %}

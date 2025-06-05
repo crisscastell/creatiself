@@ -5,6 +5,9 @@ from app.forms import CitaForm, DetalleCitaForm
 from django.contrib import messages
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
+from datetime import date 
+from django.utils import timezone
+from django.core.exceptions import ValidationError
 import datetime 
 
 
@@ -13,7 +16,9 @@ def crear_cita(request):
     if request.method == "POST":
         form = CitaForm(request.POST)
         if form.is_valid():
-            form.save()
+            cita = form.save(commit=False)
+            cita.estatus = 'pendiente'  # Asegurarse de que nuevas citas sean pendientes
+            cita.save()
             request.session['mostrar_alerta'] = True
             request.session.save()
             return redirect('Listar_citas')
@@ -25,13 +30,18 @@ def crear_cita(request):
             })
     else:
         # Establecer fecha mínima como hoy por defecto
-        form = CitaForm(initial={'fecha': datetime.date.today()})
+        form = CitaForm(initial={
+            'fecha': datetime.date.today(),
+            'estatus': 'pendiente'  # Valor inicial para nuevas citas
+        })
 
-    return render(request, 'citas/crear_cita.html', { 'form': form,
-    'pacientes': Paciente.objects.all(),
-    'parejas': RelacionPaciente.objects.filter(tipo_relacion='pareja'),
-    'horas_disponibles': [datetime.time(h, 0) for h in range(8, 18)],  # Ajusta según tus necesidades
-    'form_errors': form.errors if form.errors else None})
+    return render(request, 'citas/crear_cita.html', { 
+        'form': form,
+        'pacientes': Paciente.objects.all(),
+        'parejas': RelacionPaciente.objects.filter(tipo_relacion='pareja'),
+        'horas_disponibles': [datetime.time(h, 0) for h in range(8, 18)],
+        'form_errors': form.errors if form.errors else None
+    })
 
 def listar_citas(request):
     # Obtener el parámetro de búsqueda si existe
@@ -131,5 +141,19 @@ def editar_detalle_cita(request, detalle_cita_id):
     return redirect('Listar_citas')
 
 def historial(request):
-    detalles_citas = DetalleCita.objects.all().order_by('titulo')
-    return render(request, 'citas/historial.html', {'detalles_citas': detalles_citas})
+    detalles_citas = DetalleCita.objects.select_related('cita').all().order_by('-cita__fecha', '-cita__hora')
+    
+    # Conteos para estadísticas
+    completadas_count = detalles_citas.filter(cita__estatus='completada').count()
+    este_mes_count = detalles_citas.filter(cita__fecha__month=timezone.now().month).count()
+    
+    # Paginación
+    paginator = Paginator(detalles_citas, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    return render(request, 'citas/historial.html', {
+        'detalles_citas': page_obj,
+        'completadas_count': completadas_count,
+        'este_mes_count': este_mes_count,
+    })

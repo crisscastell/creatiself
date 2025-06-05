@@ -8,8 +8,10 @@ from .models import *
 from .forms import AntecedentesPersonalesForm, CondicionForm, PaisForm, EstadoForm, CiudadForm
 from django.contrib.auth.hashers import make_password
 from django.views.decorators.http import require_POST
-from datetime import date, timedelta
-
+from datetime import date, timedelta, datetime
+from django.views import View
+from django.views.decorators.http import require_http_methods
+from django.utils import timezone
 
 def login(request):
     if request.method == "POST":
@@ -58,7 +60,7 @@ def index(request):
     hoy = date.today()
     inicio_semana = hoy - timedelta(days=hoy.weekday())
     
-    # Estadísticas
+    # Estadísticas básicas
     stats = {
         'citas_hoy': Cita.objects.filter(fecha=hoy).count(),
         'citas_semana': Cita.objects.filter(fecha__range=[inicio_semana, hoy]).count(),
@@ -73,6 +75,30 @@ def index(request):
         }
     }
     
+    # Estadísticas mensuales para los gráficos
+    meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
+    año_actual = datetime.now().year
+    
+    # Consultas presenciales por mes
+    presencial_mensual = []
+    for mes in range(1, 13):
+        count = Cita.objects.filter(
+            modalidad='presencial',
+            fecha__year=año_actual,
+            fecha__month=mes
+        ).count()
+        presencial_mensual.append(count)
+    
+    # Consultas virtuales por mes
+    virtual_mensual = []
+    for mes in range(1, 13):
+        count = Cita.objects.filter(
+            modalidad='virtual',
+            fecha__year=año_actual,
+            fecha__month=mes
+        ).count()
+        virtual_mensual.append(count)
+    
     # Datos existentes
     pacientes_destacados = Paciente.objects.all()[:5]
     proximas_citas = Cita.objects.filter(fecha__gte=hoy).order_by('fecha', 'hora')[:3]
@@ -83,57 +109,169 @@ def index(request):
         "stats": stats,
         "proximas_citas": proximas_citas,
         "pacientes": pacientes_destacados,
-        "hoy": hoy
+        "hoy": hoy,
+        "presencial_mensual": presencial_mensual,
+        "virtual_mensual": virtual_mensual,
+        "meses": meses
     }
 
     return render(request, "index.html", context)
 
+@require_http_methods(["POST"])
 def crear_antecedente(request):
-    if request.method == 'POST':
-        form = AntecedentesPersonalesForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('Caracteristicas')  # Nombre de la URL para listar
-    else:
-        form = AntecedentesPersonalesForm()
-    
-    return render(request, 'paciente/caracteristicas.html', {'form': form})
+    try:
+        # Verificar si es una solicitud AJAX
+        is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+        
+        if request.method == 'POST':
+            form = AntecedentesPersonalesForm(request.POST)
+            if form.is_valid():
+                antecedente = form.save()
+                
+                if is_ajax:
+                    return JsonResponse({
+                        'success': True,
+                        'id': antecedente.id,
+                        'descripcion': antecedente.descripcion,
+                        'message': 'Antecedente creado exitosamente'
+                    })
+                else:
+                    return redirect('Caracteristicas')
+            else:
+                if is_ajax:
+                    return JsonResponse({
+                        'success': False,
+                        'errors': form.errors,
+                        'message': 'Error en el formulario'
+                    }, status=400)
+                else:
+                    return render(request, 'paciente/caracteristicas.html', {'form': form})
+        
+    except Exception as e:
+        if is_ajax:
+            return JsonResponse({
+                'success': False,
+                'message': str(e)
+            }, status=500)
+        else:
+            raise e
 
+@require_http_methods(["POST"])
 def editar_antecedente(request, id):
-    antecedente = get_object_or_404(AntecedentesPersonales, id=id)
-    if request.method == 'POST':
-        form = AntecedentesPersonalesForm(request.POST, instance=antecedente)
-        if form.is_valid():
-            form.save()
-            return redirect('Caracteristicas')  # Redirige a la lista de antecedentes
-    else:
-        form = AntecedentesPersonalesForm(instance=antecedente)
+    try:
+        is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+        antecedente = get_object_or_404(AntecedentesPersonales, id=id)
+        
+        if request.method == 'POST':
+            form = AntecedentesPersonalesForm(request.POST, instance=antecedente)
+            if form.is_valid():
+                antecedente = form.save()
+                
+                if is_ajax:
+                    return JsonResponse({
+                        'success': True,
+                        'id': antecedente.id,
+                        'descripcion': antecedente.descripcion,
+                        'message': 'Antecedente actualizado exitosamente'
+                    })
+                else:
+                    return redirect('Caracteristicas')
+            else:
+                if is_ajax:
+                    return JsonResponse({
+                        'success': False,
+                        'errors': form.errors,
+                        'message': 'Error en el formulario'
+                    }, status=400)
+                else:
+                    return render(request, 'paciente/caracteristicas.html', {'form': form})
     
-    return render(request, 'paciente/caracteristicas.html', {'form': form})
+    except Exception as e:
+        if is_ajax:
+            return JsonResponse({
+                'success': False,
+                'message': str(e)
+            }, status=500)
+        else:
+            raise e
 
 # 🔹 CONDICIÓN
+@require_http_methods(["POST"])
 def crear_condicion(request):
-    if request.method == 'POST':
-        form = CondicionForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('Caracteristicas')
-    else:
-        form = CondicionForm()
-
-    return render(request, 'paciente/caracteristicas.html', {'form': form})
-
-def editar_condicion(request, id):
-    condicion = get_object_or_404(Condicion, id=id)
-    if request.method == 'POST':
-        form = CondicionForm(request.POST, instance=condicion)
-        if form.is_valid():
-            form.save()
-            return redirect('Caracteristicas')
-    else:
-        form = CondicionForm(instance=condicion)
+    try:
+        is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+        
+        if request.method == 'POST':
+            form = CondicionForm(request.POST)
+            if form.is_valid():
+                condicion = form.save()
+                
+                if is_ajax:
+                    return JsonResponse({
+                        'success': True,
+                        'id': condicion.id,
+                        'nombre': condicion.nombre,
+                        'message': 'Condición creada exitosamente'
+                    })
+                else:
+                    return redirect('Caracteristicas')
+            else:
+                if is_ajax:
+                    return JsonResponse({
+                        'success': False,
+                        'errors': form.errors,
+                        'message': 'Error en el formulario'
+                    }, status=400)
+                else:
+                    return render(request, 'paciente/caracteristicas.html', {'form': form})
     
-    return render(request, 'paciente/caracteristicas.html', {'form': form})
+    except Exception as e:
+        if is_ajax:
+            return JsonResponse({
+                'success': False,
+                'message': str(e)
+            }, status=500)
+        else:
+            raise e
+
+@require_http_methods(["POST"])
+def editar_condicion(request, id):
+    try:
+        is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+        condicion = get_object_or_404(Condicion, id=id)
+        
+        if request.method == 'POST':
+            form = CondicionForm(request.POST, instance=condicion)
+            if form.is_valid():
+                condicion = form.save()
+                
+                if is_ajax:
+                    return JsonResponse({
+                        'success': True,
+                        'id': condicion.id,
+                        'nombre': condicion.nombre,
+                        'message': 'Condición actualizada exitosamente'
+                    })
+                else:
+                    return redirect('Caracteristicas')
+            else:
+                if is_ajax:
+                    return JsonResponse({
+                        'success': False,
+                        'errors': form.errors,
+                        'message': 'Error en el formulario'
+                    }, status=400)
+                else:
+                    return render(request, 'paciente/caracteristicas.html', {'form': form})
+    
+    except Exception as e:
+        if is_ajax:
+            return JsonResponse({
+                'success': False,
+                'message': str(e)
+            }, status=500)
+        else:
+            raise e
 
 @require_POST
 def ocultar_antecedente(request, pk):
@@ -283,9 +421,27 @@ def tablas(request):
     paises = Pais.objects.all()
     estados = Estado.objects.all()
     ciudades = Ciudad.objects.all()
+
+    if request.method == 'GET' and 'pais' in request.GET:
+        estados = Estado.objects.filter(pais_id=request.GET.get('pais'))
+        if 'estado' in request.GET:
+            ciudades = Ciudad.objects.filter(estado_id=request.GET.get('estado'))
     
     return render(request, "tablas.html", {
         'paises': paises, 
         'estados': estados, 
         'ciudades': ciudades
     })
+
+class GetAppointmentCounts(View):
+    def get(self, request):
+        # Obtener todas las citas futuras
+        citas = Cita.objects.filter(fecha__gte=timezone.now().date())
+        
+        # Crear diccionario de conteos
+        counts = {}
+        for cita in citas:
+            fecha_str = cita.fecha.strftime('%Y-%m-%d')
+            counts[fecha_str] = counts.get(fecha_str, 0) + 1
+        
+        return JsonResponse(counts)

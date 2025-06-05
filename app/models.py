@@ -1,7 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
-import datetime
+from django.utils import timezone
+from django.db import models
+from django.core.exceptions import ValidationError
+from datetime import datetime, timedelta
 
 # Rol
 class Rol(models.Model):
@@ -168,52 +171,55 @@ class Condicion(models.Model):
     
 # Cita
 class Cita(models.Model):
+    ESTATUS_CHOICES = [
+        ('pendiente', 'Pendiente'),
+        ('completada', 'Completada'),
+        ('cancelada', 'Cancelada'),
+    ]
+    
     hora = models.TimeField()
     fecha = models.DateField()
     modalidad = models.CharField(max_length=50, choices=[('virtual', 'Virtual'), ('presencial', 'Presencial')])
     motivo_consulta = models.TextField()
-    paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE, null=True, blank=True)
+    paciente = models.ForeignKey('Paciente', on_delete=models.CASCADE, null=True, blank=True)
     pareja = models.ForeignKey('RelacionPaciente', on_delete=models.CASCADE, null=True, blank=True)
+    estatus = models.CharField(
+        max_length=20, 
+        choices=ESTATUS_CHOICES, 
+        default='pendiente'
+    )
 
     def __str__(self):
         if self.paciente:
-            return f"Cita {self.id} - {self.paciente.nombre}"
+            return f"Cita de {self.paciente.nombre} - {self.fecha} {self.hora}"
         elif self.pareja:
-            return f"Cita {self.id} - Pareja {self.pareja.id}"
-        return f"Cita {self.id} - Sin asignar"
-    
-    def clean(self):
-        # Validar que se asigne paciente o pareja, pero no ambos
-        if not self.paciente and not self.pareja:
-            raise ValidationError('Debe asignar un paciente o una pareja a la cita')
-        if self.paciente and self.pareja:
-            raise ValidationError('No puede asignar tanto un paciente como una pareja a la misma cita')
+            return f"Cita de pareja {self.pareja.id} - {self.fecha} {self.hora}"
+        return f"Cita sin asignar - {self.fecha} {self.hora}"
 
-        # Validar que no haya citas en la misma fecha y hora
-        citas_existentes = Cita.objects.filter(
-            fecha=self.fecha,
-            hora=self.hora
-        ).exclude(pk=self.pk)  # Excluye la cita actual en caso de edición
-        
-        if citas_existentes.exists():
-            raise ValidationError('Ya existe una cita programada para esta fecha y hora exacta')
-        
-        # Validar margen de 2 horas entre citas
-        hora_inicio = self.hora
-        hora_fin = (datetime.datetime.combine(datetime.date.today(), hora_inicio) + 
-                   datetime.timedelta(hours=2))
-        
-        citas_solapadas = Cita.objects.filter(
-            fecha=self.fecha,
-            hora__gte=hora_inicio,
-            hora__lt=hora_fin.time()
-        ).exclude(pk=self.pk)
-        
-        if citas_solapadas.exists():
-            raise ValidationError('No se pueden agendar citas con menos de 2 horas de diferencia')
-    
+    def clean(self):
+        if not self.paciente and not self.pareja:
+            raise ValidationError('Debe asignar un paciente o una pareja')
+        if self.paciente and self.pareja:
+            raise ValidationError('No puede asignar ambos, paciente y pareja')
+        if self.fecha and self.fecha < datetime.today().date():
+            raise ValidationError('No puede agendar citas en fechas pasadas')
+
+        if self.estatus == 'pendiente' and self.fecha and self.hora:
+            fecha_hora_inicio = datetime.combine(self.fecha, self.hora)
+            fecha_hora_fin = fecha_hora_inicio + timedelta(hours=2)
+
+            citas_solapadas = Cita.objects.filter(
+                fecha=self.fecha,
+                hora__gte=self.hora,
+                hora__lt=fecha_hora_fin.time(),
+                estatus='pendiente'
+            ).exclude(pk=self.pk if self.pk else None)
+
+            if citas_solapadas.exists():
+                raise ValidationError('Debe haber al menos 2 horas entre citas pendientes')
+
     def save(self, *args, **kwargs):
-        self.full_clean()  # Ejecuta las validaciones
+        self.full_clean()
         super().save(*args, **kwargs)
 
 # Detalle de Cita

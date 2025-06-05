@@ -212,7 +212,7 @@
                     </div>
                 </div>
                 
-                <!-- Sección 3: Información Personal -->
+                <!-- Sección de Información Personal -->
                 <div class="mb-12">
                     <div class="flex items-center mb-6">
                         <div class="h-px flex-1 bg-gradient-to-r from-transparent via-teal-400 to-transparent"></div>
@@ -228,11 +228,11 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <!-- Condición -->
                         <div>
-                            <label for="condicion" class="block text-sm font-medium text-gray-700 mb-2">Condición <span class="text-red-500">*</span></label>
+                            <label for="condicion" class="block text-sm font-medium text-gray-700 mb-2">Condición</label>
                             <div class="flex items-center">
                                 <div class="relative flex-grow">
-                                    <select id="condicion" name="condicion" class="appearance-none w-full pl-4 pr-10 py-3 border border-gray-300 rounded-l-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white" required>
-                                        <option value="" selected disabled>Seleccione una condición</option>
+                                    <select id="condicion" name="condicion" class="appearance-none w-full pl-4 pr-10 py-3 border border-gray-300 rounded-l-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white">
+                                        <option value="" selected>Ninguna</option>
                                         {% for condicion in condiciones %}
                                             <option value="{{ condicion.id }}">{{ condicion.nombre }}</option>
                                         {% endfor %}
@@ -244,16 +244,19 @@
                                 <button type="button" onclick="abrirModalCondicion()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-r-xl transition-all shadow-md hover:shadow-lg">
                                     <i class="fas fa-plus"></i>
                                 </button>
+                                <button type="button" onclick="seleccionarNinguno('condicion')" class="ml-2 bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-3 rounded-xl transition-all shadow-md">
+                                    Ninguna
+                                </button>
                             </div>
                         </div>
-                        
+
                         <!-- Antecedentes Personales -->
                         <div>
                             <label for="antecedentes_personales" class="block text-sm font-medium text-gray-700 mb-2">Antecedentes Personales</label>
                             <div class="flex items-center">
                                 <div class="relative flex-grow">
                                     <select id="antecedentes_personales" name="antecedentes_personales" class="appearance-none w-full pl-4 pr-10 py-3 border border-gray-300 rounded-l-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white">
-                                        <option value="" selected>Seleccione un antecedente</option>
+                                        <option value="" selected>Ninguno</option>
                                         {% for antecedente in antecedentes %}
                                             <option value="{{ antecedente.id }}">{{ antecedente.descripcion }}</option>
                                         {% endfor %}
@@ -264,6 +267,9 @@
                                 </div>
                                 <button type="button" onclick="abrirModalAntecedente()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-r-xl transition-all shadow-md hover:shadow-lg">
                                     <i class="fas fa-plus"></i>
+                                </button>
+                                <button type="button" onclick="seleccionarNinguno('antecedente')" class="ml-2 bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-3 rounded-xl transition-all shadow-md">
+                                    Ninguno
                                 </button>
                             </div>
                         </div>
@@ -304,8 +310,8 @@
                         <div class="relative">
                             <label for="estado" class="block text-sm font-medium text-gray-700 mb-2">Estado <span class="text-red-500">*</span></label>
                             <div class="relative">
-                                <select id="estado" name="estado" class="appearance-none w-full pl-4 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white" required>
-                                    <option value="">Seleccione un estado</option>
+                                <select id="estado" name="estado" class="appearance-none w-full pl-4 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white" required disabled>
+                                    <option value="">Primero seleccione un país</option>
                                     {% for estado in estados %}
                                         <option value="{{ estado.id }}">{{ estado.nombre_estado }}</option>
                                     {% endfor %}
@@ -320,8 +326,8 @@
                         <div class="relative">
                             <label for="ciudad" class="block text-sm font-medium text-gray-700 mb-2">Ciudad <span class="text-red-500">*</span></label>
                             <div class="relative">
-                                <select id="ciudad" name="ciudad" class="appearance-none w-full pl-4 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white" required>
-                                    <option value="">Seleccione una ciudad</option>
+                                <select id="ciudad" name="ciudad" class="appearance-none w-full pl-4 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white" required disabled>
+                                    <option value="">Primero seleccione un estado</option>
                                     {% for ciudad in ciudades %}
                                         <option value="{{ ciudad.id }}">{{ ciudad.nombre_ciudad }}</option>
                                     {% endfor %}
@@ -534,27 +540,27 @@
         </div>
         
         <!-- Formulario -->
-        <form method="POST" action="{% url 'Crear_condicion' %}" class="p-6">
+        <form id="formCondicion" class="p-6">
             {% csrf_token %}
             
             <div class="mb-6">
-                <label for="nombre" class="block text-sm font-medium text-gray-700 mb-2">Nombre <span class="text-red-500">*</span></label>
-                <input type="text" name="nombre" required 
+                <label for="nombre_condicion" class="block text-sm font-medium text-gray-700 mb-2">Nombre <span class="text-red-500">*</span></label>
+                <input type="text" name="nombre" id="nombre_condicion" required 
                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" 
                        placeholder="Nombre de la condición">
             </div>
 
             <div class="mb-6">
-                <label for="descripcion" class="block text-sm font-medium text-gray-700 mb-2">Descripción</label>
-                <textarea name="descripcion" rows="4" 
+                <label for="descripcion_condicion" class="block text-sm font-medium text-gray-700 mb-2">Descripción</label>
+                <textarea name="descripcion" id="descripcion_condicion" rows="4" 
                           class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                           placeholder="Descripción de la condición">Sin descripción</textarea>
             </div>
 
             <div class="flex items-center mb-8">
-                <input type="checkbox" id="activo" name="activo" value="true" checked
+                <input type="checkbox" id="activo_condicion" name="activo" value="true" checked
                     class="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-                <label for="activo" class="ml-3 block text-sm text-gray-700">Activo</label>
+                <label for="activo_condicion" class="ml-3 block text-sm text-gray-700">Activo</label>
             </div>
             
             <!-- Botones -->
@@ -563,7 +569,7 @@
                         class="px-6 py-3 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-all shadow-sm">
                     Cancelar
                 </button>
-                <button type="submit" 
+                <button type="button" onclick="guardarCondicion()" 
                         class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-all shadow-lg">
                     Guardar
                 </button>
@@ -586,20 +592,20 @@
         </div>
         
         <!-- Formulario -->
-        <form method="POST" action="{% url 'Crear_antecedentes' %}" class="p-6">
+        <form id="formAntecedente" class="p-6">
             {% csrf_token %}
             
             <div class="mb-6">
-                <label for="descripcion" class="block text-sm font-medium text-gray-700 mb-2">Descripción <span class="text-red-500">*</span></label>
-                <textarea name="descripcion" id="descripcion" required rows="4" 
+                <label for="descripcion_antecedente" class="block text-sm font-medium text-gray-700 mb-2">Descripción <span class="text-red-500">*</span></label>
+                <textarea name="descripcion" id="descripcion_antecedente" required rows="4" 
                           class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                           placeholder="Descripción del antecedente personal"></textarea>
             </div>
 
             <div class="flex items-center mb-8">
-                <input type="checkbox" id="activo" name="activo" value="true" checked
+                <input type="checkbox" id="activo_antecedente" name="activo" value="true" checked
                     class="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-                <label for="activo" class="ml-3 block text-sm text-gray-700">Activo</label>
+                <label for="activo_antecedente" class="ml-3 block text-sm text-gray-700">Activo</label>
             </div>
             
             <!-- Botones -->
@@ -608,12 +614,20 @@
                         class="px-6 py-3 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-all shadow-sm">
                     Cancelar
                 </button>
-                <button type="submit" 
+                <button type="button" onclick="guardarAntecedente()" 
                         class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-all shadow-lg">
                     Guardar Antecedente
                 </button>
             </div>
         </form>
+    </div>
+</div>
+
+<!-- Notificación Toast -->
+<div id="toast-notification" class="hidden fixed top-4 right-4 z-50">
+    <div class="px-6 py-3 rounded-xl shadow-lg text-white font-medium flex items-center">
+        <i id="toast-icon" class="fas mr-3"></i>
+        <span id="toast-message"></span>
     </div>
 </div>
 
@@ -656,6 +670,82 @@
     function editarRepresentante() {
         abrirModalRepresentante();
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const paisSelect = document.getElementById('pais');
+        const estadoSelect = document.getElementById('estado');
+        const ciudadSelect = document.getElementById('ciudad');
+        
+        // Datos precargados (convertimos las listas de Django a un objeto JS)
+        const estadosData = {
+            {% for pais in paises %}
+                '{{ pais.id }}': [
+                    {% for estado in pais.estado_set.all %}
+                        {id: '{{ estado.id }}', nombre: '{{ estado.nombre_estado }}'},
+                    {% endfor %}
+                ],
+            {% endfor %}
+        };
+        
+        const ciudadesData = {
+            {% for estado in estados %}
+                '{{ estado.id }}': [
+                    {% for ciudad in estado.ciudad_set.all %}
+                        {id: '{{ ciudad.id }}', nombre: '{{ ciudad.nombre_ciudad }}'},
+                    {% endfor %}
+                ],
+            {% endfor %}
+        };
+        
+        // Cuando cambia el país
+        paisSelect.addEventListener('change', function() {
+            const paisId = this.value;
+            
+            // Limpiar y deshabilitar estados y ciudades
+            estadoSelect.innerHTML = '<option value="">Seleccione un estado</option>';
+            estadoSelect.disabled = !paisId;
+            
+            ciudadSelect.innerHTML = '<option value="">Seleccione una ciudad</option>';
+            ciudadSelect.disabled = true;
+            
+            // Si se seleccionó un país, cargar sus estados
+            if (paisId && estadosData[paisId]) {
+                estadosData[paisId].forEach(estado => {
+                    const option = document.createElement('option');
+                    option.value = estado.id;
+                    option.textContent = estado.nombre;
+                    estadoSelect.appendChild(option);
+                });
+            }
+        });
+        
+        // Cuando cambia el estado
+        estadoSelect.addEventListener('change', function() {
+            const estadoId = this.value;
+            
+            // Limpiar y deshabilitar ciudades
+            ciudadSelect.innerHTML = '<option value="">Seleccione una ciudad</option>';
+            ciudadSelect.disabled = !estadoId;
+            
+            // Si se seleccionó un estado, cargar sus ciudades
+            if (estadoId && ciudadesData[estadoId]) {
+                ciudadesData[estadoId].forEach(ciudad => {
+                    const option = document.createElement('option');
+                    option.value = ciudad.id;
+                    option.textContent = ciudad.nombre;
+                    ciudadSelect.appendChild(option);
+                });
+            }
+        });
+        
+        // Si hay valores preseleccionados (para edición)
+        if (paisSelect.value) {
+            paisSelect.dispatchEvent(new Event('change'));
+            if (estadoSelect.value) {
+                estadoSelect.dispatchEvent(new Event('change'));
+            }
+        }
+    });
 
     // Manejar cambio en tipo de paciente
     document.getElementById('tipo_paciente')?.addEventListener('change', function() {
@@ -710,10 +800,11 @@
             })
             .catch(error => {
                 console.error('Error en cargarRepresentantes:', error);
-                alert('Error al cargar representantes. Ver consola para detalles.');
+                mostrarNotificacion('Error al cargar representantes', 'error');
             });
         } catch (error) {
             console.error('Error inesperado:', error);
+            mostrarNotificacion('Error inesperado', 'error');
         }
     }
 
@@ -726,6 +817,7 @@
         document.getElementById('representante-info-display').classList.remove('hidden');
         document.getElementById('btnAgregarRepresentante').classList.add('hidden');
         cerrarModalRepresentante();
+        mostrarNotificacion('Representante seleccionado', 'success');
     }
 
     // Función para guardar representante (versión modificada)
@@ -735,7 +827,7 @@
         
         // Validación del campo 'edad'
         if (!formData.get('edad')) {
-            alert('El campo Edad es obligatorio');
+            mostrarNotificacion('El campo Edad es obligatorio', 'error');
             return false;
         }
         
@@ -744,24 +836,153 @@
         return false; // Previene el comportamiento por defecto del submit
     }
 
-    // Función para manejar el éxito después del guardado
-    function manejarRepresentanteGuardado() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const representanteGuardado = urlParams.get('representante_guardado');
+    // Función para guardar condición con AJAX
+    function guardarCondicion() {
+        const form = document.getElementById('formCondicion');
+        const formData = new FormData(form);
         
-        if (representanteGuardado === 'true') {
-            // Cierra el modal de creación
-            cerrarModalCrearRepresentante();
-            
-            // Opcional: Muestra un mensaje de éxito
-            alert('Representante guardado correctamente');
-            
-            // Limpia los parámetros de la URL
-            window.history.replaceState({}, document.title, window.location.pathname);
-            
-            // Aquí puedes agregar lógica para seleccionar automáticamente el representante
-            // si tu backend envía los datos necesarios
+        // Mostrar carga
+        const submitBtn = form.querySelector('button[type="button"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+        
+        fetch("{% url 'Crear_condicion' %}", {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => { throw err; });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Agregar la nueva opción al select de condiciones
+                const selectCondicion = document.getElementById('condicion');
+                const newOption = document.createElement('option');
+                newOption.value = data.id;
+                newOption.textContent = data.nombre;
+                newOption.selected = true;
+                selectCondicion.appendChild(newOption);
+                
+                // Cerrar el modal
+                cerrarModalCondicion();
+                
+                // Mostrar notificación de éxito
+                mostrarNotificacion(data.message || 'Condición creada exitosamente', 'success');
+                
+                // Resetear el formulario
+                form.reset();
+            } else {
+                throw new Error(data.message || 'Error al guardar la condición');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            mostrarNotificacion(error.message || 'Error al procesar la solicitud', 'error');
+        })
+        .finally(() => {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        });
+    }
+    
+    // Función para guardar antecedente con AJAX
+    function guardarAntecedente() {
+        const form = document.getElementById('formAntecedente');
+        const formData = new FormData(form);
+        
+        // Mostrar carga
+        const submitBtn = form.querySelector('button[type="button"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+        
+        fetch("{% url 'Crear_antecedentes' %}", {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => { throw err; });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Agregar la nueva opción al select de antecedentes
+                const selectAntecedente = document.getElementById('antecedentes_personales');
+                const newOption = document.createElement('option');
+                newOption.value = data.id;
+                newOption.textContent = data.descripcion;
+                newOption.selected = true;
+                selectAntecedente.appendChild(newOption);
+                
+                // Cerrar el modal
+                cerrarModalAntecedente();
+                
+                // Mostrar notificación de éxito
+                mostrarNotificacion(data.message || 'Antecedente creado exitosamente', 'success');
+                
+                // Resetear el formulario
+                form.reset();
+            } else {
+                throw new Error(data.message || 'Error al guardar el antecedente');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            mostrarNotificacion(error.message || 'Error al procesar la solicitud', 'error');
+        })
+        .finally(() => {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        });
+    }
+
+    // Función para mostrar notificaciones
+    function mostrarNotificacion(mensaje, tipo) {
+        const toast = document.getElementById('toast-notification');
+        const toastIcon = document.getElementById('toast-icon');
+        const toastMessage = document.getElementById('toast-message');
+        
+        // Configurar según el tipo
+        let bgColor = '';
+        let icon = '';
+        
+        if (tipo === 'success') {
+            bgColor = 'bg-green-500';
+            icon = 'fa-check-circle';
+        } else if (tipo === 'error') {
+            bgColor = 'bg-red-500';
+            icon = 'fa-exclamation-circle';
+        } else {
+            bgColor = 'bg-blue-500';
+            icon = 'fa-info-circle';
         }
+        
+        // Configurar el toast
+        toast.className = `fixed top-4 right-4 z-50 ${bgColor} px-6 py-3 rounded-xl shadow-lg text-white font-medium flex items-center`;
+        toastIcon.className = `fas ${icon} mr-3`;
+        toastMessage.textContent = mensaje;
+        
+        // Mostrar
+        toast.classList.remove('hidden');
+        
+        // Ocultar después de 5 segundos
+        setTimeout(() => {
+            toast.classList.add('hidden');
+        }, 5000);
     }
 
     // Inicializar eventos cuando se carga el DOM
@@ -788,7 +1009,7 @@
             
             if (tipoPaciente === 'infantil' && !representanteId) {
                 e.preventDefault();
-                alert('Para pacientes infantiles es necesario registrar un representante');
+                mostrarNotificacion('Para pacientes infantiles es necesario registrar un representante', 'error');
                 abrirModalRepresentante();
             }
         });

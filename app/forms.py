@@ -4,8 +4,9 @@ from .models import *
 from django.contrib.auth.forms import UserChangeForm
 from django import forms
 from .models import Cita
-from datetime import datetime, date, time, timedelta
+from django.utils import timezone
 import datetime as dt
+from datetime import datetime, date, time, timedelta
 
 class AntecedentesPersonalesForm(forms.ModelForm):
     class Meta:
@@ -153,7 +154,7 @@ class UsuarioForm(UserChangeForm):
 class CitaForm(forms.ModelForm):
     class Meta:
         model = Cita
-        fields = ['paciente', 'pareja', 'hora', 'fecha', 'modalidad', 'motivo_consulta']
+        fields = ['paciente', 'pareja', 'hora', 'fecha', 'modalidad', 'motivo_consulta', 'estatus']
         widgets = {
             'hora': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
             'fecha': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
@@ -161,6 +162,7 @@ class CitaForm(forms.ModelForm):
             'motivo_consulta': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
             'paciente': forms.Select(attrs={'class': 'form-control'}),
             'pareja': forms.Select(attrs={'class': 'form-control'}),
+            'estatus': forms.Select(attrs={'class': 'form-control'}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -176,6 +178,10 @@ class CitaForm(forms.ModelForm):
             elif self.instance.pareja:
                 self.fields['pareja'].required = True
                 self.fields['paciente'].required = False
+        
+        # Establecer el valor inicial del estatus como 'pendiente' para nuevas citas
+        if not self.instance.pk:
+            self.fields['estatus'].initial = 'pendiente'
 
     def clean_fecha(self):
         fecha = self.cleaned_data.get('fecha')
@@ -199,6 +205,7 @@ class CitaForm(forms.ModelForm):
         pareja = cleaned_data.get('pareja')
         fecha = cleaned_data.get('fecha')
         hora = cleaned_data.get('hora')
+        estatus = cleaned_data.get('estatus', 'pendiente')
         
         # Validar selección de paciente o pareja
         if not paciente and not pareja:
@@ -212,34 +219,36 @@ class CitaForm(forms.ModelForm):
             ahora = datetime.now()
             fecha_hora_cita = datetime.combine(fecha, hora)
             
-            if fecha_hora_cita < ahora:
-                raise ValidationError("La fecha y hora de la cita no pueden ser en el pasado.")
+            if fecha_hora_cita < ahora and estatus == 'pendiente':
+                raise ValidationError("No puede agendar citas pendientes en el pasado.")
 
-            # Validar que no haya citas en la misma fecha y hora
-            citas_existentes = Cita.objects.filter(fecha=fecha, hora=hora)
+            # Validar que no haya citas pendientes en la misma fecha y hora
+            citas_existentes = Cita.objects.filter(fecha=fecha, hora=hora, estatus='pendiente')
             
             if self.instance.pk:  # Si es una edición, excluir la cita actual
                 citas_existentes = citas_existentes.exclude(pk=self.instance.pk)
             
             if citas_existentes.exists():
-                raise ValidationError('Ya existe una cita programada para esta fecha y hora exacta')
+                raise ValidationError('Ya existe una cita pendiente programada para esta fecha y hora exacta')
             
-            # Validar margen de 2 horas
-            hora_inicio = hora
-            hora_fin = (datetime.combine(date.today(), hora_inicio) + timedelta(hours=2))
-            hora_fin = hora_fin.time()
-            
-            citas_solapadas = Cita.objects.filter(
-                fecha=fecha,
-                hora__gte=hora_inicio,
-                hora__lt=hora_fin
-            )
-            
-            if self.instance.pk:  # Si es una edición, excluir la cita actual
-                citas_solapadas = citas_solapadas.exclude(pk=self.instance.pk)
-            
-            if citas_solapadas.exists():
-                raise ValidationError('Debe haber al menos 2 horas entre citas')
+            # Validar margen de 2 horas para citas pendientes
+            if estatus == 'pendiente':
+                hora_inicio = hora
+                hora_fin = (datetime.combine(date.today(), hora_inicio) + timedelta(hours=2))
+                hora_fin = hora_fin.time()
+                
+                citas_solapadas = Cita.objects.filter(
+                    fecha=fecha,
+                    hora__gte=hora_inicio,
+                    hora__lt=hora_fin,
+                    estatus='pendiente'
+                )
+                
+                if self.instance.pk:  # Si es una edición, excluir la cita actual
+                    citas_solapadas = citas_solapadas.exclude(pk=self.instance.pk)
+                
+                if citas_solapadas.exists():
+                    raise ValidationError('Debe haber al menos 2 horas entre citas pendientes')
         
         return cleaned_data
 
@@ -255,7 +264,7 @@ class CitaForm(forms.ModelForm):
         if commit:
             instance.save()
         return instance
-
+    
 class DetalleCitaForm(forms.ModelForm):
     class Meta:
         model = DetalleCita

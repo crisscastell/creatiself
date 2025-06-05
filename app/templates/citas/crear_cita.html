@@ -191,6 +191,21 @@
                             </div>
                         {% endif %}
                     </div>
+
+                    <!-- Appointment Status -->
+                    <div class="mb-6 space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">Estatus</label>
+                        <select name="estatus" class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-800 focus:border-teal-800 transition duration-200">
+                            <option value="pendiente" {% if form.estatus.value == 'pendiente' %}selected{% endif %}>Pendiente</option>
+                            <option value="completada" {% if form.estatus.value == 'completada' %}selected{% endif %}>Completada</option>
+                            <option value="cancelada" {% if form.estatus.value == 'cancelada' %}selected{% endif %}>Cancelada</option>
+                        </select>
+                        {% if form.estatus.errors %}
+                            <div class="mt-1 text-red-600 text-sm">
+                                {{ form.estatus.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
                     
                     <!-- Consultation Reason -->
                     <div class="space-y-2">

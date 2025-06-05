@@ -43,6 +43,7 @@ urlpatterns = [
 
     path('historial/listar', historial, name='Historial'),
 
+    path('appointment-counts/', GetAppointmentCounts.as_view(), name='get_appointment_counts'),
 
     path('antecedentes_personales/crear', crear_antecedente, name='Crear_antecedentes'),
     path('editar_antecedente/<int:id>/', editar_antecedente, name='Editar_antecedente'),

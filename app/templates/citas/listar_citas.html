@@ -8,178 +8,227 @@
         <!-- Header con título y botón -->
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
             <div class="mb-4 sm:mb-0">
-                <h1 class="text-3xl font-bold text-gray-800">Lista de Citas</h1>
-                <p class="text-gray-600 mt-2">Gestiona todas las citas programadas</p>
+                <h1 class="text-3xl font-bold text-gray-800">Gestión de Citas</h1>
+                <p class="text-gray-600 mt-2">Visualiza y gestiona todas las citas programadas</p>
             </div>
-            <a href="{% url 'Crear_citas' %}" class="inline-flex items-center px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-md transition-colors duration-200">
+            <a href="{% url 'Crear_citas' %}" class="inline-flex items-center px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-sm">
                 <i data-lucide="plus" class="w-5 h-5 mr-2"></i>
                 Nueva Cita
             </a>
         </div>
 
-        <!-- Barra de búsqueda -->
-        <div class="mb-6">
-            <div class="relative">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <i data-lucide="search" class="text-gray-400"></i>
+        <!-- Panel de filtros y búsqueda -->
+        <div class="bg-white rounded-lg shadow-sm p-4 mb-6 border border-gray-200">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <!-- Barra de búsqueda -->
+                <div class="md:col-span-3">
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i data-lucide="search" class="text-gray-400"></i>
+                        </div>
+                        <input 
+                            type="text" 
+                            id="searchInput"
+                            placeholder="Buscar por paciente, cédula, motivo..." 
+                            class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                        />
+                    </div>
                 </div>
-                <input 
-                    type="text" 
-                    id="searchInput"
-                    placeholder="Buscar por nombre, fecha, hora, modalidad o motivo..." 
-                    class="block w-full pl-10 pr-3 py-2 border border-gray-400 rounded-lg bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
-                    onkeyup="filterCards()"
-                />
+                
+                <!-- Filtro por estado -->
+                <div>
+                    <select id="filtroEstado" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+                        <option value="">Todos los estados</option>
+                        <option value="pendiente">Pendiente</option>
+                        <option value="completada">Completada</option>
+                        <option value="cancelada">Cancelada</option>
+                    </select>
+                </div>
+                
+    
             </div>
         </div>
 
         <!-- Lista de citas -->
-        <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+        <div class="bg-white shadow-sm rounded-lg overflow-hidden">
             {% if citas %}
-                <ul class="divide-y divide-gray-200">
+                <div class="grid grid-cols-1 gap-4 p-4" id="citasContainer">
                     {% for cita in citas %}
-                    <li class="cita-card hover:bg-gray-50 transition duration-150 ease-in-out">
-                        <div class="px-4 py-5 sm:px-6">
-                            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start">
-                                <!-- Información principal -->
-                                <div class="flex-1 min-w-0">
-                                    <div class="flex items-center">
-                                        <p class="text-lg font-semibold text-gray-900 truncate">
+                    <div class="cita-card bg-white rounded-lg border border-gray-200 hover:border-teal-300 transition-all duration-200 shadow-sm hover:shadow-md overflow-hidden"
+                        data-estatus="{{ cita.estatus }}"
+                        data-tipo="{% if cita.paciente %}{% if cita.paciente.tipo == 'infantil' %}infantil{% else %}individual{% endif %}{% else %}individual{% endif %}"
+                        data-cedula="{% if cita.paciente %}{{ cita.paciente.identificacion }}{% elif cita.pareja %}{{ cita.pareja.paciente1.identificacion }} {{ cita.pareja.paciente2.identificacion }}{% endif %}"
+                        data-nombre="{% if cita.paciente %}{{ cita.paciente.nombre }} {{ cita.paciente.apellido }}{% elif cita.pareja %}Pareja: {{ cita.pareja.paciente1.nombre }} & {{ cita.pareja.paciente2.nombre }}{% endif %}"
+                        data-motivo="{{ cita.motivo_consulta|lower }}">
+                        <!-- Encabezado de la cita -->
+                        <div class="px-5 py-4 border-b border-gray-100 flex justify-between items-center">
+                            <div class="flex items-center">
+                                <div class="mr-3">
+                                    <div class="text-lg font-semibold text-gray-900">
+                                        {% if cita.paciente %}
+                                            {{ cita.paciente.nombre }} {{ cita.paciente.apellido }}
+                                        {% elif cita.pareja %}
+                                            Pareja: {{ cita.pareja.paciente1.nombre }} & {{ cita.pareja.paciente2.nombre }}
+                                        {% endif %}
+                                    </div>
+                                    <div class="flex items-center mt-1">
+                                        <span class="text-sm text-gray-500 mr-3 flex items-center">
+                                            <i data-lucide="calendar" class="w-4 h-4 mr-1"></i>
+                                            {{ cita.fecha|date:"d/m/Y" }}
+                                        </span>
+                                        <span class="text-sm text-gray-500 flex items-center">
+                                            <i data-lucide="clock" class="w-4 h-4 mr-1"></i>
+                                            {{ cita.hora|time:"H:i" }}
+                                        </span>
+                                        <span class="text-sm text-gray-500 flex items-center ml-3">
+                                            <i data-lucide="id-card" class="w-4 h-4 mr-1"></i>
                                             {% if cita.paciente %}
-                                                {{ cita.paciente.nombre }} {{ cita.paciente.apellido }}
+                                                {{ cita.paciente.identificacion }}
                                             {% elif cita.pareja %}
-                                                Pareja: {{ cita.pareja.paciente1.nombre }} & {{ cita.pareja.paciente2.nombre }}
+                                                {{ cita.pareja.paciente1.identificacion }} / {{ cita.pareja.paciente2.identificacion }}
                                             {% endif %}
-                                        </p>
-                                        <span class="ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                            {% if cita.modalidad == 'virtual' %}bg-blue-200 text-blue-800
-                                            {% else %}bg-green-200 text-green-800{% endif %}">
-                                            {{ cita.modalidad|title }}
                                         </span>
                                     </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Estado -->
+                            <div class="flex items-center">
+                                <span class="px-3 py-1 rounded-full text-xs font-medium 
+                                    {% if cita.estatus == 'completada' %}bg-green-100 text-green-800
+                                    {% elif cita.estatus == 'cancelada' %}bg-red-100 text-red-800
+                                    {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                                    {{ cita.get_estatus_display }}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <!-- Detalles de la cita -->
+                        <div class="px-5 py-3">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h3 class="text-sm font-medium text-gray-500">Motivo de consulta</h3>
+                                    <p class="text-gray-800 mt-1">{{ cita.motivo_consulta|truncatechars:60 }}</p>
                                     
-                                    <div class="mt-1 flex flex-col sm:flex-row sm:flex-wrap sm:mt-0 sm:space-x-6">
-                                        <div class="mt-2 flex items-center text-sm text-gray-500">
-                                            <i data-lucide="calendar" class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400"></i>
-                                            {{ cita.fecha|date:"d/m/Y" }}
-                                        </div>
-                                        <div class="mt-2 flex items-center text-sm text-gray-500">
-                                            <i data-lucide="clock" class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400"></i>
-                                            {{ cita.hora|time:"H:i" }}
-                                        </div>
-                                        <div class="mt-2 flex items-center text-sm text-gray-500">
-                                            <i data-lucide="file-text" class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400"></i>
-                                            {{ cita.motivo_consulta|truncatechars:30 }}
-                                        </div>
+                                    <div class="mt-3 flex items-center">
+                                        <span class="px-2 py-1 rounded text-xs font-medium 
+                                            {% if cita.modalidad == 'virtual' %}bg-blue-100 text-blue-800
+                                            {% else %}bg-purple-100 text-purple-800{% endif %}">
+                                            {{ cita.modalidad|title }}
+                                        </span>
+                                        <span class="ml-2 px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                            {% if cita.paciente and cita.paciente.tipo == 'infantil' %}Infantil{% else %}Individual{% endif %}
+                                        </span>
                                     </div>
                                 </div>
                                 
                                 <!-- Acciones -->
-                                <div class="mt-4 sm:mt-0 flex items-center space-x-3">
+                                <div class="flex space-x-2">
                                     <!-- Botón de Detalles -->
                                     <button onclick="openModalDetalleCita({{ cita.id }})" 
-                                            class="p-2 rounded-full text-gray-500 hover:text-yellow-500 hover:bg-yellow-50"
+                                            class="p-2 rounded-lg text-gray-500 hover:text-teal-600 hover:bg-teal-50 transition-colors"
                                             title="Ver detalles">
                                         <i data-lucide="eye" class="w-5 h-5"></i>
                                     </button>
                                     
                                     <!-- Botón Agregar Detalle -->
                                     <button onclick="openModalAgregarDetalle({{ cita.id }})" 
-                                            class="p-2 rounded-full text-gray-500 hover:text-indigo-500 hover:bg-indigo-50"
+                                            class="p-2 rounded-lg text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
                                             title="Agregar detalle">
                                         <i data-lucide="plus-circle" class="w-5 h-5"></i>
                                     </button>
                                     
                                     <!-- Botón Editar -->
                                     <button onclick="openModalEditarCita({{ cita.id }})" 
-                                            class="p-2 rounded-full text-gray-500 hover:text-blue-500 hover:bg-blue-50"
+                                            class="p-2 rounded-lg text-gray-500 hover:text-blue-600 hover:bg-blue-50 transition-colors"
                                             title="Editar">
-                                        <i data-lucide="pencil" class="w-5 h-5"></i>
+                                        <i data-lucide="edit" class="w-5 h-5"></i>
                                     </button>
                                 </div>
                             </div>
                         </div>
-                    </li>
+                    </div>
                     {% endfor %}
-                </ul>
+                </div>
 
+                <!-- Paginación -->
                 {% if citas.paginator.num_pages > 1 %}
-                    <div class="px-4 py-4 bg-gray-50 border-t border-gray-200 sm:px-6">
-                        <div class="flex-1 flex justify-between sm:hidden">
-                            {% if citas.has_previous %}
-                            <a href="?page={{ citas.previous_page_number }}{% if query %}&q={{ query }}{% endif %}" 
-                            class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                                Anterior
-                            </a>
-                            {% endif %}
-                            {% if citas.has_next %}
-                            <a href="?page={{ citas.next_page_number }}{% if query %}&q={{ query }}{% endif %}" 
-                            class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                                Siguiente
-                            </a>
-                            {% endif %}
+                <div class="px-4 py-4 bg-gray-50 border-t border-gray-200 sm:px-6">
+                    <div class="flex-1 flex justify-between sm:hidden">
+                        {% if citas.has_previous %}
+                        <a href="?page={{ citas.previous_page_number }}{% if query %}&q={{ query }}{% endif %}" 
+                        class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                            Anterior
+                        </a>
+                        {% endif %}
+                        {% if citas.has_next %}
+                        <a href="?page={{ citas.next_page_number }}{% if query %}&q={{ query }}{% endif %}" 
+                        class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                            Siguiente
+                        </a>
+                        {% endif %}
+                    </div>
+                    <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                        <div>
+                            <p class="text-sm text-gray-700">
+                                Mostrando <span class="font-medium">{{ citas.start_index }}</span> a 
+                                <span class="font-medium">{{ citas.end_index }}</span> de 
+                                <span class="font-medium">{{ citas.paginator.count }}</span> resultados
+                            </p>
                         </div>
-                        <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-                            <div>
-                                <p class="text-sm text-gray-700">
-                                    Mostrando <span class="font-medium">{{ citas.start_index }}</span> a 
-                                    <span class="font-medium">{{ citas.end_index }}</span> de 
-                                    <span class="font-medium">{{ citas.paginator.count }}</span> resultados
-                                </p>
-                            </div>
-                            <div>
-                                <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                                    {% if citas.has_previous %}
-                                    <a href="?page=1{% if query %}&q={{ query }}{% endif %}" 
-                                    class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                                        <span class="sr-only">Primera</span>
-                                        <i data-lucide="chevrons-left" class="h-5 w-5"></i>
+                        <div>
+                            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                                {% if citas.has_previous %}
+                                <a href="?page=1{% if query %}&q={{ query }}{% endif %}" 
+                                class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                    <span class="sr-only">Primera</span>
+                                    <i data-lucide="chevrons-left" class="h-5 w-5"></i>
+                                </a>
+                                <a href="?page={{ citas.previous_page_number }}{% if query %}&q={{ query }}{% endif %}" 
+                                class="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                    <span class="sr-only">Anterior</span>
+                                    <i data-lucide="chevron-left" class="h-5 w-5"></i>
+                                </a>
+                                {% endif %}
+                                
+                                {% for num in citas.paginator.page_range %}
+                                    {% if citas.number == num %}
+                                    <a href="#" aria-current="page" 
+                                    class="z-10 bg-teal-600 border-teal-500 text-white relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+                                        {{ num }}
                                     </a>
-                                    <a href="?page={{ citas.previous_page_number }}{% if query %}&q={{ query }}{% endif %}" 
-                                    class="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                                        <span class="sr-only">Anterior</span>
-                                        <i data-lucide="chevron-left" class="h-5 w-5"></i>
-                                    </a>
-                                    {% endif %}
-                                    
-                                    {% for num in citas.paginator.page_range %}
-                                        {% if citas.number == num %}
-                                        <a href="#" aria-current="page" 
-                                        class="z-10 bg-teal-600 border-teal-500 text-white relative inline-flex items-center px-4 py-2 border text-sm font-medium">
-                                            {{ num }}
-                                        </a>
-                                        {% elif num > citas.number|add:'-3' and num < citas.number|add:'3' %}
-                                        <a href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}" 
-                                        class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
-                                            {{ num }}
-                                        </a>
-                                        {% endif %}
-                                    {% endfor %}
-                                    
-                                    {% if citas.has_next %}
-                                    <a href="?page={{ citas.next_page_number }}{% if query %}&q={{ query }}{% endif %}" 
-                                    class="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                                        <span class="sr-only">Siguiente</span>
-                                        <i data-lucide="chevron-right" class="h-5 w-5"></i>
-                                    </a>
-                                    <a href="?page={{ citas.paginator.num_pages }}{% if query %}&q={{ query }}{% endif %}" 
-                                    class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                                        <span class="sr-only">Última</span>
-                                        <i data-lucide="chevrons-right" class="h-5 w-5"></i>
+                                    {% elif num > citas.number|add:'-3' and num < citas.number|add:'3' %}
+                                    <a href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}" 
+                                    class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+                                        {{ num }}
                                     </a>
                                     {% endif %}
-                                </nav>
-                            </div>
+                                {% endfor %}
+                                
+                                {% if citas.has_next %}
+                                <a href="?page={{ citas.next_page_number }}{% if query %}&q={{ query }}{% endif %}" 
+                                class="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                    <span class="sr-only">Siguiente</span>
+                                    <i data-lucide="chevron-right" class="h-5 w-5"></i>
+                                </a>
+                                <a href="?page={{ citas.paginator.num_pages }}{% if query %}&q={{ query }}{% endif %}" 
+                                class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                    <span class="sr-only">Última</span>
+                                    <i data-lucide="chevrons-right" class="h-5 w-5"></i>
+                                </a>
+                                {% endif %}
+                            </nav>
                         </div>
                     </div>
-                    {% endif %}
+                </div>
+                {% endif %}
             {% else %}
                 <div class="px-4 py-12 text-center">
                     <i data-lucide="calendar-x" class="mx-auto h-12 w-12 text-gray-400"></i>
                     <h3 class="mt-2 text-lg font-medium text-gray-900">No hay citas registradas</h3>
                     <p class="mt-1 text-sm text-gray-500">Comienza agregando una nueva cita.</p>
                     <div class="mt-6">
-                        <a href="{% url 'Crear_citas' %}" class="inline-flex items-center px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-md">
+                        <a href="{% url 'Crear_citas' %}" class="inline-flex items-center px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-lg shadow-sm">
                             <i data-lucide="plus" class="w-5 h-5 mr-2"></i>
                             Nueva Cita
                         </a>
@@ -190,7 +239,7 @@
     </div>
 </div>
 
-<!-- Modales (mantener igual que antes) -->
+<!-- Modales -->
 {% for cita in citas %}
 <!-- Modal de Edición -->
 <div id="modalEditarCita{{ cita.id }}" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden items-center justify-center z-50">
@@ -219,9 +268,16 @@
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Paciente</label>
                 <div class="w-full p-3 border border-gray-300 rounded-lg bg-gray-50">
-                    <p class="font-medium">{{ cita.paciente.nombre }} {{ cita.paciente.apellido }}</p>
+                    <p class="font-medium">
+                        {% if cita.paciente %}
+                            {{ cita.paciente.nombre }} {{ cita.paciente.apellido }}
+                        {% elif cita.pareja %}
+                            Pareja: {{ cita.pareja.paciente1.nombre }} & {{ cita.pareja.paciente2.nombre }}
+                        {% endif %}
+                    </p>
                 </div>
-                <input type="hidden" name="paciente" value="{{ cita.paciente.id }}">
+                <input type="hidden" name="paciente" value="{% if cita.paciente %}{{ cita.paciente.id }}{% endif %}">
+                <input type="hidden" name="pareja" value="{% if cita.pareja %}{{ cita.pareja.id }}{% endif %}">
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -249,6 +305,17 @@
                         class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500" required>
                     <option value="virtual" {% if cita.modalidad == 'virtual' %}selected{% endif %}>Virtual</option>
                     <option value="presencial" {% if cita.modalidad == 'presencial' %}selected{% endif %}>Presencial</option>
+                </select>
+            </div>
+            
+            <!-- Estado -->
+            <div class="mb-4">
+                <label for="estatus" class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
+                <select id="estatus" name="estatus" 
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500" required>
+                    <option value="pendiente" {% if cita.estatus == 'pendiente' %}selected{% endif %}>Pendiente</option>
+                    <option value="completada" {% if cita.estatus == 'completada' %}selected{% endif %}>Completada</option>
+                    <option value="cancelada" {% if cita.estatus == 'cancelada' %}selected{% endif %}>Cancelada</option>
                 </select>
             </div>
             
@@ -287,30 +354,32 @@
         <div class="space-y-4">
             <div>
                 <h3 class="text-lg font-medium text-gray-900 mb-2">Información básica</h3>
-                <div class="bg-gray-50 p-4 rounded-lg">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <p class="text-sm text-gray-500">Paciente</p>
-                            <p class="text-lg font-semibold text-gray-900 truncate">
-                                {% if cita.paciente %}
-                                    {{ cita.paciente.nombre }} {{ cita.paciente.apellido }}
-                                {% elif cita.pareja %}
-                                    {{ cita.pareja.paciente1.nombre }} & {{ cita.pareja.paciente2.nombre }}
-                                {% endif %}
-                            </p>
-                        </div>
-                        <div>
-                            <p class="text-sm text-gray-500">Fecha y Hora</p>
-                            <p class="font-medium">{{ cita.fecha|date:"d/m/Y" }} a las {{ cita.hora|time:"H:i" }}</p>
-                        </div>
-                        <div>
-                            <p class="text-sm text-gray-500">Modalidad</p>
-                            <p class="font-medium capitalize">{{ cita.modalidad }}</p>
-                        </div>
-                        <div>
-                            <p class="text-sm text-gray-500">Motivo</p>
-                            <p class="font-medium">{{ cita.motivo_consulta }}</p>
-                        </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-sm text-gray-500">Paciente</p>
+                        <p class="text-lg font-semibold text-gray-900 truncate">
+                            {% if cita.paciente %}
+                                {{ cita.paciente.nombre }} {{ cita.paciente.apellido }}
+                            {% elif cita.pareja %}
+                                {{ cita.pareja.paciente1.nombre }} & {{ cita.pareja.paciente2.nombre }}
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Fecha y Hora</p>
+                        <p class="font-medium">{{ cita.fecha|date:"d/m/Y" }} a las {{ cita.hora|time:"H:i" }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Modalidad</p>
+                        <p class="font-medium capitalize">{{ cita.modalidad }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Estado</p>
+                        <p class="font-medium capitalize">{{ cita.get_estatus_display }}</p>
+                    </div>
+                    <div class="col-span-2">
+                        <p class="text-sm text-gray-500">Motivo</p>
+                        <p class="font-medium">{{ cita.motivo_consulta }}</p>
                     </div>
                 </div>
             </div>
@@ -446,17 +515,59 @@
         document.body.classList.remove('overflow-hidden');
     }
 
-    // Función para filtrar citas
-    function filterCards() {
-        const input = document.getElementById("searchInput").value.toLowerCase();
+    // Función principal de filtrado mejorada
+    function aplicarFiltros() {
+        const estadoSeleccionado = document.getElementById("filtroEstado").value;
         const cards = document.querySelectorAll(".cita-card");
+        let citasVisibles = 0;
         
         cards.forEach(card => {
-            const text = card.textContent.toLowerCase();
-            card.style.display = text.includes(input) ? "" : "none";
+            const estadoCard = card.dataset.estatus;
+            
+            // Verificar coincidencia con el filtro de estado
+            const coincideEstado = estadoSeleccionado === '' || estadoCard === estadoSeleccionado;
+            
+            // Mostrar u ocultar según el filtro
+            if (coincideEstado) {
+                card.style.display = "";
+                citasVisibles++;
+            } else {
+                card.style.display = "none";
+            }
         });
-    }
 
+        // Mostrar mensaje si no hay resultados
+        const noResultsMessage = document.getElementById("noResultsMessage");
+        if (citasVisibles === 0 && cards.length > 0) {
+            if (!noResultsMessage) {
+                const container = document.getElementById("citasContainer");
+                const message = document.createElement("div");
+                message.id = "noResultsMessage";
+                message.className = "col-span-full text-center py-12";
+                message.innerHTML = `
+                    <i data-lucide="search-x" class="mx-auto h-12 w-12 text-gray-400"></i>
+                    <h3 class="mt-2 text-lg font-medium text-gray-900">No se encontraron citas</h3>
+                    <p class="mt-1 text-sm text-gray-500">Intenta con otros criterios de búsqueda.</p>
+                `;
+                container.appendChild(message);
+                lucide.createIcons(); // Recrear iconos para el nuevo elemento
+            }
+        } else if (noResultsMessage) {
+            noResultsMessage.remove();
+        }
+    }
+    
+    // Configurar event listeners para los filtros
+    document.addEventListener('DOMContentLoaded', function() {
+        // Inicializar iconos
+        lucide.createIcons();
+        
+        // Asignar eventos al filtro de estado
+        document.getElementById("filtroEstado").addEventListener("change", aplicarFiltros);
+        
+        // Aplicar filtros al cargar la página
+        aplicarFiltros();
+    });
 </script>
 
 {% if mostrar_alerta %}
@@ -471,6 +582,5 @@
     });
 </script>
 {% endif %}
-
 
 {% endblock %}
