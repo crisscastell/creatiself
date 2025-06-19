@@ -18,7 +18,7 @@
 
         <!-- Tarjeta del formulario con sombra suave -->
         <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-teal-100">
-            <form method="POST" action="{% url 'Crear_empleado' %}" class="p-8">
+            <form method="POST" action="{% url 'Crear_empleado' %}" class="p-8" id="empleadoForm">
                 {% csrf_token %}
                 
                 <!-- Sección 1: Información Básica -->
@@ -41,29 +41,29 @@
                         
                         <div class="space-y-1">
                             <label class="block text-sm font-medium text-gray-700">Cédula <span class="text-red-500">*</span></label>
-                            <input type="text" name="cedula" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-300 focus:border-teal-400 transition-all">
+                            <input type="text" name="cedula" id="cedula" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-300 focus:border-teal-400 transition-all">
                         </div>
                         
                         <!-- Fila 2 -->
                         <div class="space-y-1">
                             <label class="block text-sm font-medium text-gray-700">Primer Nombre <span class="text-red-500">*</span></label>
-                            <input type="text" name="nombre" placeholder="Ej: Juan" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-300 focus:border-teal-400 transition-all">
+                            <input type="text" name="nombre" id="nombre" placeholder="Ej: Juan" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-300 focus:border-teal-400 transition-all">
                         </div>
                         
                         <div class="space-y-1">
                             <label class="block text-sm font-medium text-gray-700">Segundo Nombre</label>
-                            <input type="text" name="nombre2" placeholder="Ej: Carlos" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-300 focus:border-teal-400 transition-all">
+                            <input type="text" name="nombre2" id="nombre2" placeholder="Ej: Carlos" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-300 focus:border-teal-400 transition-all">
                         </div>
                         
                         <!-- Fila 3 -->
                         <div class="space-y-1">
                             <label class="block text-sm font-medium text-gray-700">Primer Apellido <span class="text-red-500">*</span></label>
-                            <input type="text" name="apellido" placeholder="Ej: Pérez" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-300 focus:border-teal-400 transition-all">
+                            <input type="text" name="apellido" id="apellido" placeholder="Ej: Pérez" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-300 focus:border-teal-400 transition-all">
                         </div>
                         
                         <div class="space-y-1">
                             <label class="block text-sm font-medium text-gray-700">Segundo Apellido</label>
-                            <input type="text" name="apellido2" placeholder="Ej: González" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-300 focus:border-teal-400 transition-all">
+                            <input type="text" name="apellido2" id="apellido2" placeholder="Ej: González" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-300 focus:border-teal-400 transition-all">
                         </div>
                     </div>
                 </div>
@@ -79,7 +79,7 @@
                         <!-- Fila 1 -->
                         <div class="space-y-1">
                             <label class="block text-sm font-medium text-gray-700">Cargo <span class="text-red-500">*</span></label>
-                            <input type="text" name="cargo" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-300 focus:border-teal-400 transition-all">
+                            <input type="text" id="cargo" name="cargo" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-300 focus:border-teal-400 transition-all">
                         </div>
                         
                         <div class="space-y-1">
@@ -117,7 +117,7 @@
                         <!-- Fila 1 -->
                         <div class="space-y-1">
                             <label class="block text-sm font-medium text-gray-700">Teléfono <span class="text-red-500">*</span></label>
-                            <input type="text" name="telefono" placeholder="Ej: 04121234567" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-300 focus:border-teal-400 transition-all">
+                            <input type="text" name="telefono" id="telefono" placeholder="Ej: 04121234567" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-300 focus:border-teal-400 transition-all">
                         </div>
                         
                         <div class="space-y-1">
@@ -136,7 +136,7 @@
                         
                         <div class="space-y-1">
                             <label class="block text-sm font-medium text-gray-700">Edad <span class="text-red-500">*</span></label>
-                            <input type="number" name="edad" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-300 focus:border-teal-400 transition-all">
+                            <input type="number" name="edad" id="edad" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-300 focus:border-teal-400 transition-all">
                         </div>
                     </div>
                 </div>
@@ -148,38 +148,74 @@
                         <h2 class="text-xl font-semibold text-gray-800">Ubicación</h2>
                     </div>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="space-y-1">
-                            <label class="block text-sm font-medium text-gray-700">País <span class="text-red-500">*</span></label>
-                            <select name="pais" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-300 focus:border-teal-400 transition-all">
-                                {% for pais in paises %}
-                                <option value="{{ pais.id }}">{{ pais.nombre_pais }}</option>
-                                {% endfor %}
-                            </select>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <!-- País -->
+                        <div class="relative">
+                            <label for="pais" class="block text-sm font-medium text-gray-700 mb-2">País <span class="text-red-500">*</span></label>
+                            <div class="flex items-center">
+                                <div class="relative flex-grow">
+                                    <select id="pais" name="pais" class="appearance-none w-full pl-4 pr-10 py-3 border border-gray-300 rounded-l-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white" required>
+                                        <option value="">Seleccione un país</option>
+                                        {% for pais in paises %}
+                                            <option value="{{ pais.id }}">{{ pais.nombre_pais }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                        <i class="fas fa-chevron-down text-gray-400"></i>
+                                    </div>
+                                </div>
+                                <button type="button" onclick="abrirModalPais()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-r-xl transition-all shadow-md hover:shadow-lg">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
                         </div>
-                        
-                        <div class="space-y-1">
-                            <label class="block text-sm font-medium text-gray-700">Estado <span class="text-red-500">*</span></label>
-                            <select name="estado" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-300 focus:border-teal-400 transition-all">
-                                {% for estado in estados %}
-                                <option value="{{ estado.id }}">{{ estado.nombre_estado }}</option>
-                                {% endfor %}
-                            </select>
+
+                        <!-- Estado -->
+                        <div class="relative">
+                            <label for="estado" class="block text-sm font-medium text-gray-700 mb-2">Estado <span class="text-red-500">*</span></label>
+                            <div class="flex items-center">
+                                <div class="relative flex-grow">
+                                    <select id="estado" name="estado" class="appearance-none w-full pl-4 pr-10 py-3 border border-gray-300 rounded-l-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white" required disabled>
+                                        <option value="">Primero seleccione un país</option>
+                                        {% for estado in estados %}
+                                            <option value="{{ estado.id }}">{{ estado.nombre_estado }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                        <i class="fas fa-chevron-down text-gray-400"></i>
+                                    </div>
+                                </div>
+                                <button type="button" onclick="abrirModalEstado()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-r-xl transition-all shadow-md hover:shadow-lg">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
                         </div>
-                        
-                        <div class="space-y-1">
-                            <label class="block text-sm font-medium text-gray-700">Ciudad <span class="text-red-500">*</span></label>
-                            <select name="ciudad" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-300 focus:border-teal-400 transition-all">
-                                {% for ciudad in ciudades %}
-                                <option value="{{ ciudad.id }}">{{ ciudad.nombre_ciudad }}</option>
-                                {% endfor %}
-                            </select>
+
+                        <!-- Ciudad -->
+                        <div class="relative">
+                            <label for="ciudad" class="block text-sm font-medium text-gray-700 mb-2">Ciudad <span class="text-red-500">*</span></label>
+                            <div class="flex items-center">
+                                <div class="relative flex-grow">
+                                    <select id="ciudad" name="ciudad" class="appearance-none w-full pl-4 pr-10 py-3 border border-gray-300 rounded-l-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white" required disabled>
+                                        <option value="">Primero seleccione un estado</option>
+                                        {% for ciudad in ciudades %}
+                                            <option value="{{ ciudad.id }}">{{ ciudad.nombre_ciudad }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                        <i class="fas fa-chevron-down text-gray-400"></i>
+                                    </div>
+                                </div>
+                                <button type="button" onclick="abrirModalCiudad()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-r-xl transition-all shadow-md hover:shadow-lg">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                     
                     <div class="mt-6 space-y-1">
                         <label class="block text-sm font-medium text-gray-700">Dirección <span class="text-red-500">*</span></label>
-                        <textarea name="direccion" rows="3" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-300 focus:border-teal-400 transition-all"></textarea>
+                        <textarea name="direccion" id="direccion" rows="3" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-300 focus:border-teal-400 transition-all"></textarea>
                     </div>
                 </div>
 
@@ -194,6 +230,166 @@
     </div>
 </div>
 
+<!-- Modal para crear País -->
+<div id="modalPais" class="hidden fixed inset-0 bg-gray-900/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all duration-300">
+        <!-- Encabezado -->
+        <div class="bg-gradient-to-r from-teal-600 to-blue-700 p-6 text-white">
+            <div class="flex justify-between items-center">
+                <h3 class="text-2xl font-semibold">Agregar Nuevo País</h3>
+                <button onclick="cerrarModalPais()" class="text-white hover:text-blue-100 transition-colors">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Formulario -->
+        <form id="formPais" class="p-6">
+            {% csrf_token %}
+            
+            <div class="mb-6">
+                <label for="nombre_pais" class="block text-sm font-medium text-gray-700 mb-2">Nombre <span class="text-red-500">*</span></label>
+                <input type="text" name="nombre_pais" id="nombre_pais" required 
+       class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" 
+       placeholder="Nombre del país">
+            </div>
+            
+            <!-- Botones -->
+            <div class="flex justify-end space-x-4">
+                <button type="button" onclick="cerrarModalPais()" 
+                        class="px-6 py-3 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-all shadow-sm">
+                    Cancelar
+                </button>
+                <button type="button" onclick="guardarPais()" 
+                        class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-all shadow-lg">
+                    Guardar País
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal para crear Estado -->
+<div id="modalEstado" class="hidden fixed inset-0 bg-gray-900/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all duration-300">
+        <!-- Encabezado -->
+        <div class="bg-gradient-to-r from-teal-600 to-blue-700 p-6 text-white">
+            <div class="flex justify-between items-center">
+                <h3 class="text-2xl font-semibold">Agregar Nuevo Estado</h3>
+                <button onclick="cerrarModalEstado()" class="text-white hover:text-blue-100 transition-colors">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Formulario -->
+        <form id="formEstado" class="p-6">
+            {% csrf_token %}
+            
+            <div class="mb-6">
+                <label for="pais_estado" class="block text-sm font-medium text-gray-700 mb-2">País <span class="text-red-500">*</span></label>
+                
+                <!-- Contenedor del buscador -->
+                <div class="relative mb-2">
+                    <input type="text" id="buscarPais" placeholder="Buscar país..." 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                        <i class="fas fa-search text-gray-400"></i>
+                    </div>
+                </div>
+                
+                <select name="pais" id="pais_estado" required
+                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                    <option value="">Seleccione un país</option>
+                    {% for pais in paises %}
+                        <option value="{{ pais.id }}">{{ pais.nombre_pais }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        
+            <div class="mb-6">
+                <label for="nombre_estado" class="block text-sm font-medium text-gray-700 mb-2">Nombre <span class="text-red-500">*</span></label>
+                <input type="text" name="nombre_estado" id="nombre_estado" required
+                       class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                       placeholder="Nombre del estado">
+            </div>
+            
+            <!-- Botones -->
+            <div class="flex justify-end space-x-4">
+                <button type="button" onclick="cerrarModalEstado()" 
+                        class="px-6 py-3 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-all shadow-sm">
+                    Cancelar
+                </button>
+                <button type="button" onclick="guardarEstado()" 
+                        class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-all shadow-lg">
+                    Guardar Estado
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal para crear Ciudad -->
+<div id="modalCiudad" class="hidden fixed inset-0 bg-gray-900/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all duration-300">
+        <!-- Encabezado -->
+        <div class="bg-gradient-to-r from-teal-600 to-blue-700 p-6 text-white">
+            <div class="flex justify-between items-center">
+                <h3 class="text-2xl font-semibold">Agregar Nueva Ciudad</h3>
+                <button onclick="cerrarModalCiudad()" class="text-white hover:text-blue-100 transition-colors">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Formulario -->
+        <form id="formCiudad" class="p-6">
+            {% csrf_token %}
+            
+            <div class="mb-6">
+                <label for="estado_ciudad" class="block text-sm font-medium text-gray-700 mb-2">Estado <span class="text-red-500">*</span></label>
+                
+                <!-- Contenedor del buscador -->
+                <div class="relative mb-2">
+                    <input type="text" id="buscarEstado" placeholder="Buscar estado..." 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                        <i class="fas fa-search text-gray-400"></i>
+                    </div>
+                </div>
+                
+                <select name="estado" id="estado_ciudad" required
+                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                    <option value="">Seleccione un estado</option>
+                    {% for estado in estados %}
+                        <option value="{{ estado.id }}" data-pais="{{ estado.pais.id }}">{{ estado.nombre_estado }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="mb-6">
+                <label for="nombre_ciudad" class="block text-sm font-medium text-gray-700 mb-2">Nombre <span class="text-red-500">*</span></label>
+                <input type="text" name="nombre_ciudad" id="nombre_ciudad" required
+                       class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                       placeholder="Ej: Caracas"
+                       oninput="this.value = this.value.charAt(0).toUpperCase() + this.value.slice(1)">
+            </div>
+            
+            <!-- Botones -->
+            <div class="flex justify-end space-x-4">
+                <button type="button" onclick="cerrarModalCiudad()" 
+                        class="px-6 py-3 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-all shadow-sm">
+                    Cancelar
+                </button>
+                <button type="button" onclick="guardarCiudad()" 
+                        class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-all shadow-lg">
+                    Guardar Ciudad
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <!-- Efectos visuales adicionales -->
 <style>
     select, input, textarea {
@@ -205,33 +401,560 @@
 </style>
 
 <script>
+
+    function abrirModalPais() {
+        document.getElementById('modalPais').classList.remove('hidden');
+    }
+    
+    function cerrarModalPais() {
+        document.getElementById('modalPais').classList.add('hidden');
+    }
+    
+    function abrirModalEstado() {
+        document.getElementById('modalEstado').classList.remove('hidden');
+    }
+    
+    function cerrarModalEstado() {
+        document.getElementById('modalEstado').classList.add('hidden');
+    }
+    
+    function abrirModalCiudad() {
+        document.getElementById('modalCiudad').classList.remove('hidden');
+    }
+    
+    function cerrarModalCiudad() {
+        document.getElementById('modalCiudad').classList.add('hidden');
+    }
+
+    // Validación de campos de texto (solo letras y espacios)
     document.getElementById('nombre').addEventListener('input', function(e) {
-        // Elimina caracteres no permitidos (solo letras y espacios)
         this.value = this.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúñÑ\s]/g, '');
     });
+    
     document.getElementById('nombre2').addEventListener('input', function(e) {
-        // Elimina caracteres no permitidos (solo letras y espacios)
         this.value = this.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúñÑ\s]/g, '');
     });
     
     document.getElementById('apellido').addEventListener('input', function(e) {
-        // Elimina caracteres no permitidos (solo letras y espacios)
         this.value = this.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúñÑ\s]/g, '');
     });
 
     document.getElementById('apellido2').addEventListener('input', function(e) {
-        // Elimina caracteres no permitidos (solo letras y espacios)
         this.value = this.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúñÑ\s]/g, '');
     });
 
+    // Validación de campos numéricos
     document.getElementById('cedula').addEventListener('input', function(e) {
-        // Elimina todo lo que no sea número
         this.value = this.value.replace(/[^0-9]/g, '');
     });
 
     document.getElementById('telefono').addEventListener('input', function(e) {
-        // Elimina todo lo que no sea número
         this.value = this.value.replace(/[^0-9]/g, '');
+    });
+
+    document.getElementById('edad').addEventListener('input', function(e) {
+        this.value = this.value.replace(/[^0-9]/g, '');
+        
+        // Validar que la edad sea razonable (1-120)
+        if (parseInt(this.value) > 120) {
+            this.value = '120';
+            showError('La edad máxima permitida es 120 años');
+        }
+    });
+
+    document.getElementById('buscarPais').addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        const options = document.querySelectorAll('#pais_estado option');
+        
+        options.forEach(option => {
+            const text = option.textContent.toLowerCase();
+            if (text.includes(searchTerm) || option.value === "") {
+                option.style.display = 'block';
+            } else {
+                option.style.display = 'none';
+            }
+        });
+    });
+    
+    // Función para el buscador de estados
+    document.getElementById('buscarEstado').addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        const options = document.querySelectorAll('#estado_ciudad option');
+        
+        options.forEach(option => {
+            const text = option.textContent.toLowerCase();
+            if (text.includes(searchTerm) || option.value === "") {
+                option.style.display = 'block';
+            } else {
+                option.style.display = 'none';
+            }
+        });
+    });
+
+     // Funciones para guardar ubicaciones
+     function guardarPais() {
+        const form = document.getElementById('formPais');
+        const formData = new FormData(form);
+        
+        const submitBtn = form.querySelector('button[type="button"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+        
+        fetch("{% url 'Crear_pais' %}", {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+            }
+        })
+        .then(response => {
+            // Primero verifica el estado de la respuesta
+            if (!response.ok) {
+                // Si hay un error, intenta parsear el JSON del error
+                return response.json().then(err => {
+                    throw new Error(err.message || 'Error al guardar el país');
+                }).catch(() => {
+                    throw new Error(`Error ${response.status}: ${response.statusText}`);
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Actualizar los selects
+                const selectPais = document.getElementById('pais');
+                const newOption = document.createElement('option');
+                newOption.value = data.id;
+                newOption.textContent = data.nombre;
+                newOption.selected = true;
+                selectPais.appendChild(newOption);
+                
+                const selectPaisEstado = document.getElementById('pais_estado');
+                const newOptionEstado = document.createElement('option');
+                newOptionEstado.value = data.id;
+                newOptionEstado.textContent = data.nombre;
+                selectPaisEstado.appendChild(newOptionEstado);
+                
+                cerrarModalPais();
+                mostrarNotificacion(data.message, 'success');
+                form.reset();
+            } else {
+                throw new Error(data.message || 'Error al guardar el país');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            mostrarNotificacion(error.message, 'error');
+        })
+        .finally(() => {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        });
+    }
+    
+    function guardarEstado() {
+        const form = document.getElementById('formEstado');
+        const formData = new FormData(form);
+        
+        // Verificación de datos antes de enviar
+        const paisId = formData.get('pais');
+        const nombreEstado = formData.get('nombre_estado');
+        
+        if (!paisId || !nombreEstado) {
+            mostrarNotificacion('Todos los campos son requeridos', 'error');
+            return;
+        }
+    
+        const submitBtn = form.querySelector('button[type="button"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+    
+        fetch("{% url 'Crear_estado' %}", {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => {
+                    // Manejo especial para errores de Django
+                    if (err.errors) {
+                        const firstError = Object.values(err.errors)[0][0].message;
+                        throw new Error(firstError);
+                    }
+                    throw new Error(err.message || `Error ${response.status}`);
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Actualizar select de estados
+                const selectEstado = document.getElementById('estado');
+                const newOption = new Option(data.nombre, data.id, true, true);
+                selectEstado.add(newOption);
+                
+                // Actualizar select de estados en modal de ciudades
+                const selectEstadoCiudad = document.getElementById('estado_ciudad');
+                const newOptionCiudad = new Option(data.nombre, data.id);
+                selectEstadoCiudad.add(newOptionCiudad);
+                
+                cerrarModalEstado();
+                mostrarNotificacion(data.message, 'success');
+                form.reset();
+            } else {
+                throw new Error(data.message || 'Error al guardar el estado');
+            }
+        })
+        .catch(error => {
+            console.error('Error completo:', error);
+            mostrarNotificacion(error.message, 'error');
+        })
+        .finally(() => {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        });
+    }
+    
+    function guardarCiudad() {
+        const form = document.getElementById('formCiudad');
+        const formData = new FormData(form);
+        
+        // Validación frontend básica
+        const estadoSeleccionado = formData.get('estado');
+        const nombreCiudad = formData.get('nombre_ciudad').trim();
+        
+        if (!estadoSeleccionado || !nombreCiudad) {
+            mostrarNotificacion('❌ Estado y nombre son requeridos', 'error');
+            return;
+        }
+    
+        // UI Loading State
+        const submitBtn = form.querySelector('button[type="button"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Guardando...';
+    
+        fetch("{% url 'Crear_ciudad' %}", {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(async response => {
+            const data = await response.json();
+            
+            if (!response.ok) {
+                // Manejo de errores de Django
+                if (data.errors) {
+                    const firstError = Object.values(data.errors)[0][0].message;
+                    throw new Error(firstError);
+                }
+                throw new Error(data.message || `Error ${response.status}`);
+            }
+            
+            return data;
+        })
+        .then(data => {
+            if (data.success) {
+                // Actualizar selects
+                actualizarSelectCiudad(data);
+                
+                // Cerrar modal y resetear
+                cerrarModalCiudad();
+                mostrarNotificacion(data.message, 'success');
+                form.reset();
+            }
+        })
+        .catch(error => {
+            console.error("Error creación ciudad:", error);
+            mostrarNotificacion(error.message || "Error al guardar ciudad", 'error');
+        })
+        .finally(() => {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        });
+    }
+    
+    // Función auxiliar para actualizar selects
+    function actualizarSelectCiudad(data) {
+        // Select principal
+        const selectCiudad = document.getElementById('ciudad');
+        if (selectCiudad) {
+            const newOption = new Option(data.nombre, data.id, true, true);
+            selectCiudad.add(newOption);
+        }
+        
+        // Select en modal de representantes (si existe)
+        const selectCiudadRep = document.getElementById('ciudad_representante');
+        if (selectCiudadRep) {
+            const newOptionRep = new Option(data.nombre, data.id);
+            selectCiudadRep.add(newOptionRep);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const paisSelect = document.getElementById('pais');
+        const estadoSelect = document.getElementById('estado');
+        const ciudadSelect = document.getElementById('ciudad');
+        
+        // Datos precargados (convertimos las listas de Django a un objeto JS)
+        const estadosData = {
+            {% for pais in paises %}
+                '{{ pais.id }}': [
+                    {% for estado in pais.estado_set.all %}
+                        {id: '{{ estado.id }}', nombre: '{{ estado.nombre_estado }}'},
+                    {% endfor %}
+                ],
+            {% endfor %}
+        };
+        
+        const ciudadesData = {
+            {% for estado in estados %}
+                '{{ estado.id }}': [
+                    {% for ciudad in estado.ciudad_set.all %}
+                        {id: '{{ ciudad.id }}', nombre: '{{ ciudad.nombre_ciudad }}'},
+                    {% endfor %}
+                ],
+            {% endfor %}
+        };
+        
+        // Cuando cambia el país
+        paisSelect.addEventListener('change', function() {
+            const paisId = this.value;
+            
+            // Limpiar y deshabilitar estados y ciudades
+            estadoSelect.innerHTML = '<option value="">Seleccione un estado</option>';
+            estadoSelect.disabled = !paisId;
+            
+            ciudadSelect.innerHTML = '<option value="">Seleccione una ciudad</option>';
+            ciudadSelect.disabled = true;
+            
+            // Si se seleccionó un país, cargar sus estados
+            if (paisId && estadosData[paisId]) {
+                estadosData[paisId].forEach(estado => {
+                    const option = document.createElement('option');
+                    option.value = estado.id;
+                    option.textContent = estado.nombre;
+                    estadoSelect.appendChild(option);
+                });
+            }
+        });
+        
+        // Cuando cambia el estado
+        estadoSelect.addEventListener('change', function() {
+            const estadoId = this.value;
+            
+            // Limpiar y deshabilitar ciudades
+            ciudadSelect.innerHTML = '<option value="">Seleccione una ciudad</option>';
+            ciudadSelect.disabled = !estadoId;
+            
+            // Si se seleccionó un estado, cargar sus ciudades
+            if (estadoId && ciudadesData[estadoId]) {
+                ciudadesData[estadoId].forEach(ciudad => {
+                    const option = document.createElement('option');
+                    option.value = ciudad.id;
+                    option.textContent = ciudad.nombre;
+                    ciudadSelect.appendChild(option);
+                });
+            }
+        });
+        
+        // Si hay valores preseleccionados (para edición)
+        if (paisSelect.value) {
+            paisSelect.dispatchEvent(new Event('change'));
+            if (estadoSelect.value) {
+                estadoSelect.dispatchEvent(new Event('change'));
+            }
+        }
+    });
+
+    // Función para mostrar errores con SweetAlert
+    function showError(message) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error de validación',
+            text: message,
+            confirmButtonColor: '#0d9488',
+            background: '#ffffff',
+            iconColor: '#ef4444'
+        });
+    }
+
+    // Validación del formulario antes de enviar
+    document.getElementById('empleadoForm').addEventListener('submit', function(e) {
+        // Validar que los campos requeridos no estén vacíos
+        const requiredFields = [
+            'nombre', 'apellido', 'cedula', 'telefono', 'edad',
+            'fecha_nacimiento', 'fecha_ingreso', 'cargo'
+        ];
+        
+        let firstErrorField = null;
+        let isValid = true;
+        
+        requiredFields.forEach(field => {
+            const element = document.querySelector(`[name="${field}"]`);
+            if (!element.value.trim()) {
+                if (!firstErrorField) firstErrorField = element;
+                isValid = false;
+                element.classList.add('border-error');
+                
+                // Agregar clase de error al label correspondiente
+                const label = element.closest('.space-y-1').querySelector('label');
+                if (label) {
+                    label.classList.add('text-red-600');
+                }
+            } else {
+                element.classList.remove('border-error');
+                const label = element.closest('.space-y-1').querySelector('label');
+                if (label) {
+                    label.classList.remove('text-red-600');
+                }
+            }
+        });
+        
+        if (!isValid) {
+            e.preventDefault();
+            // Scroll al primer campo con error
+            if (firstErrorField) {
+                firstErrorField.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'center' 
+                });
+                // Dar foco al campo
+                setTimeout(() => {
+                    firstErrorField.focus();
+                }, 500);
+            }
+            
+            showError('Por favor complete todos los campos requeridos');
+            return false;
+        }
+        
+        // Validar formato de teléfono (ejemplo para Venezuela)
+        const telefono = document.getElementById('telefono').value;
+        if (telefono.length < 10 || telefono.length > 11) {
+            e.preventDefault();
+            const telefonoField = document.getElementById('telefono');
+            telefonoField.classList.add('border-error');
+            telefonoField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            showError('El teléfono debe tener entre 10 y 11 dígitos');
+            return false;
+        }
+        
+        // Validar formato de cédula (ejemplo para Venezuela)
+        const cedula = document.getElementById('cedula').value;
+        if (cedula.length < 6 || cedula.length > 8) {
+            e.preventDefault();
+            const cedulaField = document.getElementById('cedula');
+            cedulaField.classList.add('border-error');
+            cedulaField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            showError('La cédula debe tener entre 6 y 8 dígitos');
+            return false;
+        }
+        
+        return true;
+    });
+
+    // Mostrar errores de validación en tiempo real
+    document.querySelectorAll('input[required], select[required], textarea[required]').forEach(input => {
+        input.addEventListener('blur', function() {
+            if (!this.value.trim()) {
+                this.classList.add('border-error');
+                const label = this.closest('.space-y-1').querySelector('label');
+                if (label) {
+                    label.classList.add('text-red-600');
+                }
+            } else {
+                this.classList.remove('border-error');
+                const label = this.closest('.space-y-1').querySelector('label');
+                if (label) {
+                    label.classList.remove('text-red-600');
+                }
+            }
+        });
+    });
+
+    // Mostrar mensajes del backend con SweetAlert
+    {% if messages %}
+        {% for message in messages %}
+            Swal.fire({
+                icon: '{% if message.tags == "error" %}error{% else %}success{% endif %}',
+                title: '{% if message.tags == "error" %}Error{% else %}Éxito{% endif %}',
+                text: '{{ message }}',
+                confirmButtonColor: '#0d9488',
+                background: '#ffffff',
+                {% if message.tags == "error" %}
+                    iconColor: '#ef4444',
+                {% else %}
+                    iconColor: '#10b981',
+                {% endif %}
+                timer: 5000,
+                timerProgressBar: true,
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false
+            });
+        {% endfor %}
+    {% endif %}
+
+    function capitalizarInput(input) {
+        input.addEventListener('input', function(e) {
+            // Elimina caracteres no permitidos (solo letras y espacios)
+            this.value = this.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúñÑ\s]/g, '');
+            
+            // Capitaliza la primera letra de cada palabra
+            this.value = this.value.toLowerCase().replace(/(^|\s)\S/g, function(letra) {
+                return letra.toUpperCase();
+            });
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Selecciona los campos que deseas que empiecen con mayúscula
+        const camposAMayusculas = [
+            'nombre', 'nombre2', 'apellido', 'apellido2', 
+            'cargo', 'direccion'
+        ];
+    
+        // Aplica el evento a cada campo
+        camposAMayusculas.forEach(function(campoId) {
+            const campo = document.getElementById(campoId);
+            if (campo) {
+                campo.addEventListener('input', function() {
+                    // Convierte el primer carácter a mayúscula y el resto a minúscula
+                    if (this.value.length > 0) {
+                        this.value = this.value.charAt(0).toUpperCase() + 
+                                    this.value.slice(1).toLowerCase();
+                    }
+                });
+                
+                // También puedes convertir cuando el campo pierde el foco
+                campo.addEventListener('blur', function() {
+                    if (this.value.length > 0) {
+                        this.value = this.value.charAt(0).toUpperCase() + 
+                                    this.value.slice(1).toLowerCase();
+                    }
+                });
+            }
+        });
+    
+        // Para el campo de cédula y teléfono (solo permitir números)
+        const camposNumericos = ['cedula', 'telefono'];
+        camposNumericos.forEach(function(campoId) {
+            const campo = document.getElementById(campoId);
+            if (campo) {
+                campo.addEventListener('input', function() {
+                    this.value = this.value.replace(/[^0-9]/g, '');
+                });
+            }
+        });
     });
 </script>
 {% endblock %}

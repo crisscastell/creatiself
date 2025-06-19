@@ -23,8 +23,17 @@
             
             <!-- Formulario -->
             <div class="p-8">
-                <form class="space-y-6" method="POST" action="{% url 'Crear_usuario' %}">
+                <form class="space-y-6" method="POST" action="{% url 'Crear_usuario' %}" id="userForm">
                     {% csrf_token %}
+                    
+                    <!-- Mostrar errores generales del formulario -->
+                    {% if form.non_field_errors %}
+                    <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
+                        {% for error in form.non_field_errors %}
+                        <p class="text-red-700">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
                     
                     <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                         <!-- Nombre de Usuario -->
@@ -37,9 +46,13 @@
                                     </svg>
                                 </div>
                                 <input id="username" name="username" type="text" required
-                                    class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition duration-200"
-                                    placeholder="usuario123">
+                                    class="block w-full pl-10 pr-3 py-3 border {% if form.username.errors %}border-red-500{% else %}border-gray-300{% endif %} rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition duration-200"
+                                    placeholder="usuario123"
+                                    value="{{ form.username.value|default:'' }}">
                             </div>
+                            {% if form.username.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.username.errors.0 }}</p>
+                            {% endif %}
                         </div>
 
                         <!-- Correo Electrónico -->
@@ -53,9 +66,13 @@
                                     </svg>
                                 </div>
                                 <input id="email" name="email" type="email" required
-                                    class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition duration-200"
-                                    placeholder="correo@ejemplo.com">
+                                    class="block w-full pl-10 pr-3 py-3 border {% if form.email.errors %}border-red-500{% else %}border-gray-300{% endif %} rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition duration-200"
+                                    placeholder="correo@ejemplo.com"
+                                    value="{{ form.email.value|default:'' }}">
                             </div>
+                            {% if form.email.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.email.errors.0 }}</p>
+                            {% endif %}
                         </div>
 
                         <!-- Rol -->
@@ -69,9 +86,9 @@
                                     </svg>
                                 </div>
                                 <select id="rol" name="rol" required
-                                    class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition duration-200 bg-white appearance-none">
+                                    class="block w-full pl-10 pr-3 py-3 border {% if form.rol.errors %}border-red-500{% else %}border-gray-300{% endif %} rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition duration-200 bg-white appearance-none">
                                     {% for rol in roles %}
-                                    <option value="{{ rol.id }}">{{ rol.nombre_rol }}</option>
+                                    <option value="{{ rol.id }}" {% if form.rol.value == rol.id %}selected{% endif %}>{{ rol.nombre_rol }}</option>
                                     {% endfor %}
                                 </select>
                                 <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
@@ -80,12 +97,15 @@
                                     </svg>
                                 </div>
                             </div>
+                            {% if form.rol.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.rol.errors.0 }}</p>
+                            {% endif %}
                         </div>
 
                         <!-- Estado Activo -->
                         <div class="flex items-center md:col-span-2">
                             <div class="flex items-center h-5">
-                                <input id="is_active" name="is_active" type="checkbox" checked
+                                <input id="is_active" name="is_active" type="checkbox" {% if form.is_active.value %}checked{% endif %}
                                     class="focus:ring-teal-500 h-4 w-4 text-teal-600 border-gray-300 rounded">
                             </div>
                             <label for="is_active" class="ml-3 block text-sm font-medium text-gray-700">
@@ -102,11 +122,14 @@
                                         <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
                                     </svg>
                                 </div>
-                                <input id="password1" name="password1" type="password" required
-                                    class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition duration-200"
+                                <input id="password1" name="password1" type="password" required minlength="8"
+                                    class="block w-full pl-10 pr-3 py-3 border {% if form.password1.errors %}border-red-500{% else %}border-gray-300{% endif %} rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition duration-200"
                                     placeholder="••••••••">
                             </div>
                             <p class="mt-1 text-xs text-gray-500">Mínimo 8 caracteres</p>
+                            {% if form.password1.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.password1.errors.0 }}</p>
+                            {% endif %}
                         </div>
 
                         <!-- Confirmar Contraseña -->
@@ -118,10 +141,13 @@
                                         <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
                                     </svg>
                                 </div>
-                                <input id="password2" name="password2" type="password" required
-                                    class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition duration-200"
+                                <input id="password2" name="password2" type="password" required minlength="8"
+                                    class="block w-full pl-10 pr-3 py-3 border {% if form.password2.errors %}border-red-500{% else %}border-gray-300{% endif %} rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition duration-200"
                                     placeholder="••••••••">
                             </div>
+                            {% if form.password2.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.password2.errors.0 }}</p>
+                            {% endif %}
                         </div>
                     </div>
 
@@ -138,12 +164,119 @@
             </div>
         </div>
         
-        <!-- Enlace de regreso (opcional) -->
+        <!-- Enlace de regreso -->
         <div class="mt-6 text-center">
-            <a href="{%url 'Index' %}" class="text-sm font-medium text-teal-800 hover:text-teal-700 transition duration-200">
+            <a href="{% url 'Index' %}" class="text-sm font-medium text-teal-800 hover:text-teal-700 transition duration-200">
                 ← Volver al inicio
             </a>
         </div>
     </div>
 </div>
+
+<!-- Incluir SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+// Validación de contraseñas en el frontend con SweetAlert2
+document.getElementById('userForm').addEventListener('submit', function(e) {
+    const password1 = document.getElementById('password1').value;
+    const password2 = document.getElementById('password2').value;
+    const username = document.getElementById('username').value;
+    const email = document.getElementById('email').value;
+    
+    // Validar campos requeridos
+    if (!username || !email || !password1 || !password2) {
+        e.preventDefault();
+        Swal.fire({
+            icon: 'error',
+            title: 'Campos requeridos',
+            text: 'Por favor complete todos los campos obligatorios',
+            confirmButtonColor: '#0d9488',
+            confirmButtonText: 'Entendido'
+        });
+        return false;
+    }
+    
+    // Validar coincidencia de contraseñas
+    if (password1 !== password2) {
+        e.preventDefault();
+        Swal.fire({
+            icon: 'error',
+            title: 'Contraseñas no coinciden',
+            html: 'Las contraseñas ingresadas no coinciden. <br>Por favor verifique e intente nuevamente.',
+            confirmButtonColor: '#0d9488',
+            confirmButtonText: 'Entendido'
+        });
+        return false;
+    }
+    
+    // Validar longitud mínima de contraseña
+    if (password1.length < 8) {
+        e.preventDefault();
+        Swal.fire({
+            icon: 'warning',
+            title: 'Contraseña muy corta',
+            html: 'La contraseña debe tener al menos <b>8 caracteres</b>.<br>Por favor ingrese una contraseña más segura.',
+            confirmButtonColor: '#0d9488',
+            confirmButtonText: 'Entendido'
+        });
+        return false;
+    }
+    
+    // Validar fortaleza de contraseña (opcional)
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
+    if (!passwordRegex.test(password1)) {
+        e.preventDefault();
+        Swal.fire({
+            icon: 'info',
+            title: 'Contraseña poco segura',
+            html: 'Para mayor seguridad, recomendamos que su contraseña:<br>' +
+                  '• Tenga al menos 8 caracteres<br>' +
+                  '• Incluya letras mayúsculas y minúsculas<br>' +
+                  '• Contenga al menos un número',
+            confirmButtonColor: '#0d9488',
+            confirmButtonText: 'Entendido',
+            footer: 'Puede continuar con esta contraseña si lo desea'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('userForm').submit();
+            }
+        });
+        return false;
+    }
+    
+    // Mostrar confirmación antes de enviar (opcional)
+    e.preventDefault();
+    Swal.fire({
+        title: '¿Registrar nuevo usuario?',
+        text: '¿Está seguro que desea crear esta cuenta de usuario?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#0d9488',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Sí, registrar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById('userForm').submit();
+        }
+    });
+});
+
+// Mostrar mensajes de error del servidor con SweetAlert2
+{% if form.errors %}
+document.addEventListener('DOMContentLoaded', function() {
+    {% for field in form %}
+        {% if field.errors %}
+            Swal.fire({
+                icon: 'error',
+                title: 'Error en {{ field.label }}',
+                text: '{{ field.errors.0 }}',
+                confirmButtonColor: '#0d9488'
+            });
+        {% endif %}
+    {% endfor %}
+});
+{% endif %}
+</script>
 {% endblock %}

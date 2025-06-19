@@ -3,7 +3,7 @@ from django.core.paginator import Paginator
 from django.contrib import messages
 from django.shortcuts import render
 from django.db.models import Q
-from .forms import EmpleadoForm, UsuarioForm
+from .forms import EmpleadoForm, UsuarioCreationForm, UsuarioChangeForm 
 from .models import *
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
@@ -118,21 +118,22 @@ def listar_empleados(request):
 @login_required
 def crear_usuario(request):
     if request.method == 'POST':
-        form = UsuarioForm(request.POST)
+        form = UsuarioCreationForm(request.POST)
         if form.is_valid():
-            form.save()
-            return redirect('Listar_usuarios')  # Redirige a donde quieras después de guardar
+            user = form.save(commit=False)
+            # Si necesitas hacer algo adicional con el usuario antes de guardar
+            user.save()
+            return redirect('Listar_usuarios')
         else:
             print(form.errors)
     else:
-        form = UsuarioForm()
+        form = UsuarioCreationForm()
 
     roles = Rol.objects.all()
-
     return render(request, 'admin/crear_usuario.html', {'form': form, 'roles': roles})
 
 
-@login_required
+
 @login_required
 def listar_usuarios(request):
     usuario = request.user
@@ -179,31 +180,22 @@ def listar_usuarios(request):
     }
     return render(request, 'admin/listar_usuarios.html', context)
 
+@login_required
 def editar_usuario(request, id):
     usuario = get_object_or_404(Usuario, id=id)
     
     if request.method == 'POST':
-        form = UsuarioForm(request.POST, instance=usuario)
+        form = UsuarioChangeForm(request.POST, instance=usuario)
         if form.is_valid():
-            user = form.save(commit=False)
-            
-            # Manejo especial de la contraseña
-            new_password = request.POST.get('new_password')
-            confirm_password = request.POST.get('confirm_password')
-            
-            if new_password and new_password == confirm_password:
-                user.set_password(new_password)
-            elif new_password and new_password != confirm_password:
-                messages.error(request, "Las contraseñas no coinciden")
-                return render(request, 'admin/listar_usuarios.html', {
-                    'usuarios': Usuario.objects.all(),
-                    'roles': Rol.objects.all()
-                })
-            
-            user.save()
+            form.save()
             messages.success(request, "Usuario actualizado correctamente")
             return redirect('Listar_usuarios')
-    
-    return redirect('Listar_usuarios')
+    else:
+        form = UsuarioChangeForm(instance=usuario)
+
+    return render(request, 'admin/crear_usuario.html', {
+        'form': form,
+        'editing': True  # Puedes usar este flag para mostrar diferente título en el template
+    })
 
 

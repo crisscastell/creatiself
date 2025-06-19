@@ -5,18 +5,18 @@
 
 {% block content %} estado
 <div class="min-h-screen bg-gray-50">
-    <!-- Header -->
-    <div class="bg-white shadow-sm">
+    <!-- Header mejorado -->
+    <div class="bg-gradient-to-r from-teal-600 to-teal-800 shadow-lg">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-900">Historial Clínico</h1>
-                    <p class="mt-1 text-sm text-gray-500">Registro completo de sesiones terapéuticas</p>
+                    <h1 class="text-3xl font-bold text-white">Historial Clínico</h1>
+                    <p class="mt-2 text-lg text-teal-100">Registro completo de sesiones terapéuticas</p>
                 </div>
                 <div class="w-full md:w-auto flex flex-col sm:flex-row gap-3">
                     <div class="relative flex-1 min-w-[200px]">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg class="h-5 w-5 text-teal-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                             </svg>
                         </div>
@@ -24,14 +24,14 @@
                             type="text" 
                             id="searchInput"
                             placeholder="Buscar paciente, cédula..." 
-                            class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm"
+                            class="block w-full pl-10 pr-3 py-3 border border-teal-500 rounded-lg bg-white/90 focus:outline-none focus:ring-2 focus:ring-white focus:border-white text-sm shadow-sm"
                         />
                     </div>
-                    <a href="{% url 'Crear_citas' %}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
+                    <a href="{% url 'Crear_citas' %}" class="inline-flex items-center px-6 py-3 border border-transparent text-sm font-medium rounded-lg shadow-lg text-teal-800 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white transition-all duration-200">
                         <svg class="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                         </svg>
-                        Nueva sesión
+                        Nueva Cita
                     </a>
                 </div>
             </div>
@@ -39,143 +39,199 @@
     </div>
 
     <!-- Contenido principal -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <!-- Filtros y estadísticas -->
-        <div class="mb-6 bg-white rounded-lg shadow-xs p-4">
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <div class="flex items-center space-x-4">
-                    <div class="flex items-center space-x-2">
-                        <label for="filterStatus" class="text-sm font-medium text-gray-700">Estado:</label>
-                        <select id="filterStatus" class="mt-1 block pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm rounded-md">
-                            <option value="">Todos</option>
-                            <option value="completada">Completadas</option>
-                            <option value="cancelada">Canceladas</option>
-                            <option value="pendiente">Pendientes</option>
-                        </select>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 -mt-10">
+        <!-- Tarjetas de estadísticas -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-xl shadow-md overflow-hidden p-6 border-l-4 border-teal-500">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-teal-100 text-teal-600">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="text-sm font-medium text-gray-500">Total sesiones</h3>
+                        <p class="text-2xl font-semibold text-gray-900">{{ detalles_citas.paginator.count }}</p>
                     </div>
                 </div>
-                <div class="flex items-center space-x-4 text-sm">
-                    <span class="text-gray-500">Total: <span class="font-medium text-gray-900">{{ detalles_citas.paginator.count }}</span></span>
-                    <span class="text-green-600">Completadas: <span class="font-medium">{{ completadas_count }}</span></span>
-                    <span class="text-blue-600">Este mes: <span class="font-medium">{{ este_mes_count }}</span></span>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-md overflow-hidden p-6 border-l-4 border-green-500">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-green-100 text-green-600">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="text-sm font-medium text-gray-500">Completadas</h3>
+                        <p class="text-2xl font-semibold text-gray-900">{{ completadas_count }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-md overflow-hidden p-6 border-l-4 border-blue-500">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="text-sm font-medium text-gray-500">Este mes</h3>
+                        <p class="text-2xl font-semibold text-gray-900">{{ este_mes_count }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-md overflow-hidden p-6 border-l-4 border-yellow-500">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-yellow-100 text-yellow-600">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="text-sm font-medium text-gray-500">Pendientes</h3>
+                        <p class="text-2xl font-semibold text-gray-900">{{ pendientes_count }}</p>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Tabla de sesiones -->
-        <div class="bg-white shadow overflow-hidden sm:rounded-lg">
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Paciente</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha/Hora</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Modalidad</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Motivo</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200" id="sessionsTable">
-                        {% for detalle in detalles_citas %}
-                        <tr class="hover:bg-gray-50 transition-colors duration-150 session-row"
-                            data-nombre="{% if detalle.cita.paciente %}{{ detalle.cita.paciente.nombre }} {{ detalle.cita.paciente.apellido }}{% else %}{{ detalle.cita.pareja.paciente1.nombre }} & {{ detalle.cita.pareja.paciente2.nombre }}{% endif %}"
-                            data-cedula="{% if detalle.cita.paciente %}{{ detalle.cita.paciente.cedula }}{% elif detalle.cita.pareja %}{{ detalle.cita.pareja.paciente1.cedula }}|{{ detalle.cita.pareja.paciente2.cedula }}{% endif %}"
-                            data-estatus="{{ detalle.cita.estatus }}">
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="flex items-center">
-                                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-teal-100 flex items-center justify-center text-teal-600 font-bold">
-                                        {% if detalle.cita.paciente %}
-                                            {{ detalle.cita.paciente.nombre|slice:":1" }}{{ detalle.cita.paciente.apellido|slice:":1" }}
-                                        {% else %}
-                                            PP
-                                        {% endif %}
-                                    </div>
-                                    <div class="ml-4">
-                                        <div class="text-sm font-medium text-gray-900">
-                                            {% if detalle.cita.paciente %}
-                                                {{ detalle.cita.paciente.nombre }} {{ detalle.cita.paciente.apellido }}
-                                            {% else %}
-                                                {{ detalle.cita.pareja.paciente1.nombre }} & {{ detalle.cita.pareja.paciente2.nombre }}
-                                            {% endif %}
-                                        </div>
-                                        <div class="text-sm text-gray-500">
-                                            {% if detalle.cita.paciente %}
-                                                {{ detalle.cita.paciente.cedula }}
-                                            {% else %}
-                                                {{ detalle.cita.pareja.paciente1.cedula }} / {{ detalle.cita.pareja.paciente2.cedula }}
-                                            {% endif %}
-                                        </div>
-                                    </div>
+        <!-- Panel de filtros -->
+        <div class="mb-8 bg-white rounded-xl shadow-md overflow-hidden">
+            <div class="p-6">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <h3 class="text-lg font-medium text-gray-900">Filtrar sesiones</h3>
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <div class="flex-1 min-w-[180px]">
+                            <label for="filterStatus" class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
+                            <select id="filterStatus" class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm rounded-lg border shadow-sm">
+                                <option value="">Todos</option>
+                                <option value="completada">Completadas</option>
+                                <option value="cancelada">Canceladas</option>
+                                <option value="pendiente">Pendientes</option>
+                            </select>
+                        </div>
+                        <div class="flex-1 min-w-[180px]">
+                            <label for="filterModalidad" class="block text-sm font-medium text-gray-700 mb-1">Modalidad</label>
+                            <select id="filterModalidad" class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm rounded-lg border shadow-sm">
+                                <option value="">Todas</option>
+                                <option value="presencial">Presencial</option>
+                                <option value="virtual">Virtual</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tarjetas de sesiones -->
+        <div class="grid grid-cols-1 gap-6">
+            {% for detalle in detalles_citas %}
+            <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 session-card"
+                data-nombre="{% if detalle.cita.paciente %}{{ detalle.cita.paciente.nombre }} {{ detalle.cita.paciente.apellido }}{% else %}{{ detalle.cita.pareja.paciente1.nombre }} & {{ detalle.cita.pareja.paciente2.nombre }}{% endif %}"
+                data-cedula="{% if detalle.cita.paciente %}{{ detalle.cita.paciente.cedula }}{% elif detalle.cita.pareja %}{{ detalle.cita.pareja.paciente1.cedula }}|{{ detalle.cita.pareja.paciente2.cedula }}{% endif %}"
+                data-estatus="{{ detalle.cita.estatus }}"
+                data-modalidad="{{ detalle.cita.modalidad }}">
+                <div class="md:flex">
+                    <div class="md:flex-shrink-0 md:w-48 bg-gray-50 flex items-center justify-center p-6">
+                        <div class="h-20 w-20 rounded-full bg-teal-100 flex items-center justify-center text-teal-600 font-bold text-2xl">
+                            {% if detalle.cita.paciente %}
+                                {{ detalle.cita.paciente.nombre|slice:":1" }}{{ detalle.cita.paciente.apellido|slice:":1" }}
+                            {% else %}
+                                PP
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="p-6 flex-1">
+                        <div class="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
+                            <div>
+                                <div class="text-xl font-semibold text-gray-900">
+                                    {% if detalle.cita.paciente %}
+                                        {{ detalle.cita.paciente.nombre }} {{ detalle.cita.paciente.apellido }}
+                                    {% else %}
+                                        {{ detalle.cita.pareja.paciente1.nombre }} & {{ detalle.cita.pareja.paciente2.nombre }}
+                                    {% endif %}
                                 </div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">{{ detalle.cita.fecha|date:"d M Y" }}</div>
-                                <div class="text-sm text-gray-500">{{ detalle.cita.hora|time:"H:i" }}</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-2 py-1 text-xs font-medium rounded-full 
-                                    {% if detalle.cita.modalidad == 'virtual' %}bg-blue-100 text-blue-800
-                                    {% else %}bg-green-100 text-green-800{% endif %}">
-                                    {{ detalle.cita.modalidad|upper }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4">
-                                <div class="text-sm text-gray-900 font-medium">{{ detalle.titulo }}</div>
-                                <div class="text-sm text-gray-500 line-clamp-1">{{ detalle.cita.motivo_consulta }}</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-2 py-1 text-xs font-medium rounded-full 
+                                <div class="mt-1 text-sm text-gray-500">
+                                    {% if detalle.cita.paciente %}
+                                        C.I. {{ detalle.cita.paciente.cedula }}
+                                    {% else %}
+                                        C.I. {{ detalle.cita.pareja.paciente1.cedula }} / {{ detalle.cita.pareja.paciente2.cedula }}
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="flex flex-col items-end">
+                                <span class="px-3 py-1 text-xs font-semibold rounded-full 
                                     {% if detalle.cita.estatus == 'completada' %}bg-green-100 text-green-800
                                     {% elif detalle.cita.estatus == 'cancelada' %}bg-red-100 text-red-800
                                     {% else %}bg-yellow-100 text-yellow-800{% endif %}">
                                     {{ detalle.cita.get_estatus_display }}
-                                </span> 
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <button onclick="openModalDetalle({{ detalle.id }})" class="text-teal-600 hover:text-teal-900 mr-3">Ver</button>
-                                <button onclick="exportToPDF({{ detalle.id }})" class="text-gray-600 hover:text-gray-900">PDF</button>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="6" class="px-6 py-12 text-center">
-                                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                                </span>
+                                <span class="mt-2 px-3 py-1 text-xs font-semibold rounded-full 
+                                    {% if detalle.cita.modalidad == 'virtual' %}bg-blue-100 text-blue-800
+                                    {% else %}bg-green-100 text-green-800{% endif %}">
+                                    {{ detalle.cita.modalidad|upper }}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <h4 class="text-lg font-medium text-gray-900">{{ detalle.titulo }}</h4>
+                            <p class="mt-1 text-gray-600 line-clamp-2">{{ detalle.cita.motivo_consulta }}</p>
+                        </div>
+                        
+                        <div class="mt-6 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+                            <div class="flex items-center text-sm text-gray-500">
+                                <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                                 </svg>
-                                <h3 class="mt-2 text-lg font-medium text-gray-900">No hay sesiones registradas</h3>
-                                <p class="mt-1 text-sm text-gray-500">No se encontraron registros de sesiones terapéuticas.</p>
-                                <div class="mt-6">
-                                    <a href="{% url 'crear_cita' %}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
-                                        <svg class="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                                        </svg>
-                                        Nueva sesión
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                                {{ detalle.cita.fecha|date:"d M Y" }} • {{ detalle.cita.hora|time:"H:i" }}
+                            </div>
+                            
+                            <div class="flex space-x-3">
+                                <button onclick="openModalDetalle({{ detalle.id }})" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-all">
+                                    <svg class="-ml-1 mr-2 h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                    </svg>
+                                    Ver detalles
+                                </button>
+                                <button onclick="exportToPDF({{ detalle.id }})" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-all">
+                                    <svg class="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>
+                                    </svg>
+                                    Exportar PDF
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
+            {% empty %}
+            <div class="bg-white rounded-xl shadow-md overflow-hidden p-12 text-center">
+                <svg class="mx-auto h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                </svg>
+                <h3 class="mt-4 text-xl font-medium text-gray-900">No hay sesiones registradas</h3>
+                <p class="mt-2 text-gray-500">No se encontraron registros de sesiones terapéuticas.</p>
+                <div class="mt-8">
+                    <a href="{% url 'crear_cita' %}" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg shadow-sm text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-all">
+                        <svg class="-ml-1 mr-3 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                        </svg>
+                        Crear nueva sesión
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
         </div>
 
-        <!-- Paginación -->
+        <!-- Paginación mejorada -->
         {% if detalles_citas.has_other_pages %}
-        <div class="mt-6 flex items-center justify-between">
-            <div class="flex-1 flex justify-between sm:hidden">
-                {% if detalles_citas.has_previous %}
-                <a href="?page={{ detalles_citas.previous_page_number }}" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                    Anterior
-                </a>
-                {% endif %}
-                {% if detalles_citas.has_next %}
-                <a href="?page={{ detalles_citas.next_page_number }}" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                    Siguiente
-                </a>
-                {% endif %}
-            </div>
+        <div class="mt-8 px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
             <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
                 <div>
                     <p class="text-sm text-gray-700">
@@ -187,7 +243,7 @@
                         {% if detalles_citas.has_previous %}
                         <a href="?page=1" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
                             <span class="sr-only">Primera</span>
-                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                                 <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
                             </svg>
                         </a>
@@ -198,7 +254,7 @@
 
                         {% for num in detalles_citas.paginator.page_range %}
                             {% if num == detalles_citas.number %}
-                            <a href="#" aria-current="page" class="relative inline-flex items-center px-4 py-2 border border-teal-500 bg-teal-50 text-sm font-medium text-teal-600">
+                            <a href="#" aria-current="page" class="relative z-10 inline-flex items-center px-4 py-2 border border-teal-500 bg-teal-50 text-sm font-medium text-teal-600">
                                 {{ num }}
                             </a>
                             {% elif num > detalles_citas.number|add:'-3' and num < detalles_citas.number|add:'3' %}
@@ -214,7 +270,7 @@
                         </a>
                         <a href="?page={{ detalles_citas.paginator.num_pages }}" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
                             <span class="sr-only">Última</span>
-                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                                 <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
                             </svg>
                         </a>
@@ -371,27 +427,76 @@
     // Configuración de jsPDF
     const { jsPDF } = window.jspdf;
 
-    // Función para exportar a PDF
-    function exportToPDF(id) {
+    // Función para exportar a PDF - Versión corregida
+    async function exportToPDF(id) {
+        const doc = new jsPDF('p', 'mm', 'a4');
+        const marginLeft = 15;
+        const marginRight = 15;
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+    
+        const titleStyle = { fontSize: 16, textColor: [15, 118, 110], fontStyle: 'bold' };
+        const subtitleStyle = { fontSize: 13, textColor: [75, 85, 99], fontStyle: 'bold' };
+        const normalStyle = { fontSize: 11, textColor: [0, 0, 0], fontStyle: 'normal' };
+        const highlightStyle = { fontSize: 11, textColor: [15, 118, 110], fontStyle: 'bold' };
+    
+        function applyStyle(style) {
+            doc.setFont('helvetica', style.fontStyle);
+            doc.setFontSize(style.fontSize);
+            doc.setTextColor(...style.textColor);
+        }
+    
+        const toBase64 = (url) => {
+            return fetch(url)
+                .then(response => response.blob())
+                .then(blob => new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(blob);
+                }));
+        };
+    
+        const logoBase64 = await toBase64('/static/creatiself.jpg');
+    
+        // --- ENCABEZADO ---
+        const logoSize = 35;
+        doc.addImage(logoBase64, 'JPEG', marginLeft, 10, logoSize, logoSize);
+    
+        applyStyle(titleStyle);
+        doc.text('Creatiself', marginLeft + logoSize + 8, 18);
+    
+        applyStyle(normalStyle);
+        doc.text('RIF: J-50521532-9', marginLeft + logoSize + 8, 26);
+    
+        doc.setDrawColor(15, 118, 110);
+        doc.setLineWidth(0.3);
+        doc.line(marginLeft, 48, pageWidth - marginRight, 48);
+    
+        applyStyle(titleStyle);
+        doc.text('HISTORIAL PSICOLOGICO', pageWidth / 2, 58, { align: 'center' });
+    
+        applyStyle(normalStyle);
+        doc.text(`Generado el: ${new Date().toLocaleDateString()}`, pageWidth - marginRight, 53, { align: 'right' });
+    
+        let yPosition = 68;
+    
         const modal = document.getElementById(`modalDetalle${id}`);
         if (!modal) {
             alert('No se pudo encontrar la información de la sesión');
             return;
         }
-
-        // Extraer datos del modal
+    
         const nombre = modal.querySelector('h3.text-gray-900')?.textContent || 'Nombre no disponible';
         const cedula = modal.querySelector('p.text-sm.text-gray-500')?.textContent.replace('C.C.', '').trim() || 'Cédula no disponible';
         const fechaHora = modal.querySelector('.text-teal-100.text-sm')?.textContent.split(' a las ') || [];
         const fecha = fechaHora[0] || 'Fecha no disponible';
         const hora = fechaHora[1] || 'Hora no disponible';
-        
-        // Buscar modalidad y estado
+    
         const infoItems = modal.querySelectorAll('.flex.justify-between');
         let modalidad = 'Modalidad no disponible';
         let estado = 'Estado no disponible';
-        let duracion = 'Duración no disponible';
-        
+    
         infoItems.forEach(item => {
             if (item.textContent.includes('Modalidad:')) {
                 modalidad = item.querySelector('span:last-child')?.textContent || modalidad;
@@ -399,23 +504,18 @@
             if (item.textContent.includes('Estado:')) {
                 estado = item.querySelector('span:last-child')?.textContent || estado;
             }
-            if (item.textContent.includes('Duración:')) {
-                duracion = item.querySelector('span:last-child')?.textContent || duracion;
-            }
         });
-        
+    
         const motivo = modal.querySelector('div > h4:first-child + p')?.textContent || 'Motivo no disponible';
         const titulo = modal.querySelector('h4 + .prose')?.previousElementSibling?.textContent || 'Título no disponible';
         const anotacion = modal.querySelector('.prose p')?.textContent || 'Anotaciones no disponibles';
-        
-        // Verificar si hay conclusión
+    
         const conclusionBox = modal.querySelector('.bg-blue-50');
         let conclusion = '';
         if (conclusionBox) {
             conclusion = conclusionBox.querySelector('p')?.textContent || '';
         }
-        
-        // Verificar si hay tareas
+    
         const tareasBox = modal.querySelector('.bg-purple-50');
         let tareas = [];
         if (tareasBox) {
@@ -424,99 +524,126 @@
                 tareas.push(item.textContent);
             });
         }
-
-        // Crear PDF
-        const doc = new jsPDF();
-        
-        // Configuración inicial
-        doc.setFont('helvetica');
-        doc.setFontSize(20);
-        doc.setTextColor(15, 118, 110); // Color teal-600
-        doc.text('HISTORIAL CLÍNICO', 105, 20, { align: 'center' });
-        
-        // Línea divisoria
-        doc.setDrawColor(15, 118, 110);
-        doc.setLineWidth(0.5);
-        doc.line(15, 30, 195, 30);
-        
-        // Datos del paciente
-        doc.setFontSize(14);
-        doc.setTextColor(0, 0, 0);
-        doc.text('Datos del Paciente', 15, 45);
-        
-        doc.setFontSize(12);
-        doc.text(`Nombre: ${nombre}`, 15, 55);
-        doc.text(`Cédula: ${cedula}`, 15, 65);
-        
-        // Información de la cita
-        doc.setFontSize(14);
-        doc.text('Información de la Sesión', 15, 85);
-        
-        doc.setFontSize(12);
-        doc.text(`Fecha: ${fecha}`, 15, 95);
-        doc.text(`Hora: ${hora}`, 15, 105);
-        doc.text(`Duración: ${duracion}`, 15, 115);
-        doc.text(`Modalidad: ${modalidad}`, 15, 125);
-        doc.text(`Estado: ${estado}`, 15, 135);
-        doc.text(`Motivo de Consulta: ${motivo}`, 15, 145);
-        
-        // Anotaciones
-        doc.setFontSize(14);
-        doc.text('Anotaciones de la Sesión', 15, 165);
-        
-        doc.setFontSize(12);
-        doc.text(`Título: ${titulo}`, 15, 175);
-        
-        // Texto con formato (manejo de múltiples líneas)
-        const splitAnotacion = doc.splitTextToSize(anotacion, 170);
-        doc.text(splitAnotacion, 15, 185);
-        
-        // Conclusión si existe
+    
+        // --- DATOS DEL PACIENTE ---
+        applyStyle(subtitleStyle);
+        doc.text('DATOS DEL PACIENTE', marginLeft, yPosition);
+        yPosition += 7;
+    
+        applyStyle(normalStyle);
+        doc.text(`Nombre completo:`, marginLeft, yPosition);
+        const label1Width = doc.getTextWidth('Nombre completo:');
+        applyStyle(highlightStyle);
+        doc.text(nombre, marginLeft + label1Width + 2, yPosition);
+        yPosition += 6;
+    
+        applyStyle(normalStyle);
+        doc.text(`Cédula de identidad:`, marginLeft, yPosition);
+        const label2Width = doc.getTextWidth('Cédula de identidad:');
+        applyStyle(highlightStyle);
+        doc.text(cedula, marginLeft + label2Width + 2, yPosition);
+        yPosition += 10;
+    
+        // --- INFORMACIÓN DE LA SESIÓN ---
+        applyStyle(subtitleStyle);
+        doc.text('INFORMACIÓN DE LA SESIÓN', marginLeft, yPosition);
+        yPosition += 7;
+    
+        const addInfoLine = (label, value) => {
+            applyStyle(normalStyle);
+            doc.text(`${label}`, marginLeft, yPosition);
+            const labelWidth = doc.getTextWidth(label);
+            applyStyle(highlightStyle);
+            doc.text(value, marginLeft + labelWidth + 2, yPosition);
+            yPosition += 6;
+        };
+    
+        addInfoLine('Fecha de la sesión:', fecha);
+        addInfoLine('Hora de la sesión:', hora);
+        addInfoLine('Modalidad:', modalidad);
+        addInfoLine('Estado:', estado);
+        yPosition += 4;
+    
+        // --- MOTIVO DE CONSULTA ---
+        applyStyle(subtitleStyle);
+        doc.text('MOTIVO DE CONSULTA', marginLeft, yPosition);
+        yPosition += 7;
+    
+        applyStyle(normalStyle);
+        const splitMotivo = doc.splitTextToSize(motivo, pageWidth - marginLeft - marginRight);
+        doc.text(splitMotivo, marginLeft, yPosition);
+        yPosition += splitMotivo.length * 5 + 5;
+    
+        // --- ANOTACIONES ---
+        applyStyle(subtitleStyle);
+        doc.text('ANOTACIONES DE LA SESIÓN', marginLeft, yPosition);
+        yPosition += 7;
+    
+        applyStyle(normalStyle);
+        doc.text(`Título: ${titulo}`, marginLeft, yPosition);
+        yPosition += 6;
+    
+        const splitAnotacion = doc.splitTextToSize(anotacion, pageWidth - marginLeft - marginRight);
+        doc.text(splitAnotacion, marginLeft, yPosition);
+        yPosition += splitAnotacion.length * 5 + 5;
+    
+        // --- CONCLUSIÓN ---
         if (conclusion) {
-            const yPosition = 185 + (splitAnotacion.length * 7) + 15;
-            
-            doc.setFontSize(14);
-            doc.text('Conclusión', 15, yPosition);
-            
-            doc.setFontSize(12);
-            const splitConclusion = doc.splitTextToSize(conclusion, 170);
-            doc.text(splitConclusion, 15, yPosition + 10);
+            if (yPosition > pageHeight - 50) {
+                doc.addPage();
+                yPosition = 20;
+            }
+    
+            applyStyle(subtitleStyle);
+            doc.text('CONCLUSIÓN', marginLeft, yPosition);
+            yPosition += 7;
+    
+            applyStyle(normalStyle);
+            const splitConclusion = doc.splitTextToSize(conclusion, pageWidth - marginLeft - marginRight);
+            doc.text(splitConclusion, marginLeft, yPosition);
+            yPosition += splitConclusion.length * 5 + 5;
         }
-        
-        // Tareas si existen
+    
+        // --- TAREAS ASIGNADAS ---
         if (tareas.length > 0) {
-            let yPosition = doc.lastAutoTable.finalY || 200;
-            yPosition += 15;
-            
-            doc.setFontSize(14);
-            doc.text('Tareas Asignadas', 15, yPosition);
-            
-            doc.setFontSize(12);
-            yPosition += 10;
-            
+            if (yPosition > pageHeight - 50) {
+                doc.addPage();
+                yPosition = 20;
+            }
+    
+            applyStyle(subtitleStyle);
+            doc.text('TAREAS ASIGNADAS', marginLeft, yPosition);
+            yPosition += 7;
+    
+            applyStyle(normalStyle);
             tareas.forEach((tarea, index) => {
-                if (yPosition > 250) {
+                if (yPosition > pageHeight - 20) {
                     doc.addPage();
                     yPosition = 20;
                 }
-                doc.text(`• ${tarea}`, 20, yPosition);
-                yPosition += 7;
+                doc.text(`• ${tarea}`, marginLeft + 5, yPosition);
+                yPosition += 6;
             });
         }
-        
-        // Pie de página
+    
+        // --- FOOTER ---
         const pageCount = doc.internal.getNumberOfPages();
-        for(let i = 1; i <= pageCount; i++) {
+        for (let i = 1; i <= pageCount; i++) {
             doc.setPage(i);
-            doc.setFontSize(10);
-            doc.setTextColor(100, 100, 100);
-            doc.text(`Página ${i} de ${pageCount}`, 105, 285, { align: 'center' });
-            doc.text('Generado el: ' + new Date().toLocaleDateString(), 15, 285);
+            doc.setDrawColor(15, 118, 110);
+            doc.setLineWidth(0.2);
+            doc.line(marginLeft, pageHeight - 15, pageWidth - marginRight, pageHeight - 15);
+    
+            applyStyle({ fontSize: 9, textColor: [100, 100, 100], fontStyle: 'normal' });
+            doc.text(`Creatiself - Consultorio Psicológico`, marginLeft, pageHeight - 12);
+            doc.text(`Página ${i} de ${pageCount}`, pageWidth / 2, pageHeight - 12, { align: 'center' });
+            doc.text(`Generado el ${new Date().toLocaleDateString()}`, pageWidth - marginRight, pageHeight - 12, { align: 'right' });
         }
-        
-        // Guardar el PDF
-        doc.save(`historial_sesion_${id}_${fecha.replace(/ /g, '_')}.pdf`);
+    
+        doc.save(`Historial_${nombre.replace(/ /g, '_')}_${fecha.replace(/ /g, '_')}.pdf`);
     }
+    
+    
 
     // Funciones para manejar modales
     function openModalDetalle(id) {
@@ -593,6 +720,41 @@
                 closeModalDetalle(id);
             }
         });
+    });
+
+    // Funcionalidad de búsqueda y filtrado
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchInput');
+        const filterStatus = document.getElementById('filterStatus');
+        const filterModalidad = document.getElementById('filterModalidad');
+        const sessionCards = document.querySelectorAll('.session-card');
+        
+        function filterSessions() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const statusFilter = filterStatus.value;
+            const modalidadFilter = filterModalidad.value;
+            
+            sessionCards.forEach(card => {
+                const nombre = card.getAttribute('data-nombre').toLowerCase();
+                const cedula = card.getAttribute('data-cedula').toLowerCase();
+                const estatus = card.getAttribute('data-estatus');
+                const modalidad = card.getAttribute('data-modalidad');
+                
+                const matchesSearch = nombre.includes(searchTerm) || cedula.includes(searchTerm);
+                const matchesStatus = !statusFilter || estatus === statusFilter;
+                const matchesModalidad = !modalidadFilter || modalidad === modalidadFilter;
+                
+                if (matchesSearch && matchesStatus && matchesModalidad) {
+                    card.style.display = '';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+        
+        searchInput.addEventListener('input', filterSessions);
+        filterStatus.addEventListener('change', filterSessions);
+        filterModalidad.addEventListener('change', filterSessions);
     });
 </script>
 {% endblock %}

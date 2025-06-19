@@ -8,40 +8,78 @@ from django.db.models import Q
 from datetime import date 
 from django.utils import timezone
 from django.core.exceptions import ValidationError
-import datetime 
-
-
+from datetime import datetime
+from django.db.models import Count
+from datetime import time
 
 def crear_cita(request):
+    hoy = timezone.now().date()
+    capacidad_maxima = 20
+
     if request.method == "POST":
         form = CitaForm(request.POST)
         if form.is_valid():
             cita = form.save(commit=False)
-            cita.estatus = 'pendiente'  # Asegurarse de que nuevas citas sean pendientes
+            
+            # Asignación correcta según selección
+            if form.cleaned_data.get('relacion'):  # Si se seleccionó una relación
+                cita.relacion = form.cleaned_data['relacion']
+                cita.paciente = None
+            else:  # Si se seleccionó un paciente individual
+                cita.paciente = form.cleaned_data['paciente']
+                cita.relacion = None
+            
             cita.save()
-            request.session['mostrar_alerta'] = True
-            request.session.save()
+            messages.success(request, "Cita creada exitosamente")
             return redirect('Listar_citas')
-        else:
-            # Pasar el formulario con errores al template
-            return render(request, 'citas/crear_cita.html', {
-                'form': form,
-                'form_errors': form.errors
-            })
     else:
-        # Establecer fecha mínima como hoy por defecto
         form = CitaForm(initial={
-            'fecha': datetime.date.today(),
-            'estatus': 'pendiente'  # Valor inicial para nuevas citas
+            'fecha': hoy,
+            'estatus': 'pendiente'
         })
 
-    return render(request, 'citas/crear_cita.html', { 
+    # Preparación de datos para el template
+    citas_hoy = Cita.objects.filter(fecha=hoy).count()
+    disponibilidad = max(0, 100 - int((citas_hoy / capacidad_maxima) * 100))
+    
+    proximas_citas = []
+    for cita in Cita.objects.filter(fecha__gte=hoy).order_by('fecha', 'hora')[:5]:
+        if cita.paciente:
+            paciente_nombre = f"{cita.paciente.nombre} {cita.paciente.apellido}"
+            tipo_cita = "Individual"
+        elif cita.relacion:
+            paciente_nombre = f"{cita.relacion.paciente1.nombre} & {cita.relacion.paciente2.nombre}"
+            tipo_cita = cita.relacion.get_tipo_relacion_display()
+        else:
+            paciente_nombre = 'Sin paciente'
+            tipo_cita = ""
+        
+        if cita.estatus == 'pendiente':
+            estatus_color = 'green'
+        elif cita.estatus == 'completada':
+            estatus_color = 'blue'
+        else:
+            estatus_color = 'red'
+        
+        proximas_citas.append({
+            'paciente_nombre': paciente_nombre,
+            'tipo_cita': tipo_cita,
+            'fecha': cita.fecha.strftime('%d/%m/%Y'),
+            'hora': cita.hora.strftime('%H:%M'),
+            'estatus': cita.get_estatus_display(),
+            'estatus_color': estatus_color
+        })
+    
+    context = {
         'form': form,
         'pacientes': Paciente.objects.all(),
-        'parejas': RelacionPaciente.objects.filter(tipo_relacion='pareja'),
-        'horas_disponibles': [datetime.time(h, 0) for h in range(8, 18)],
-        'form_errors': form.errors if form.errors else None
-    })
+        'relaciones': RelacionPaciente.objects.all().select_related('paciente1', 'paciente2'),
+        'proximas_citas': proximas_citas,
+        'citas_hoy': citas_hoy,
+        'disponibilidad': disponibilidad,
+    }
+    
+    return render(request, 'citas/crear_cita.html', context)
 
 def listar_citas(request):
     # Obtener el parámetro de búsqueda si existe

@@ -331,17 +331,45 @@ def caracteristicas(request):
 def crear_pais(request):
     if request.method == 'POST':
         form = PaisForm(request.POST)
+        
         if form.is_valid():
-            form.save()
+            pais = form.save()
+            
+            # Si es petición AJAX
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'success': True,
+                    'id': pais.id,
+                    'nombre': pais.nombre_pais,
+                    'message': '✅ País creado exitosamente'
+                })
+            
             messages.success(request, "✅ País creado exitosamente")
         else:
+            # Si es petición AJAX
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'success': False,
+                    'errors': form.errors.get_json_data(),
+                    'message': '❌ Error al crear el país'
+                }, status=400)
+            
+            # Para peticiones normales
             errors = form.errors.as_data()
             for field, error_list in errors.items():
                 for error in error_list:
                     messages.error(request, f"❌ Error en {field}: {error}")
+        
+        # Redirección para peticiones normales
         return redirect('Tablas')
     
-    # Si es GET, deberías mostrar el formulario, pero según tu flujo rediriges
+    # Si es GET
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({
+            'success': False,
+            'message': 'Método no permitido'
+        }, status=405)
+    
     return redirect('Tablas')
 
 def editar_pais(request, id):
@@ -362,17 +390,45 @@ def editar_pais(request, id):
 # Views para Estado
 def crear_estado(request):
     if request.method == 'POST':
+        print("Datos recibidos:", request.POST)  # Depuración
+        
         form = EstadoForm(request.POST)
+        
         if form.is_valid():
             estado = form.save()
-            messages.success(request, f"✅ Estado {estado.nombre_estado} creado exitosamente")
+            print("Estado creado:", estado)  # Depuración
+            
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'success': True,
+                    'id': estado.id,
+                    'nombre': estado.nombre_estado,
+                    'pais_id': estado.pais.id,
+                    'message': '✅ Estado creado exitosamente'
+                })
+            
+            messages.success(request, "✅ Estado creado exitosamente")
         else:
+            print("Errores de validación:", form.errors)  # Depuración
+            
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'success': False,
+                    'errors': form.errors.get_json_data(),
+                    'message': '❌ Error al crear el estado',
+                    'debug': str(form.errors)
+                }, status=400)
+            
             for field, errors in form.errors.items():
                 for error in errors:
                     messages.error(request, f"❌ Error en {field}: {error}")
+        
         return redirect('Tablas')
     
-    return redirect('Tablas')
+    return JsonResponse({
+        'success': False,
+        'message': 'Método no permitido'
+    }, status=405)
 
 def editar_estado(request, id):
     estado = get_object_or_404(Estado, id=id)
@@ -391,15 +447,50 @@ def editar_estado(request, id):
 # Views para Ciudad
 def crear_ciudad(request):
     if request.method == 'POST':
+        # Depuración
+        print("Datos recibidos para ciudad:", request.POST)
+        
         form = CiudadForm(request.POST)
+        
         if form.is_valid():
             ciudad = form.save()
-            messages.success(request, f"✅ Ciudad {ciudad.nombre_ciudad} creada exitosamente")
+            print("Ciudad creada:", ciudad.nombre_ciudad)
+            
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'success': True,
+                    'id': ciudad.id,
+                    'nombre': ciudad.nombre_ciudad,
+                    'estado_id': ciudad.estado.id,
+                    'pais_id': ciudad.estado.pais.id,  # Para dependencias anidadas
+                    'message': '✅ Ciudad creada exitosamente'
+                })
+            
+            messages.success(request, "✅ Ciudad creada exitosamente")
         else:
+            print("Errores en formulario:", form.errors)
+            
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'success': False,
+                    'errors': form.errors.get_json_data(),
+                    'message': '❌ Error al crear ciudad',
+                    'debug': {
+                        'estado': request.POST.get('estado'),
+                        'nombre_ciudad': request.POST.get('nombre_ciudad')
+                    }
+                }, status=400)
+            
             for field, errors in form.errors.items():
                 for error in errors:
-                    messages.error(request, f"❌ Error en {field}: {error}")
+                    messages.error(request, f"❌ {field}: {error}")
+        
         return redirect('Tablas')
+    
+    return JsonResponse({
+        'success': False,
+        'message': 'Método no permitido'
+    }, status=405)
     
     return redirect('Tablas')
 

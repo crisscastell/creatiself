@@ -16,7 +16,6 @@ class Rol(models.Model):
 # Usuario
 class Usuario(AbstractUser):
     rol = models.ForeignKey('Rol', on_delete=models.CASCADE, null=True, blank=True)
-    password = models.CharField(max_length=128, default='123456')
     creado_en = models.DateTimeField(auto_now_add=True)
     actualizado_en = models.DateTimeField(auto_now=True)
     
@@ -161,7 +160,7 @@ class AntecedentesPersonales(models.Model):
 # Condición
 class Condicion(models.Model):
     nombre = models.CharField(max_length=100)
-    descripcion = models.TextField(max_length=100, default="Sin descripción")
+    descripcion = models.TextField(default="Sin descripción")
     activo = models.BooleanField(default=True)
     creado_en = models.DateTimeField(auto_now_add=True)  # Solo auto_now_add
     actualizado_en = models.DateTimeField(auto_now=True)
@@ -179,10 +178,24 @@ class Cita(models.Model):
     
     hora = models.TimeField()
     fecha = models.DateField()
-    modalidad = models.CharField(max_length=50, choices=[('virtual', 'Virtual'), ('presencial', 'Presencial')])
+    modalidad = models.CharField(
+        max_length=50, 
+        choices=[('virtual', 'Virtual'), ('presencial', 'Presencial')]
+    )
     motivo_consulta = models.TextField()
-    paciente = models.ForeignKey('Paciente', on_delete=models.CASCADE, null=True, blank=True)
-    pareja = models.ForeignKey('RelacionPaciente', on_delete=models.CASCADE, null=True, blank=True)
+    paciente = models.ForeignKey(
+        'Paciente', 
+        on_delete=models.CASCADE, 
+        null=True, 
+        blank=True
+    )
+    relacion = models.ForeignKey(
+        'RelacionPaciente', 
+        on_delete=models.CASCADE, 
+        null=True, 
+        blank=True,
+        verbose_name='Relación/Pareja'  # Mejor nombre para admin
+    )
     estatus = models.CharField(
         max_length=20, 
         choices=ESTATUS_CHOICES, 
@@ -192,18 +205,23 @@ class Cita(models.Model):
     def __str__(self):
         if self.paciente:
             return f"Cita de {self.paciente.nombre} - {self.fecha} {self.hora}"
-        elif self.pareja:
-            return f"Cita de pareja {self.pareja.id} - {self.fecha} {self.hora}"
+        elif self.relacion:  # Cambiado de 'pareja' a 'relacion'
+            tipo = self.relacion.get_tipo_relacion_display() if hasattr(self.relacion, 'tipo_relacion') else 'Relación'
+            return f"Cita de {tipo}: {self.relacion.paciente1.nombre} & {self.relacion.paciente2.nombre} - {self.fecha} {self.hora}"
         return f"Cita sin asignar - {self.fecha} {self.hora}"
 
     def clean(self):
-        if not self.paciente and not self.pareja:
-            raise ValidationError('Debe asignar un paciente o una pareja')
-        if self.paciente and self.pareja:
-            raise ValidationError('No puede asignar ambos, paciente y pareja')
+        # Validación de paciente/relación
+        if not self.paciente and not self.relacion:  # Cambiado de 'pareja' a 'relacion'
+            raise ValidationError('Debe asignar un paciente o una relación/pareja')
+        if self.paciente and self.relacion:  # Cambiado de 'pareja' a 'relacion'
+            raise ValidationError('No puede asignar ambos, paciente y relación/pareja')
+        
+        # Validación de fecha
         if self.fecha and self.fecha < datetime.today().date():
             raise ValidationError('No puede agendar citas en fechas pasadas')
 
+        # Validación de solapamiento
         if self.estatus == 'pendiente' and self.fecha and self.hora:
             fecha_hora_inicio = datetime.combine(self.fecha, self.hora)
             fecha_hora_fin = fecha_hora_inicio + timedelta(hours=2)

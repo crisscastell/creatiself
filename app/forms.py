@@ -1,7 +1,7 @@
 # forms.py
 from django import forms
 from .models import *
-from django.contrib.auth.forms import UserChangeForm
+from django.contrib.auth.forms import UserChangeForm, UserCreationForm
 from django import forms
 from .models import Cita
 from django.utils import timezone
@@ -81,18 +81,57 @@ class EmpleadoForm(forms.ModelForm):
             'nivel_academico': forms.Select(attrs={'class': 'form-control border-2 border-gray-200 rounded-lg p-3 w-full'})
         }
        
-class UsuarioForm(UserChangeForm):
+class UsuarioCreationForm(UserCreationForm):
+    email = forms.EmailField(required=True, widget=forms.EmailInput(attrs={
+        'class': 'form-control',
+        'placeholder': 'Correo electrónico'
+    }))
+    
+    rol = forms.ModelChoiceField(
+        queryset=Rol.objects.all(),
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    
+    is_active = forms.BooleanField(
+        initial=True,
+        required=False,
+        widget=forms.CheckboxInput(attrs={'class': 'form-checkbox h-5 w-5 text-blue-600'})
+    )
+
+    class Meta:
+        model = Usuario
+        fields = ['username', 'email', 'rol', 'is_active', 'password1', 'password2']
+        widgets = {
+            'username': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Nombre de usuario'
+            }),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['password1'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': 'Contraseña'
+        })
+        self.fields['password2'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': 'Confirmar contraseña'
+        })
+
+class UsuarioChangeForm(UserChangeForm):
     new_password = forms.CharField(
         widget=forms.PasswordInput(attrs={
-            'class': 'form-control', 
+            'class': 'form-control',
             'placeholder': 'Nueva contraseña (dejar en blanco para no cambiar)'
         }),
         required=False,
         label="Nueva contraseña"
     )
+    
     confirm_password = forms.CharField(
         widget=forms.PasswordInput(attrs={
-            'class': 'form-control', 
+            'class': 'form-control',
             'placeholder': 'Confirmar nueva contraseña'
         }),
         required=False,
@@ -104,11 +143,11 @@ class UsuarioForm(UserChangeForm):
         fields = ['username', 'email', 'rol', 'is_active']
         widgets = {
             'username': forms.TextInput(attrs={
-                'class': 'form-control', 
+                'class': 'form-control',
                 'placeholder': 'Nombre de usuario'
             }),
             'email': forms.EmailInput(attrs={
-                'class': 'form-control', 
+                'class': 'form-control',
                 'placeholder': 'Correo electrónico'
             }),
             'rol': forms.Select(attrs={'class': 'form-control'}),
@@ -152,113 +191,55 @@ class UsuarioForm(UserChangeForm):
         return user
 
 class CitaForm(forms.ModelForm):
+    TIPO_CITA_CHOICES = [
+        ('paciente', 'Individual'),
+        ('relacion', 'Relación'),
+    ]
+    
+    tipo_cita = forms.ChoiceField(
+        choices=TIPO_CITA_CHOICES,
+        widget=forms.RadioSelect,
+        initial='paciente'
+    )
+
     class Meta:
         model = Cita
-        fields = ['paciente', 'pareja', 'hora', 'fecha', 'modalidad', 'motivo_consulta', 'estatus']
+        fields = ['tipo_cita', 'paciente', 'relacion', 'fecha', 'hora', 'modalidad', 'motivo_consulta', 'estatus']
         widgets = {
-            'hora': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
-            'fecha': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'hora': forms.TimeInput(attrs={'type': 'time'}),
+            'fecha': forms.DateInput(attrs={'type': 'date'}),
             'modalidad': forms.Select(attrs={'class': 'form-control'}),
             'motivo_consulta': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
-            'paciente': forms.Select(attrs={'class': 'form-control'}),
-            'pareja': forms.Select(attrs={'class': 'form-control'}),
-            'estatus': forms.Select(attrs={'class': 'form-control'}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Filtramos solo las relaciones de tipo pareja
-        self.fields['pareja'].queryset = RelacionPaciente.objects.filter(tipo_relacion='pareja')
+        self.fields['relacion'].queryset = RelacionPaciente.objects.all()
         
-        # Si estamos editando, establecer el campo correspondiente como requerido
-        if self.instance and self.instance.pk:
-            if self.instance.paciente:
-                self.fields['paciente'].required = True
-                self.fields['pareja'].required = False
-            elif self.instance.pareja:
-                self.fields['pareja'].required = True
-                self.fields['paciente'].required = False
-        
-        # Establecer el valor inicial del estatus como 'pendiente' para nuevas citas
-        if not self.instance.pk:
-            self.fields['estatus'].initial = 'pendiente'
+        # Configurar campos como no requeridos inicialmente
+        self.fields['paciente'].required = False
+        self.fields['relacion'].required = False
 
-    def clean_fecha(self):
-        fecha = self.cleaned_data.get('fecha')
-        hoy = date.today()
-        
-        if fecha and fecha < hoy:
-            raise ValidationError("La fecha de la cita no puede ser anterior a la fecha actual.")
-        return fecha
-
-    def clean_hora(self):
-        hora = self.cleaned_data.get('hora')
-        if hora:
-            # Validar que esté en horario laboral (ejemplo: 8am a 6pm)
-            if hora < time(8, 0) or hora > time(18, 0):
-                raise ValidationError("El horario de atención es de 8:00 AM a 6:00 PM.")
-        return hora
-    
     def clean(self):
         cleaned_data = super().clean()
+        tipo_cita = cleaned_data.get('tipo_cita')
         paciente = cleaned_data.get('paciente')
-        pareja = cleaned_data.get('pareja')
-        fecha = cleaned_data.get('fecha')
-        hora = cleaned_data.get('hora')
-        estatus = cleaned_data.get('estatus', 'pendiente')
+        relacion = cleaned_data.get('relacion')
         
-        # Validar selección de paciente o pareja
-        if not paciente and not pareja:
-            raise ValidationError('Debe seleccionar un paciente o una pareja')
-        if paciente and pareja:
-            raise ValidationError('Solo puede seleccionar un paciente o una pareja, no ambos')
-
-        # Validaciones de fecha y hora
-        if fecha and hora:
-            # Validar que no sea una cita en el pasado (fecha y hora)
-            ahora = datetime.now()
-            fecha_hora_cita = datetime.combine(fecha, hora)
-            
-            if fecha_hora_cita < ahora and estatus == 'pendiente':
-                raise ValidationError("No puede agendar citas pendientes en el pasado.")
-
-            # Validar que no haya citas pendientes en la misma fecha y hora
-            citas_existentes = Cita.objects.filter(fecha=fecha, hora=hora, estatus='pendiente')
-            
-            if self.instance.pk:  # Si es una edición, excluir la cita actual
-                citas_existentes = citas_existentes.exclude(pk=self.instance.pk)
-            
-            if citas_existentes.exists():
-                raise ValidationError('Ya existe una cita pendiente programada para esta fecha y hora exacta')
-            
-            # Validar margen de 2 horas para citas pendientes
-            if estatus == 'pendiente':
-                hora_inicio = hora
-                hora_fin = (datetime.combine(date.today(), hora_inicio) + timedelta(hours=2))
-                hora_fin = hora_fin.time()
-                
-                citas_solapadas = Cita.objects.filter(
-                    fecha=fecha,
-                    hora__gte=hora_inicio,
-                    hora__lt=hora_fin,
-                    estatus='pendiente'
-                )
-                
-                if self.instance.pk:  # Si es una edición, excluir la cita actual
-                    citas_solapadas = citas_solapadas.exclude(pk=self.instance.pk)
-                
-                if citas_solapadas.exists():
-                    raise ValidationError('Debe haber al menos 2 horas entre citas pendientes')
+        if tipo_cita == 'paciente' and not paciente:
+            self.add_error('paciente', 'Debe seleccionar un paciente para citas individuales')
+        elif tipo_cita == 'relacion' and not relacion:
+            self.add_error('relacion', 'Debe seleccionar una relación')
         
         return cleaned_data
 
     def save(self, commit=True):
         instance = super().save(commit=False)
         
-        # Asegurarse de que solo uno de los dos campos esté establecido
-        if instance.paciente:
-            instance.pareja = None
-        elif instance.pareja:
+        # Limpiar el campo no utilizado
+        if self.cleaned_data['tipo_cita'] == 'paciente':
+            instance.relacion = None
+        else:
             instance.paciente = None
         
         if commit:

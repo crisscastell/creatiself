@@ -44,8 +44,6 @@
                         <option value="cancelada">Cancelada</option>
                     </select>
                 </div>
-                
-    
             </div>
         </div>
 
@@ -56,9 +54,9 @@
                     {% for cita in citas %}
                     <div class="cita-card bg-white rounded-lg border border-gray-200 hover:border-teal-300 transition-all duration-200 shadow-sm hover:shadow-md overflow-hidden"
                         data-estatus="{{ cita.estatus }}"
-                        data-tipo="{% if cita.paciente %}{% if cita.paciente.tipo == 'infantil' %}infantil{% else %}individual{% endif %}{% else %}individual{% endif %}"
-                        data-cedula="{% if cita.paciente %}{{ cita.paciente.identificacion }}{% elif cita.pareja %}{{ cita.pareja.paciente1.identificacion }} {{ cita.pareja.paciente2.identificacion }}{% endif %}"
-                        data-nombre="{% if cita.paciente %}{{ cita.paciente.nombre }} {{ cita.paciente.apellido }}{% elif cita.pareja %}Pareja: {{ cita.pareja.paciente1.nombre }} & {{ cita.pareja.paciente2.nombre }}{% endif %}"
+                        data-tipo="{% if cita.paciente %}individual{% else %}relacion{% endif %}"
+                        data-cedula="{% if cita.paciente %}{{ cita.paciente.identificacion }}{% elif cita.relacion %}{{ cita.relacion.paciente1.identificacion }} {{ cita.relacion.paciente2.identificacion }}{% endif %}"
+                        data-nombre="{% if cita.paciente %}{{ cita.paciente.nombre }} {{ cita.paciente.apellido }}{% elif cita.relacion %}Relación: {{ cita.relacion.paciente1.nombre }} & {{ cita.relacion.paciente2.nombre }}{% endif %}"
                         data-motivo="{{ cita.motivo_consulta|lower }}">
                         <!-- Encabezado de la cita -->
                         <div class="px-5 py-4 border-b border-gray-100 flex justify-between items-center">
@@ -67,8 +65,8 @@
                                     <div class="text-lg font-semibold text-gray-900">
                                         {% if cita.paciente %}
                                             {{ cita.paciente.nombre }} {{ cita.paciente.apellido }}
-                                        {% elif cita.pareja %}
-                                            Pareja: {{ cita.pareja.paciente1.nombre }} & {{ cita.pareja.paciente2.nombre }}
+                                        {% elif cita.relacion %}
+                                            Relación: {{ cita.relacion.paciente1.nombre }} & {{ cita.relacion.paciente2.nombre }}
                                         {% endif %}
                                     </div>
                                     <div class="flex items-center mt-1">
@@ -84,8 +82,8 @@
                                             <i data-lucide="id-card" class="w-4 h-4 mr-1"></i>
                                             {% if cita.paciente %}
                                                 {{ cita.paciente.identificacion }}
-                                            {% elif cita.pareja %}
-                                                {{ cita.pareja.paciente1.identificacion }} / {{ cita.pareja.paciente2.identificacion }}
+                                            {% elif cita.relacion %}
+                                                {{ cita.relacion.paciente1.identificacion }} / {{ cita.relacion.paciente2.identificacion }}
                                             {% endif %}
                                         </span>
                                     </div>
@@ -117,7 +115,7 @@
                                             {{ cita.modalidad|title }}
                                         </span>
                                         <span class="ml-2 px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-800">
-                                            {% if cita.paciente and cita.paciente.tipo == 'infantil' %}Infantil{% else %}Individual{% endif %}
+                                            {% if cita.paciente %}Individual{% else %}Relación{% endif %}
                                         </span>
                                     </div>
                                 </div>
@@ -271,13 +269,13 @@
                     <p class="font-medium">
                         {% if cita.paciente %}
                             {{ cita.paciente.nombre }} {{ cita.paciente.apellido }}
-                        {% elif cita.pareja %}
-                            Pareja: {{ cita.pareja.paciente1.nombre }} & {{ cita.pareja.paciente2.nombre }}
+                        {% elif cita.relacion %}
+                            Relación: {{ cita.relacion.paciente1.nombre }} & {{ cita.relacion.paciente2.nombre }}
                         {% endif %}
                     </p>
                 </div>
                 <input type="hidden" name="paciente" value="{% if cita.paciente %}{{ cita.paciente.id }}{% endif %}">
-                <input type="hidden" name="pareja" value="{% if cita.pareja %}{{ cita.pareja.id }}{% endif %}">
+                <input type="hidden" name="relacion" value="{% if cita.relacion %}{{ cita.relacion.id }}{% endif %}">
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -360,8 +358,8 @@
                         <p class="text-lg font-semibold text-gray-900 truncate">
                             {% if cita.paciente %}
                                 {{ cita.paciente.nombre }} {{ cita.paciente.apellido }}
-                            {% elif cita.pareja %}
-                                {{ cita.pareja.paciente1.nombre }} & {{ cita.pareja.paciente2.nombre }}
+                            {% elif cita.relacion %}
+                                {{ cita.relacion.paciente1.nombre }} & {{ cita.relacion.paciente2.nombre }}
                             {% endif %}
                         </p>
                     </div>
