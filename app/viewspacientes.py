@@ -175,16 +175,34 @@ def editar_relacion(request, id):
 
 @require_POST
 def crear_representante(request):
-    if request.method == 'POST':
-        form = RepresentanteForm(request.POST)
-        if form.is_valid():
-            form.save()
-            # Volver a cargar la misma página para seguir agregando representantes
-            return redirect ('Crear_pacientes')
+    form = RepresentanteForm(request.POST)
+    if form.is_valid():
+        representante = form.save()
+        
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            # Respuesta para AJAX
+            return JsonResponse({
+                'success': True,
+                'representante': {
+                    'id': representante.id,
+                    'nombre': representante.nombre,
+                    'apellido': representante.apellido,
+                    'cedula': representante.cedula,
+                    'parentesco': representante.get_parentesco_display()
+                }
+            })
+        else:
+            # Redirección normal para POST tradicional
+            return redirect('Crear_pacientes')
+    
+    # Si el formulario no es válido
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({
+            'success': False,
+            'errors': form.errors.as_json()
+        }, status=400)
     else:
-        form = RepresentanteForm()
-
-    return redirect ('Crear_pacientes')
+        return redirect('Crear_pacientes')
 
 
 def listar_representantes(request):

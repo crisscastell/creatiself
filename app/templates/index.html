@@ -115,7 +115,18 @@
                                 <i data-lucide="user" class="w-5 h-5 text-blue-600"></i>
                             </div>
                             <div>
-                                <p class="font-medium text-gray-800">{{ cita.paciente.nombre }} {{ cita.paciente.apellido }}</p>
+                                <!-- Mostrar nombre del paciente o de la relación -->
+                                {% if cita.paciente %}
+                                    <p class="font-medium text-gray-800">{{ cita.paciente.nombre }} {{ cita.paciente.apellido }}</p>
+                                {% elif cita.relacion %}
+                                    <p class="font-medium text-gray-800">
+                                        {{ cita.relacion.paciente1.nombre }} & {{ cita.relacion.paciente2.nombre }}
+                                        <span class="ml-2 px-2 py-1 rounded-full text-xs bg-yellow-100 text-yellow-800">
+                                            Pareja
+                                        </span>
+                                    </p>
+                                {% endif %}
+                                
                                 <p class="text-sm text-gray-500">
                                     {{ cita.fecha|date:"d M" }} a las {{ cita.hora|time:"H:i" }}
                                     <span class="ml-2 px-2 py-1 rounded-full text-xs 

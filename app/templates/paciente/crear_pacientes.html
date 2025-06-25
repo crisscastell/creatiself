@@ -104,7 +104,7 @@
                             <div class="relative">
                                 <input 
                                     type="text" 
-                                    id="cedula" 
+                                    id="cedula_representante" 
                                     name="cedula" 
                                     class="w-full pl-4 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white" 
                                     placeholder="Ej: 123456789" 
@@ -124,7 +124,7 @@
                             <div class="relative">
                                 <input 
                                     type="text" 
-                                    id="nombre" 
+                                    id="nombre_representante" 
                                     name="nombre" 
                                     class="w-full pl-4 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white" 
                                     placeholder="Ej: Juan" 
@@ -155,7 +155,7 @@
                             <div class="relative">
                                 <input 
                                     type="text" 
-                                    id="apellido" 
+                                    id="apellido_representante" 
                                     name="apellido" 
                                     class="w-full pl-4 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white" 
                                     placeholder="Ej: Juan" 
@@ -203,7 +203,7 @@
                         <div class="relative">
                             <label for="telefono" class="block text-sm font-medium text-gray-700 mb-2">Teléfono <span class="text-red-500">*</span></label>
                             <div class="relative">
-                                <input type="text" id="telefono" name="telefono" class="w-full pl-4 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white" placeholder="Ej: 04121234567" required>
+                                <input type="text" id="telefono_representante" name="telefono" class="w-full pl-4 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white" placeholder="Ej: 04121234567" required>
                                 <div class="absolute inset-y-0 right-0 flex items-center pr-3">
                                     <i class="fas fa-phone text-gray-400"></i>
                                 </div>
@@ -214,7 +214,7 @@
                         <div class="relative">
                             <label for="edad" class="block text-sm font-medium text-gray-700 mb-2">Edad <span class="text-red-500">*</span></label>
                             <div class="relative">
-                                <input type="number" id="edad" name="edad" class="w-full pl-4 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white" placeholder="Ej: 35" required>
+                                <input type="number" id="edad_representante" name="edad" class="w-full pl-4 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white" placeholder="Ej: 35" required>
                                 <div class="absolute inset-y-0 right-0 flex items-center pr-3">
                                     <i class="fas fa-birthday-cake text-gray-400"></i>
                                 </div>
@@ -850,8 +850,78 @@
 </div>
 
 <script>
+    // Objeto para almacenar temporalmente los datos del paciente
+    let pacienteTempData = {
+        tipo_paciente: '',
+        cedula: '',
+        nombre: '',
+        nombre2: '',
+        apellido: '',
+        apellido2: '',
+        telefono: '',
+        edad: '',
+        sexo: '',
+        nivel_academico: '',
+        condicion: '',
+        antecedentes_personales: '',
+        pais: '',
+        estado: '',
+        ciudad: '',
+        direccion: ''
+    };
 
+    // Función para guardar temporalmente los datos del paciente
+    function guardarDatosTemporales() {
+        pacienteTempData.tipo_paciente = document.getElementById('tipo_paciente').value;
+        pacienteTempData.cedula = document.getElementById('cedula').value;
+        pacienteTempData.nombre = document.getElementById('nombre').value;
+        pacienteTempData.nombre2 = document.getElementById('nombre2').value;
+        pacienteTempData.apellido = document.getElementById('apellido').value;
+        pacienteTempData.apellido2 = document.getElementById('apellido2').value;
+        pacienteTempData.telefono = document.getElementById('telefono').value;
+        pacienteTempData.edad = document.getElementById('edad').value;
+        pacienteTempData.sexo = document.getElementById('sexo').value;
+        pacienteTempData.nivel_academico = document.getElementById('nivel_academico').value;
+        pacienteTempData.condicion = document.getElementById('condicion').value;
+        pacienteTempData.antecedentes_personales = document.getElementById('antecedentes_personales').value;
+        pacienteTempData.pais = document.getElementById('pais').value;
+        pacienteTempData.estado = document.getElementById('estado').value;
+        pacienteTempData.ciudad = document.getElementById('ciudad').value;
+        pacienteTempData.direccion = document.getElementById('direccion').value;
+    }
 
+    // Función para restaurar los datos temporales
+    function restaurarDatosTemporales() {
+        document.getElementById('tipo_paciente').value = pacienteTempData.tipo_paciente;
+        document.getElementById('cedula').value = pacienteTempData.cedula;
+        document.getElementById('nombre').value = pacienteTempData.nombre;
+        document.getElementById('nombre2').value = pacienteTempData.nombre2;
+        document.getElementById('apellido').value = pacienteTempData.apellido;
+        document.getElementById('apellido2').value = pacienteTempData.apellido2;
+        document.getElementById('telefono').value = pacienteTempData.telefono;
+        document.getElementById('edad').value = pacienteTempData.edad;
+        document.getElementById('sexo').value = pacienteTempData.sexo;
+        document.getElementById('nivel_academico').value = pacienteTempData.nivel_academico;
+        document.getElementById('condicion').value = pacienteTempData.condicion;
+        document.getElementById('antecedentes_personales').value = pacienteTempData.antecedentes_personales;
+        document.getElementById('pais').value = pacienteTempData.pais;
+        
+        if (pacienteTempData.pais) {
+            document.getElementById('pais').dispatchEvent(new Event('change'));
+            setTimeout(() => {
+                document.getElementById('estado').value = pacienteTempData.estado;
+                if (pacienteTempData.estado) {
+                    document.getElementById('estado').dispatchEvent(new Event('change'));
+                    setTimeout(() => {
+                        document.getElementById('ciudad').value = pacienteTempData.ciudad;
+                    }, 300);
+                }
+            }, 300);
+        }
+        document.getElementById('direccion').value = pacienteTempData.direccion;
+    }
+
+    // Funciones para mostrar/ocultar modales
     function abrirModalPais() {
         document.getElementById('modalPais').classList.remove('hidden');
     }
@@ -876,9 +946,8 @@
         document.getElementById('modalCiudad').classList.add('hidden');
     }
     
-   
-    // Funciones para mostrar/ocultar modales
     function abrirModalRepresentante() {
+        guardarDatosTemporales();
         cargarRepresentantes(1);
         document.getElementById('modalRepresentantes').classList.remove('hidden');
     }
@@ -916,66 +985,104 @@
         abrirModalRepresentante();
     }
 
-    document.getElementById('nombre').addEventListener('input', function(e) {
-        // Elimina caracteres no permitidos (solo letras y espacios)
-        this.value = this.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúñÑ\s]/g, '');
-    });
-    document.getElementById('nombre2').addEventListener('input', function(e) {
-        // Elimina caracteres no permitidos (solo letras y espacios)
-        this.value = this.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúñÑ\s]/g, '');
-    });
-    
-    document.getElementById('apellido').addEventListener('input', function(e) {
-        // Elimina caracteres no permitidos (solo letras y espacios)
-        this.value = this.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúñÑ\s]/g, '');
-    });
+    // Función para seleccionar "Ninguno" en los selects
+    function seleccionarNinguno(tipo) {
+        if (tipo === 'condicion') {
+            document.getElementById('condicion').value = '';
+        } else if (tipo === 'antecedente') {
+            document.getElementById('antecedentes_personales').value = '';
+        }
+    }
 
-    document.getElementById('apellido2').addEventListener('input', function(e) {
-        // Elimina caracteres no permitidos (solo letras y espacios)
-        this.value = this.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúñÑ\s]/g, '');
-    });
+    // Función para validar el formulario de representante
+    function validarFormularioRepresentante() {
+        const cedula = document.getElementById('cedula').value.trim();
+        if (!/^\d+$/.test(cedula)) {
+            mostrarNotificacion('La cédula solo puede contener números', 'error');
+            return false;
+        }
 
-    document.getElementById('cedula').addEventListener('input', function(e) {
-        // Elimina todo lo que no sea número
-        this.value = this.value.replace(/[^0-9]/g, '');
-    });
+        const nombre = document.getElementById('nombre').value.trim();
+        if (!/^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]+$/.test(nombre)) {
+            mostrarNotificacion('El nombre solo puede contener letras', 'error');
+            return false;
+        }
 
-    document.getElementById('telefono').addEventListener('input', function(e) {
-        // Elimina todo lo que no sea número
-        this.value = this.value.replace(/[^0-9]/g, '');
-    });
+        const apellido = document.getElementById('apellido').value.trim();
+        if (!/^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]+$/.test(apellido)) {
+            mostrarNotificacion('El apellido solo puede contener letras', 'error');
+            return false;
+        }
 
-    document.getElementById('buscarPais').addEventListener('input', function() {
-        const searchTerm = this.value.toLowerCase();
-        const options = document.querySelectorAll('#pais_estado option');
+        const telefono = document.getElementById('telefono').value.trim();
+        if (!/^\d+$/.test(telefono)) {
+            mostrarNotificacion('El teléfono solo puede contener números', 'error');
+            return false;
+        }
+
+        const edad = document.getElementById('edad').value.trim();
+        if (!/^\d+$/.test(edad) || parseInt(edad) <= 0 || parseInt(edad) > 120) {
+            mostrarNotificacion('La edad debe ser un número entre 1 y 120', 'error');
+            return false;
+        }
+
+        return true;
+    }
+
+    // Función para guardar representante
+    function guardarRepresentante() {
+        const form = document.getElementById('formRepresentante');
+        const formData = new FormData(form);
         
-        options.forEach(option => {
-            const text = option.textContent.toLowerCase();
-            if (text.includes(searchTerm) || option.value === "") {
-                option.style.display = 'block';
-            } else {
-                option.style.display = 'none';
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': formData.get('csrfmiddlewaretoken')
             }
-        });
-    });
-    
-    // Función para el buscador de estados
-    document.getElementById('buscarEstado').addEventListener('input', function() {
-        const searchTerm = this.value.toLowerCase();
-        const options = document.querySelectorAll('#estado_ciudad option');
-        
-        options.forEach(option => {
-            const text = option.textContent.toLowerCase();
-            if (text.includes(searchTerm) || option.value === "") {
-                option.style.display = 'block';
-            } else {
-                option.style.display = 'none';
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => { throw err; });
             }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                seleccionarRepresentante(
+                    data.representante.id,
+                    `${data.representante.nombre} ${data.representante.apellido}`,
+                    data.representante.cedula,
+                    data.representante.parentesco
+                );
+                mostrarNotificacion('Representante registrado con éxito', 'success');
+                cerrarModalCrearRepresentante();
+            } else {
+                throw new Error(data.errors || 'Error en el formulario');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            mostrarNotificacion(error.message, 'error');
         });
-    });
+    }
 
-     // Funciones para guardar ubicaciones
-     function guardarPais() {
+    // Función para seleccionar un representante
+    function seleccionarRepresentante(id, nombreCompleto, cedula, parentesco) {
+        document.getElementById('representante_id').value = id;
+        document.getElementById('rep-nombre-completo').textContent = nombreCompleto;
+        document.getElementById('rep-cedula').textContent = `Cédula: ${cedula}`;
+        document.getElementById('rep-parentesco').textContent = `Parentesco: ${parentesco}`;
+        document.getElementById('representante-info-display').classList.remove('hidden');
+        document.getElementById('btnAgregarRepresentante').classList.add('hidden');
+        cerrarModalRepresentante();
+        restaurarDatosTemporales();
+        mostrarNotificacion('Representante seleccionado', 'success');
+    }
+
+    // Función para guardar país
+    function guardarPais() {
         const form = document.getElementById('formPais');
         const formData = new FormData(form);
         
@@ -993,20 +1100,13 @@
             }
         })
         .then(response => {
-            // Primero verifica el estado de la respuesta
             if (!response.ok) {
-                // Si hay un error, intenta parsear el JSON del error
-                return response.json().then(err => {
-                    throw new Error(err.message || 'Error al guardar el país');
-                }).catch(() => {
-                    throw new Error(`Error ${response.status}: ${response.statusText}`);
-                });
+                return response.json().then(err => { throw err; });
             }
             return response.json();
         })
         .then(data => {
             if (data.success) {
-                // Actualizar los selects
                 const selectPais = document.getElementById('pais');
                 const newOption = document.createElement('option');
                 newOption.value = data.id;
@@ -1037,11 +1137,11 @@
         });
     }
     
+    // Función para guardar estado
     function guardarEstado() {
         const form = document.getElementById('formEstado');
         const formData = new FormData(form);
         
-        // Verificación de datos antes de enviar
         const paisId = formData.get('pais');
         const nombreEstado = formData.get('nombre_estado');
         
@@ -1064,25 +1164,16 @@
         })
         .then(response => {
             if (!response.ok) {
-                return response.json().then(err => {
-                    // Manejo especial para errores de Django
-                    if (err.errors) {
-                        const firstError = Object.values(err.errors)[0][0].message;
-                        throw new Error(firstError);
-                    }
-                    throw new Error(err.message || `Error ${response.status}`);
-                });
+                return response.json().then(err => { throw err; });
             }
             return response.json();
         })
         .then(data => {
             if (data.success) {
-                // Actualizar select de estados
                 const selectEstado = document.getElementById('estado');
                 const newOption = new Option(data.nombre, data.id, true, true);
                 selectEstado.add(newOption);
                 
-                // Actualizar select de estados en modal de ciudades
                 const selectEstadoCiudad = document.getElementById('estado_ciudad');
                 const newOptionCiudad = new Option(data.nombre, data.id);
                 selectEstadoCiudad.add(newOptionCiudad);
@@ -1095,7 +1186,7 @@
             }
         })
         .catch(error => {
-            console.error('Error completo:', error);
+            console.error('Error:', error);
             mostrarNotificacion(error.message, 'error');
         })
         .finally(() => {
@@ -1104,20 +1195,19 @@
         });
     }
     
+    // Función para guardar ciudad
     function guardarCiudad() {
         const form = document.getElementById('formCiudad');
         const formData = new FormData(form);
         
-        // Validación frontend básica
         const estadoSeleccionado = formData.get('estado');
         const nombreCiudad = formData.get('nombre_ciudad').trim();
         
         if (!estadoSeleccionado || !nombreCiudad) {
-            mostrarNotificacion('❌ Estado y nombre son requeridos', 'error');
+            mostrarNotificacion('Estado y nombre son requeridos', 'error');
             return;
         }
     
-        // UI Loading State
         const submitBtn = form.querySelector('button[type="button"]');
         const originalText = submitBtn.innerHTML;
         submitBtn.disabled = true;
@@ -1132,24 +1222,14 @@
         })
         .then(async response => {
             const data = await response.json();
-            
             if (!response.ok) {
-                // Manejo de errores de Django
-                if (data.errors) {
-                    const firstError = Object.values(data.errors)[0][0].message;
-                    throw new Error(firstError);
-                }
                 throw new Error(data.message || `Error ${response.status}`);
             }
-            
             return data;
         })
         .then(data => {
             if (data.success) {
-                // Actualizar selects
                 actualizarSelectCiudad(data);
-                
-                // Cerrar modal y resetear
                 cerrarModalCiudad();
                 mostrarNotificacion(data.message, 'success');
                 form.reset();
@@ -1165,16 +1245,14 @@
         });
     }
     
-    // Función auxiliar para actualizar selects
+    // Función auxiliar para actualizar selects de ciudad
     function actualizarSelectCiudad(data) {
-        // Select principal
         const selectCiudad = document.getElementById('ciudad');
         if (selectCiudad) {
             const newOption = new Option(data.nombre, data.id, true, true);
             selectCiudad.add(newOption);
         }
         
-        // Select en modal de representantes (si existe)
         const selectCiudadRep = document.getElementById('ciudad_representante');
         if (selectCiudadRep) {
             const newOptionRep = new Option(data.nombre, data.id);
@@ -1182,104 +1260,7 @@
         }
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
-        const paisSelect = document.getElementById('pais');
-        const estadoSelect = document.getElementById('estado');
-        const ciudadSelect = document.getElementById('ciudad');
-        
-        // Datos precargados (convertimos las listas de Django a un objeto JS)
-        const estadosData = {
-            {% for pais in paises %}
-                '{{ pais.id }}': [
-                    {% for estado in pais.estado_set.all %}
-                        {id: '{{ estado.id }}', nombre: '{{ estado.nombre_estado }}'},
-                    {% endfor %}
-                ],
-            {% endfor %}
-        };
-        
-        const ciudadesData = {
-            {% for estado in estados %}
-                '{{ estado.id }}': [
-                    {% for ciudad in estado.ciudad_set.all %}
-                        {id: '{{ ciudad.id }}', nombre: '{{ ciudad.nombre_ciudad }}'},
-                    {% endfor %}
-                ],
-            {% endfor %}
-        };
-        
-        // Cuando cambia el país
-        paisSelect.addEventListener('change', function() {
-            const paisId = this.value;
-            
-            // Limpiar y deshabilitar estados y ciudades
-            estadoSelect.innerHTML = '<option value="">Seleccione un estado</option>';
-            estadoSelect.disabled = !paisId;
-            
-            ciudadSelect.innerHTML = '<option value="">Seleccione una ciudad</option>';
-            ciudadSelect.disabled = true;
-            
-            // Si se seleccionó un país, cargar sus estados
-            if (paisId && estadosData[paisId]) {
-                estadosData[paisId].forEach(estado => {
-                    const option = document.createElement('option');
-                    option.value = estado.id;
-                    option.textContent = estado.nombre;
-                    estadoSelect.appendChild(option);
-                });
-            }
-        });
-        
-        // Cuando cambia el estado
-        estadoSelect.addEventListener('change', function() {
-            const estadoId = this.value;
-            
-            // Limpiar y deshabilitar ciudades
-            ciudadSelect.innerHTML = '<option value="">Seleccione una ciudad</option>';
-            ciudadSelect.disabled = !estadoId;
-            
-            // Si se seleccionó un estado, cargar sus ciudades
-            if (estadoId && ciudadesData[estadoId]) {
-                ciudadesData[estadoId].forEach(ciudad => {
-                    const option = document.createElement('option');
-                    option.value = ciudad.id;
-                    option.textContent = ciudad.nombre;
-                    ciudadSelect.appendChild(option);
-                });
-            }
-        });
-        
-        // Si hay valores preseleccionados (para edición)
-        if (paisSelect.value) {
-            paisSelect.dispatchEvent(new Event('change'));
-            if (estadoSelect.value) {
-                estadoSelect.dispatchEvent(new Event('change'));
-            }
-        }
-    });
-
-    // Manejar cambio en tipo de paciente
-    document.getElementById('tipo_paciente')?.addEventListener('change', function() {
-        const tipoPaciente = this.value;
-        const representanteContainer = document.getElementById('representanteContainer');
-        const btnAgregarRepresentante = document.getElementById('btnAgregarRepresentante');
-    
-        if (!representanteContainer || !btnAgregarRepresentante) {
-            console.error('Elementos del representante no encontrados');
-            return;
-        }
-    
-        if (tipoPaciente === 'infantil') {
-            representanteContainer.classList.remove('hidden');
-            btnAgregarRepresentante.classList.remove('hidden');
-        } else {
-            representanteContainer.classList.add('hidden');
-            btnAgregarRepresentante.classList.add('hidden');
-            document.getElementById('representante_id').value = '';
-        }
-    });
-
-    // Función para cargar representantes con paginación y búsqueda
+    // Función para cargar representantes
     function cargarRepresentantes(page = 1) {
         try {
             const query = document.getElementById('search-input-representantes')?.value || '';
@@ -1301,7 +1282,6 @@
                 
                 container.innerHTML = html;
                 
-                // Agrega eventos a los botones de paginación
                 document.querySelectorAll('[data-page]').forEach(btn => {
                     btn.onclick = (e) => {
                         e.preventDefault();
@@ -1319,84 +1299,11 @@
         }
     }
 
-    // Función para seleccionar un representante de la lista
-    function seleccionarRepresentante(id, nombreCompleto, cedula, parentesco) {
-        document.getElementById('representante_id').value = id;
-        document.getElementById('rep-nombre-completo').textContent = nombreCompleto;
-        document.getElementById('rep-cedula').textContent = `Cédula: ${cedula}`;
-        document.getElementById('rep-parentesco').textContent = `Parentesco: ${parentesco}`;
-        document.getElementById('representante-info-display').classList.remove('hidden');
-        document.getElementById('btnAgregarRepresentante').classList.add('hidden');
-        cerrarModalRepresentante();
-        mostrarNotificacion('Representante seleccionado', 'success');
-    }
-
-    // Función para guardar representante (versión modificada)
-    function guardarRepresentante() {
-        const form = document.getElementById('formRepresentante');
-        const formData = new FormData(form);
-        
-        // Mostrar estado de carga
-        const submitBtn = form.querySelector('button[type="submit"]');
-        const originalText = submitBtn.innerHTML;
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
-    
-        fetch(form.action, {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRFToken': formData.get('csrfmiddlewaretoken')
-            }
-        })
-        .then(response => {
-            if (!response.ok) {
-                return response.json().then(err => { throw err; });
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                // Seleccionar automáticamente el representante recién creado
-                seleccionarRepresentante(
-                    data.id, 
-                    `${data.nombre} ${data.apellido}`, 
-                    data.cedula, 
-                    data.parentesco
-                );
-                
-                // Cerrar el modal de creación
-                cerrarModalCrearRepresentante();
-                
-                // Mostrar notificación
-                mostrarNotificacion('Representante registrado y seleccionado', 'success');
-                
-                // Resetear el formulario
-                form.reset();
-            } else {
-                throw new Error(data.message || 'Error al guardar el representante');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            mostrarNotificacion(error.message || 'Error al procesar la solicitud', 'error');
-        })
-        .finally(() => {
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = originalText;
-        });
-        
-        // Prevenir el envío normal del formulario
-        return false;
-    }
-
-    // Función para guardar condición con AJAX
+    // Función para guardar condición
     function guardarCondicion() {
         const form = document.getElementById('formCondicion');
         const formData = new FormData(form);
         
-        // Mostrar carga
         const submitBtn = form.querySelector('button[type="button"]');
         const originalText = submitBtn.innerHTML;
         submitBtn.disabled = true;
@@ -1418,7 +1325,6 @@
         })
         .then(data => {
             if (data.success) {
-                // Agregar la nueva opción al select de condiciones
                 const selectCondicion = document.getElementById('condicion');
                 const newOption = document.createElement('option');
                 newOption.value = data.id;
@@ -1426,13 +1332,8 @@
                 newOption.selected = true;
                 selectCondicion.appendChild(newOption);
                 
-                // Cerrar el modal
                 cerrarModalCondicion();
-                
-                // Mostrar notificación de éxito
                 mostrarNotificacion(data.message || 'Condición creada exitosamente', 'success');
-                
-                // Resetear el formulario
                 form.reset();
             } else {
                 throw new Error(data.message || 'Error al guardar la condición');
@@ -1448,12 +1349,11 @@
         });
     }
     
-    // Función para guardar antecedente con AJAX
+    // Función para guardar antecedente
     function guardarAntecedente() {
         const form = document.getElementById('formAntecedente');
         const formData = new FormData(form);
         
-        // Mostrar carga
         const submitBtn = form.querySelector('button[type="button"]');
         const originalText = submitBtn.innerHTML;
         submitBtn.disabled = true;
@@ -1475,7 +1375,6 @@
         })
         .then(data => {
             if (data.success) {
-                // Agregar la nueva opción al select de antecedentes
                 const selectAntecedente = document.getElementById('antecedentes_personales');
                 const newOption = document.createElement('option');
                 newOption.value = data.id;
@@ -1483,13 +1382,8 @@
                 newOption.selected = true;
                 selectAntecedente.appendChild(newOption);
                 
-                // Cerrar el modal
                 cerrarModalAntecedente();
-                
-                // Mostrar notificación de éxito
                 mostrarNotificacion(data.message || 'Antecedente creado exitosamente', 'success');
-                
-                // Resetear el formulario
                 form.reset();
             } else {
                 throw new Error(data.message || 'Error al guardar el antecedente');
@@ -1511,7 +1405,6 @@
         const toastIcon = document.getElementById('toast-icon');
         const toastMessage = document.getElementById('toast-message');
         
-        // Configurar según el tipo
         let bgColor = '';
         let icon = '';
         
@@ -1526,25 +1419,77 @@
             icon = 'fa-info-circle';
         }
         
-        // Configurar el toast
         toast.className = `fixed top-4 right-4 z-50 ${bgColor} px-6 py-3 rounded-xl shadow-lg text-white font-medium flex items-center`;
         toastIcon.className = `fas ${icon} mr-3`;
         toastMessage.textContent = mensaje;
         
-        // Mostrar
         toast.classList.remove('hidden');
         
-        // Ocultar después de 5 segundos
         setTimeout(() => {
             toast.classList.add('hidden');
         }, 5000);
     }
 
+    // Función para capitalizar inputs de texto
+    function capitalizarInput(input) {
+        input.addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúñÑ\s]/g, '');
+            this.value = this.value.toLowerCase().replace(/(^|\s)\S/g, function(letra) {
+                return letra.toUpperCase();
+            });
+        });
+    }
+
+    // Manejar cambio en tipo de paciente
+    function manejarTipoPaciente() {
+        const tipoPaciente = document.getElementById('tipo_paciente').value;
+        const representanteContainer = document.getElementById('representanteContainer');
+        const btnAgregarRepresentante = document.getElementById('btnAgregarRepresentante');
+        const representanteInfoDisplay = document.getElementById('representante-info-display');
+    
+        if (!representanteContainer || !btnAgregarRepresentante || !representanteInfoDisplay) {
+            console.error('Elementos del representante no encontrados');
+            return;
+        }
+    
+        if (tipoPaciente === 'infantil') {
+            representanteContainer.classList.remove('hidden');
+            // Mostrar botón solo si no hay representante seleccionado
+            if (!document.getElementById('representante_id').value) {
+                btnAgregarRepresentante.classList.remove('hidden');
+            }
+            representanteInfoDisplay.classList.add('hidden');
+        } else {
+            representanteContainer.classList.add('hidden');
+            btnAgregarRepresentante.classList.add('hidden');
+            document.getElementById('representante_id').value = '';
+        }
+    }
+
     // Inicializar eventos cuando se carga el DOM
     document.addEventListener('DOMContentLoaded', function() {
-        // Manejar representante recién guardado
-        manejarRepresentanteGuardado();
+        // Capitalizar nombres y apellidos
+        capitalizarInput(document.getElementById('nombre'));
+        capitalizarInput(document.getElementById('nombre2'));
+        capitalizarInput(document.getElementById('apellido'));
+        capitalizarInput(document.getElementById('apellido2'));
         
+        // Validar y formatear cédula y teléfono
+        document.getElementById('cedula').addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+        
+        document.getElementById('telefono').addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+        
+        document.getElementById('edad').addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^0-9]/g, '');
+            if (parseInt(this.value) > 120) {
+                this.value = '120';
+            }
+        });
+
         // Evento para el formulario de búsqueda de representantes
         document.getElementById('search-form-representantes')?.addEventListener('submit', function(e) {
             e.preventDefault();
@@ -1567,44 +1512,166 @@
                 mostrarNotificacion('Para pacientes infantiles es necesario registrar un representante', 'error');
                 abrirModalRepresentante();
             }
+            
+            const cedula = document.getElementById('cedula').value;
+            if (!/^\d+$/.test(cedula)) {
+                e.preventDefault();
+                mostrarNotificacion('La cédula solo puede contener números', 'error');
+                return;
+            }
+            
+            const telefono = document.getElementById('telefono').value;
+            if (!/^\d+$/.test(telefono)) {
+                e.preventDefault();
+                mostrarNotificacion('El teléfono solo puede contener números', 'error');
+                return;
+            }
+            
+            const edad = document.getElementById('edad').value;
+            if (!/^\d+$/.test(edad) || parseInt(edad) <= 0 || parseInt(edad) > 120) {
+                e.preventDefault();
+                mostrarNotificacion('La edad debe ser un número entre 1 y 120', 'error');
+                return;
+            }
         });
-    });
 
-    // Función para capitalizar la primera letra de cada palabra
-        function capitalizarInput(input) {
-            input.addEventListener('input', function(e) {
-                // Elimina caracteres no permitidos (solo letras y espacios)
-                this.value = this.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúñÑ\s]/g, '');
-                
-                // Capitaliza la primera letra de cada palabra
-                this.value = this.value.toLowerCase().replace(/(^|\s)\S/g, function(letra) {
-                    return letra.toUpperCase();
+        // Cargar datos de ubicación
+        const paisSelect = document.getElementById('pais');
+        const estadoSelect = document.getElementById('estado');
+        const ciudadSelect = document.getElementById('ciudad');
+        
+        const estadosData = {
+            {% for pais in paises %}
+                '{{ pais.id }}': [
+                    {% for estado in pais.estado_set.all %}
+                        {id: '{{ estado.id }}', nombre: '{{ estado.nombre_estado }}'},
+                    {% endfor %}
+                ],
+            {% endfor %}
+        };
+        
+        const ciudadesData = {
+            {% for estado in estados %}
+                '{{ estado.id }}': [
+                    {% for ciudad in estado.ciudad_set.all %}
+                        {id: '{{ ciudad.id }}', nombre: '{{ ciudad.nombre_ciudad }}'},
+                    {% endfor %}
+                ],
+            {% endfor %}
+        };
+        
+        paisSelect.addEventListener('change', function() {
+            const paisId = this.value;
+            
+            estadoSelect.innerHTML = '<option value="">Seleccione un estado</option>';
+            estadoSelect.disabled = !paisId;
+            
+            ciudadSelect.innerHTML = '<option value="">Seleccione una ciudad</option>';
+            ciudadSelect.disabled = true;
+            
+            if (paisId && estadosData[paisId]) {
+                estadosData[paisId].forEach(estado => {
+                    const option = document.createElement('option');
+                    option.value = estado.id;
+                    option.textContent = estado.nombre;
+                    estadoSelect.appendChild(option);
                 });
+            }
+        });
+        
+        estadoSelect.addEventListener('change', function() {
+            const estadoId = this.value;
+            
+            ciudadSelect.innerHTML = '<option value="">Seleccione una ciudad</option>';
+            ciudadSelect.disabled = !estadoId;
+            
+            if (estadoId && ciudadesData[estadoId]) {
+                ciudadesData[estadoId].forEach(ciudad => {
+                    const option = document.createElement('option');
+                    option.value = ciudad.id;
+                    option.textContent = ciudad.nombre;
+                    ciudadSelect.appendChild(option);
+                });
+            }
+        });
+        
+        if (paisSelect.value) {
+            paisSelect.dispatchEvent(new Event('change'));
+            if (estadoSelect.value) {
+                estadoSelect.dispatchEvent(new Event('change'));
+            }
+        }
+
+        // Buscador de países
+        document.getElementById('buscarPais').addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const options = document.querySelectorAll('#pais_estado option');
+            
+            options.forEach(option => {
+                const text = option.textContent.toLowerCase();
+                if (text.includes(searchTerm) || option.value === "") {
+                    option.style.display = 'block';
+                } else {
+                    option.style.display = 'none';
+                }
+            });
+        });
+        
+        // Buscador de estados
+        document.getElementById('buscarEstado').addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const options = document.querySelectorAll('#estado_ciudad option');
+            
+            options.forEach(option => {
+                const text = option.textContent.toLowerCase();
+                if (text.includes(searchTerm) || option.value === "") {
+                    option.style.display = 'block';
+                } else {
+                    option.style.display = 'none';
+                }
+            });
+        });
+
+        // Validación en tiempo real para el formulario de representante
+        const cedulaRep = document.getElementById('cedula');
+        if (cedulaRep) {
+            cedulaRep.addEventListener('input', function(e) {
+                this.value = this.value.replace(/[^0-9]/g, '');
             });
         }
 
-        // Aplicar a los campos de nombre y apellido
-        document.addEventListener('DOMContentLoaded', function() {
-            // Capitalizar nombres y apellidos
-            capitalizarInput(document.getElementById('nombre'));
-            capitalizarInput(document.getElementById('nombre2'));
-            capitalizarInput(document.getElementById('apellido'));
-            capitalizarInput(document.getElementById('apellido2'));
-            
-            // También para el representante si existe
-            if (document.getElementById('nombre_representante')) {
-                capitalizarInput(document.getElementById('nombre_representante'));
-                capitalizarInput(document.getElementById('apellido_representante'));
-            }
-            
-            // Validar y formatear cédula y teléfono
-            document.getElementById('cedula').addEventListener('input', function(e) {
+        const nombreRep = document.getElementById('nombre');
+        if (nombreRep) {
+            capitalizarInput(nombreRep);
+        }
+
+        const apellidoRep = document.getElementById('apellido');
+        if (apellidoRep) {
+            capitalizarInput(apellidoRep);
+        }
+
+        const telefonoRep = document.getElementById('telefono');
+        if (telefonoRep) {
+            telefonoRep.addEventListener('input', function(e) {
                 this.value = this.value.replace(/[^0-9]/g, '');
             });
-            
-            document.getElementById('telefono').addEventListener('input', function(e) {
+        }
+
+        const edadRep = document.getElementById('edad');
+        if (edadRep) {
+            edadRep.addEventListener('input', function(e) {
                 this.value = this.value.replace(/[^0-9]/g, '');
+                if (parseInt(this.value) > 120) {
+                    this.value = '120';
+                }
             });
-        });
+        }
+
+        // Configurar evento change para tipo de paciente
+        document.getElementById('tipo_paciente').addEventListener('change', manejarTipoPaciente);
+        
+        // Ejecutar inicialmente para establecer el estado correcto
+        manejarTipoPaciente();
+    });
 </script>
-{% endblock %}
+{% endblock %} 

@@ -13,30 +13,25 @@
 
         <!-- Search and Filters -->
         <div class="bg-white rounded-lg shadow-xs p-4 mb-6">
-            <form method="GET" action="{% url 'Listar_empleados' %}" class="flex flex-col md:flex-row gap-3">
+            <form id="filterForm" method="GET" action="{% url 'Listar_empleados' %}" class="flex flex-col md:flex-row gap-3">
                 <div class="relative flex-grow">
                     <i data-lucide="search" class="absolute left-3 top-3 text-gray-500"></i>
                     <input 
                         type="text" 
                         id="searchInput"
+                        name="q"
                         placeholder="Buscar por nombre, cédula, teléfono..." 
                         class="pl-10 pr-4 py-2 w-full border border-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        onkeyup="filterCards()"
+                        value="{{ request.GET.q }}"
                     />
                 </div>
                 
                 <div class="flex gap-2">
-         
                     <select name="status" class="p-2 border border-gray-200 rounded-lg text-sm focus:ring-blue-200 focus:border-blue-400">
                         <option value="">Todos los estados</option>
                         <option value="1" {% if request.GET.status == "1" %}selected{% endif %}>Activos</option>
                         <option value="0" {% if request.GET.status == "0" %}selected{% endif %}>Inactivos</option>
                     </select>
-                    
-                    <button type="submit" class="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                        <i data-lucide="filter" class="w-4 h-4"></i>
-                        Filtrar
-                    </button>
                 </div>
             </form>
         </div>
@@ -520,7 +515,7 @@
 <script>
     lucide.createIcons();
 
-    // Función para filtrar empleados
+    // Función para filtrar empleados en el cliente (búsqueda instantánea)
     window.filterCards = function() {
         const input = document.getElementById("searchInput").value.toLowerCase();
         const cards = document.querySelectorAll(".empleado-card");
@@ -530,6 +525,37 @@
             card.style.display = text.includes(input) ? "" : "none";
         });
     };
+
+    // Configurar el filtrado automático
+    document.addEventListener('DOMContentLoaded', function() {
+        const filterForm = document.getElementById('filterForm');
+        const inputs = filterForm.querySelectorAll('input, select');
+        
+        // Agregar evento de cambio a todos los inputs y selects del formulario
+        inputs.forEach(input => {
+            input.addEventListener('change', function() {
+                // Para el campo de búsqueda, usamos un retraso para evitar muchas solicitudes
+                if (input.name === 'q') {
+                    clearTimeout(window.filterTimeout);
+                    window.filterTimeout = setTimeout(() => {
+                        filterForm.submit();
+                    }, 500); // 500ms de retraso después de que el usuario deja de escribir
+                } else {
+                    filterForm.submit();
+                }
+            });
+            
+            // Para el campo de búsqueda, también escuchar el evento input
+            if (input.name === 'q') {
+                input.addEventListener('input', function() {
+                    clearTimeout(window.filterTimeout);
+                    window.filterTimeout = setTimeout(() => {
+                        filterForm.submit();
+                    }, 500);
+                });
+            }
+        });
+    });
     
     // Funciones para el modal de visualización
     function openModalVerEmpleado(id) {

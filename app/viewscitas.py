@@ -183,6 +183,7 @@ def historial(request):
     
     # Conteos para estadísticas
     completadas_count = detalles_citas.filter(cita__estatus='completada').count()
+    pendientes_count = detalles_citas.filter(cita__estatus='pendiente').count()
     este_mes_count = detalles_citas.filter(cita__fecha__month=timezone.now().month).count()
     
     # Paginación
@@ -194,4 +195,5 @@ def historial(request):
         'detalles_citas': page_obj,
         'completadas_count': completadas_count,
         'este_mes_count': este_mes_count,
+        'pendientes_count':pendientes_count
     })

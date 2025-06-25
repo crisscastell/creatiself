@@ -26,7 +26,7 @@
 
     <!-- Filtros -->
     <div class="bg-white rounded-lg shadow-sm p-4 mb-6 border border-gray-100">
-        <form method="GET" action="{% url 'Listar_usuarios' %}" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <form id="filterForm" method="GET" action="{% url 'Listar_usuarios' %}" class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div class="md:col-span-2">
                 <div class="relative">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -46,15 +46,12 @@
                     {% endfor %}
                 </select>
             </div>
-            <div class="flex gap-2">
-                <select name="status" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+            <div>
+                <select name="status" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                     <option value="">Todos</option>
                     <option value="1" {% if request.GET.status == "1" %}selected{% endif %}>Activos</option>
                     <option value="0" {% if request.GET.status == "0" %}selected{% endif %}>Inactivos</option>
                 </select>
-                <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg">
-                    <i class="fas fa-filter"></i>
-                </button>
             </div>
         </form>
     </div>
@@ -205,7 +202,7 @@
 
 {% block scripts %}
 <script>
-    // Funciones para manejar modales (igual que antes)
+    // Funciones para manejar modales
     function openModal(id) {
         document.getElementById(id).classList.remove('hidden');
         document.body.classList.add('overflow-hidden');
@@ -276,6 +273,35 @@
         {% endfor %}
     {% endif %}
     
-    // Eliminar el timeout anterior para mensajes ya que ahora usamos SweetAlert
-    </script>
+    // Filtro automático
+    document.addEventListener('DOMContentLoaded', function() {
+        const filterForm = document.getElementById('filterForm');
+        const inputs = filterForm.querySelectorAll('input, select');
+        
+        // Agregar evento de cambio a todos los inputs y selects del formulario
+        inputs.forEach(input => {
+            input.addEventListener('change', function() {
+                // Agregar un pequeño retraso para el campo de búsqueda
+                if (input.name === 'q') {
+                    clearTimeout(window.filterTimeout);
+                    window.filterTimeout = setTimeout(() => {
+                        filterForm.submit();
+                    }, 500); // 500ms de retraso después de que el usuario deja de escribir
+                } else {
+                    filterForm.submit();
+                }
+            });
+            
+            // Para el campo de búsqueda, también escuchar el evento input
+            if (input.name === 'q') {
+                input.addEventListener('input', function() {
+                    clearTimeout(window.filterTimeout);
+                    window.filterTimeout = setTimeout(() => {
+                        filterForm.submit();
+                    }, 500);
+                });
+            }
+        });
+    });
+</script>
 {% endblock %}

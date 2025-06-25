@@ -100,7 +100,7 @@ def index(request):
         virtual_mensual.append(count)
     
     # Datos existentes
-    pacientes_destacados = Paciente.objects.all()[:5]
+    pacientes_destacados = Paciente.objects.all()[:6]
     proximas_citas = Cita.objects.filter(fecha__gte=hoy).order_by('fecha', 'hora')[:3]
 
     context = {
