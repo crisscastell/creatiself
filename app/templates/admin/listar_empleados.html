@@ -3,107 +3,139 @@
 {% block title %}Gestión de Empleados{% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-gray-50 py-20 px-4">
+<div class="min-h-screen bg-gray-50 py-20 px-4 sm:px-6 lg:px-8">
     <div class="max-w-7xl mx-auto">
         <!-- Header -->
-        <div class="mb-8">
-            <h1 class="text-2xl font-semibold text-gray-800">Gestión de Empleados</h1>
-            <p class="text-gray-500 mt-1">Administra el registro de empleados de tu organización</p>
+        <div class="mb-8 text-center sm:text-left">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">Gestión de Empleados</h1>
+                    <p class="mt-2 text-lg text-gray-600">Administra el registro de empleados de tu organización</p>
+                </div>
+                <a href="{% url 'Crear_empleado' %}" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+                    <i data-lucide="plus" class="mr-2 w-5 h-5"></i>
+                    Agregar Empleado
+                </a>
+            </div>
         </div>
 
         <!-- Search and Filters -->
-        <div class="bg-white rounded-lg shadow-xs p-4 mb-6">
-            <form id="filterForm" method="GET" action="{% url 'Listar_empleados' %}" class="flex flex-col md:flex-row gap-3">
-                <div class="relative flex-grow">
-                    <i data-lucide="search" class="absolute left-3 top-3 text-gray-500"></i>
-                    <input 
-                        type="text" 
-                        id="searchInput"
-                        name="q"
-                        placeholder="Buscar por nombre, cédula, teléfono..." 
-                        class="pl-10 pr-4 py-2 w-full border border-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        value="{{ request.GET.q }}"
-                    />
-                </div>
-                
-                <div class="flex gap-2">
-                    <select name="status" class="p-2 border border-gray-200 rounded-lg text-sm focus:ring-blue-200 focus:border-blue-400">
-                        <option value="">Todos los estados</option>
-                        <option value="1" {% if request.GET.status == "1" %}selected{% endif %}>Activos</option>
-                        <option value="0" {% if request.GET.status == "0" %}selected{% endif %}>Inactivos</option>
-                    </select>
-                </div>
-            </form>
+        <!-- Barra de búsqueda principal -->
+        <div class="relative flex-grow">
+            <i data-lucide="search" class="absolute left-3 top-3 text-gray-500"></i>
+            <input 
+                type="text" 
+                id="searchInput"
+                placeholder="Buscar por nombre, cédula, teléfono..." 
+                class="pl-10 pr-4 py-2 w-full border border-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                onkeyup="filterCards()"
+            />
         </div>
-
         <!-- Employee Cards Container -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {% if empleados %}
+        <div class="empleado-card grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {% for empleado in empleados %}
-            <div class="empleado-card bg-white rounded-lg shadow-xs p-4 hover:shadow-md transition-shadow cursor-pointer" onclick="openModalVerEmpleado('{{ empleado.id }}')">
+            <div class="empleado-card bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow duration-200 transform hover:-translate-y-1 cursor-pointer" onclick="openModalVerEmpleado('{{ empleado.id }}')">
                 <!-- Card Header -->
-                <div class="flex justify-between items-start mb-3">
-                    <div>
-                        <h3 class="font-semibold text-gray-800">{{ empleado.nombre }} {{ empleado.apellido }}</h3>
-                        <p class="text-sm text-gray-500">{{ empleado.cargo }}</p>
+                <div class="flex justify-between items-start p-6 pb-4">
+                    <div class="flex items-center space-x-4">
+                        <div class="flex-shrink-0">
+                            <div class="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold text-lg">
+                                {{ empleado.nombre|first }}{{ empleado.apellido|first }}
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-900">{{ empleado.nombre }} {{ empleado.apellido }}</h3>
+                            <p class="text-sm text-gray-500">{{ empleado.cargo }}</p>
+                        </div>
                     </div>
                     <div>
                         {% if empleado.status %}
-                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-200 text-green-800">Activo</span>
+                            <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Activo</span>
                         {% else %}
-                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-200 text-red-800">Inactivo</span>
+                            <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Inactivo</span>
                         {% endif %}
                     </div>
                 </div>
                 
                 <!-- Progress Bar -->
-                <div class="mb-4">
-                    <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
-                        <div class="h-full bg-blue-500 rounded-full" style="width: {% if empleado.status %}90%{% else %}10%{% endif %}"></div>
+                <div class="px-6 pb-4">
+                    <div class="flex justify-between text-sm text-gray-600 mb-1">
+                        <span>Disponibilidad</span>
+                        <span>{% if empleado.status %}90%{% else %}10%{% endif %}</span>
                     </div>
-                    <p class="text-xs text-gray-500 mt-1">Disponibilidad</p>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div class="h-2 rounded-full {% if empleado.status %}bg-blue-600{% else %}bg-gray-400{% endif %}" style="width: {% if empleado.status %}90%{% else %}10%{% endif %}"></div>
+                    </div>
                 </div>
                 
                 <!-- Employee Details -->
-                <div class="space-y-2 text-sm">
-                    <div class="flex items-center">
-                        <i data-lucide="id-card" class="w-4 h-4 text-gray-500 mr-2"></i>
-                        <span class="text-gray-700">Cédula: {{ empleado.cedula }}</span>
-                    </div>
-                    <div class="flex items-center">
-                        <i data-lucide="phone" class="w-4 h-4 text-gray-500 mr-2"></i>
-                        <span class="text-gray-700">{{ empleado.telefono }}</span>
-                    </div>
-                    <div class="flex items-center">
-                        <i data-lucide="venus-mars" class="w-4 h-4 text-gray-500 mr-2"></i>
-                        <span class="text-gray-700">
-                            {% if empleado.sexo == 'masculino' %}Masculino{% else %}Femenino{% endif %}
-                        </span>
+                <div class="border-t border-gray-100 px-6 py-4">
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                        <div class="flex items-center">
+                            <i data-lucide="id-card" class="w-4 h-4 text-gray-500 mr-2"></i>
+                            <span class="text-gray-700 truncate">{{ empleado.cedula }}</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i data-lucide="phone" class="w-4 h-4 text-gray-500 mr-2"></i>
+                            <span class="text-gray-700 truncate">{{ empleado.telefono }}</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i data-lucide="venus-mars" class="w-4 h-4 text-gray-500 mr-2"></i>
+                            <span class="text-gray-700">
+                                {% if empleado.sexo == 'masculino' %}Masculino{% else %}Femenino{% endif %}
+                            </span>
+                        </div>
+                        <div class="flex items-center">
+                            <i data-lucide="calendar" class="w-4 h-4 text-gray-500 mr-2"></i>
+                            <span class="text-gray-700">{{ empleado.edad }} años</span>
+                        </div>
                     </div>
                 </div>
                 
                 <!-- Actions -->
-                <div class="mt-4 flex justify-end">
-                    <button onclick="event.stopPropagation(); openModalEditarEmpleado('{{ empleado.id }}')" class="p-2 text-blue-500 hover:text-blue-700 rounded-full hover:bg-blue-50 transition-colors">
-                        <i data-lucide="edit" class="w-4 h-4"></i>
+                <div class="bg-gray-50 px-6 py-3 flex justify-between items-center border-t border-gray-100">
+                    <button onclick="event.stopPropagation(); exportToPDF('{{ empleado.id }}')" class="px-3 py-2 text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-100 transition-colors duration-200 flex items-center">
+                        <i data-lucide="file-text" class="w-4 h-4 mr-2"></i>
+                        PDF
                     </button>
+                    <div class="flex space-x-2">
+                        <button onclick="event.stopPropagation(); openModalEditarEmpleado('{{ empleado.id }}')" class="p-2 text-blue-500 hover:text-blue-700 rounded-lg hover:bg-blue-50 transition-colors duration-200">
+                            <i data-lucide="edit" class="w-5 h-5"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
             {% endfor %}
         </div>
+        {% else %}
+        <div class="bg-white rounded-xl shadow-sm p-12 text-center border border-gray-100">
+            <i data-lucide="users" class="mx-auto h-12 w-12 text-gray-400"></i>
+            <h3 class="mt-2 text-lg font-medium text-gray-900">No se encontraron empleados</h3>
+            <p class="mt-1 text-sm text-gray-500">No hay empleados que coincidan con los criterios de búsqueda.</p>
+            <div class="mt-6">
+                <a href="{% url 'Crear_empleado' %}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    <i data-lucide="plus" class="mr-2 w-4 h-4"></i>
+                    Agregar nuevo empleado
+                </a>
+            </div>
+        </div>
+        {% endif %}
 
         <!-- Pagination -->
-        <div class="mt-6 bg-white px-6 py-3 flex items-center justify-between border-t border-gray-200 rounded-b-lg">
-            <div class="flex-1 flex justify-between items-center">
+        {% if empleados.has_other_pages %}
+        <div class="mt-8 bg-white px-6 py-4 flex items-center justify-between border border-gray-100 rounded-xl shadow-sm">
+            <div class="flex-1 flex flex-col sm:flex-row justify-between items-center gap-4">
                 <p class="text-sm text-gray-700">
                     Mostrando <span class="font-medium">{{ empleados.start_index }}</span> a <span class="font-medium">{{ empleados.end_index }}</span> de <span class="font-medium">{{ empleados.paginator.count }}</span> empleados
                 </p>
-                <div class="flex space-x-2">
+                <div class="flex space-x-1">
                     {% if empleados.has_previous %}
-                    <a href="?page=1" class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
-                        &laquo;
+                    <a href="?page=1" class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center">
+                        <i data-lucide="chevrons-left" class="w-4 h-4"></i>
                     </a>
-                    <a href="?page={{ empleados.previous_page_number }}" class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
-                        &lsaquo;
+                    <a href="?page={{ empleados.previous_page_number }}" class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center">
+                        <i data-lucide="chevron-left" class="w-4 h-4"></i>
                     </a>
                     {% endif %}
                     
@@ -122,87 +154,80 @@
                     {% endfor %}
                     
                     {% if empleados.has_next %}
-                    <a href="?page={{ empleados.next_page_number }}" class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
-                        &rsaquo;
+                    <a href="?page={{ empleados.next_page_number }}" class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center">
+                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
                     </a>
-                    <a href="?page={{ empleados.paginator.num_pages }}" class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
-                        &raquo;
+                    <a href="?page={{ empleados.paginator.num_pages }}" class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center">
+                        <i data-lucide="chevrons-right" class="w-4 h-4"></i>
                     </a>
                     {% endif %}
                 </div>
             </div>
         </div>
-
-        <!-- Add Button -->
-        <div class="mt-6 flex justify-end">
-            <a href="{% url 'Crear_empleado' %}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                <i data-lucide="plus" class="mr-2 w-4 h-4"></i>
-                Agregar Empleado
-            </a>
-        </div>
+        {% endif %}
     </div>
 </div>
 
 <!-- Modal para Ver Empleado (solo lectura) -->
 {% for empleado in empleados %}
-    <div id="modalVerEmpleado{{ empleado.id }}" class="fixed inset-0 bg-gray-500 bg-opacity-75 hidden flex items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div id="modalVerEmpleado{{ empleado.id }}" class="fixed inset-0 bg-gray-500 bg-opacity-75 hidden flex items-center justify-center z-50 p-4 transition-opacity duration-300">
+        <div class="bg-white rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto transform transition-all duration-300">
             <!-- Modal Header -->
-            <div class="px-6 py-4 border-b flex justify-between items-center">
-                <h3 class="text-lg font-medium text-gray-900">Información del Empleado</h3>
-                <button type="button" onclick="closeModalVerEmpleado('{{ empleado.id }}')" class="text-gray-400 hover:text-gray-500">
+            <div class="px-6 py-4 border-b flex justify-between items-center sticky top-0 bg-white z-10">
+                <h3 class="text-xl font-semibold text-gray-900">Información del Empleado</h3>
+                <button type="button" onclick="closeModalVerEmpleado('{{ empleado.id }}')" class="text-gray-400 hover:text-gray-500 rounded-full p-1 hover:bg-gray-100">
                     <i data-lucide="x" class="w-6 h-6"></i>
                 </button>
             </div>
             
             <!-- Modal Content -->
             <div class="p-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <!-- Columna 1 -->
                     <div class="space-y-6">
                         <!-- Información Básica -->
                         <div>
-                            <h4 class="text-sm font-medium text-gray-500 mb-3">INFORMACIÓN BÁSICA</h4>
-                            <div class="space-y-3">
+                            <h4 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Información Básica</h4>
+                            <div class="space-y-4">
                                 <div>
-                                    <p class="text-xs text-gray-500">Usuario</p>
-                                    <p class="text-sm text-gray-800">{{ empleado.usuario.username }}</p>
+                                    <p class="text-xs text-gray-500 mb-1">Usuario</p>
+                                    <p class="text-sm font-medium text-gray-800">{{ empleado.usuario.username }}</p>
                                 </div>
                                 
                                 <div>
-                                    <p class="text-xs text-gray-500">Cédula</p>
-                                    <p class="text-sm text-gray-800">{{ empleado.cedula }}</p>
+                                    <p class="text-xs text-gray-500 mb-1">Cédula</p>
+                                    <p class="text-sm font-medium text-gray-800">{{ empleado.cedula }}</p>
                                 </div>
                                 
                                 <div>
-                                    <p class="text-xs text-gray-500">Nombres</p>
-                                    <p class="text-sm text-gray-800">{{ empleado.nombre }} {{ empleado.nombre2 }}</p>
+                                    <p class="text-xs text-gray-500 mb-1">Nombres</p>
+                                    <p class="text-sm font-medium text-gray-800">{{ empleado.nombre }} {{ empleado.nombre2 }}</p>
                                 </div>
                                 
                                 <div>
-                                    <p class="text-xs text-gray-500">Apellidos</p>
-                                    <p class="text-sm text-gray-800">{{ empleado.apellido }} {{ empleado.apellido2 }}</p>
+                                    <p class="text-xs text-gray-500 mb-1">Apellidos</p>
+                                    <p class="text-sm font-medium text-gray-800">{{ empleado.apellido }} {{ empleado.apellido2 }}</p>
                                 </div>
                             </div>
                         </div>
                         
                         <!-- Información Laboral -->
                         <div>
-                            <h4 class="text-sm font-medium text-gray-500 mb-3">INFORMACIÓN LABORAL</h4>
-                            <div class="space-y-3">
+                            <h4 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Información Laboral</h4>
+                            <div class="space-y-4">
                                 <div>
-                                    <p class="text-xs text-gray-500">Cargo</p>
-                                    <p class="text-sm text-gray-800">{{ empleado.cargo }}</p>
+                                    <p class="text-xs text-gray-500 mb-1">Cargo</p>
+                                    <p class="text-sm font-medium text-gray-800">{{ empleado.cargo }}</p>
                                 </div>
                                 
                                 <div>
-                                    <p class="text-xs text-gray-500">Fecha de Ingreso</p>
-                                    <p class="text-sm text-gray-800">{{ empleado.fecha_ingreso|date:"d/m/Y" }}</p>
+                                    <p class="text-xs text-gray-500 mb-1">Fecha de Ingreso</p>
+                                    <p class="text-sm font-medium text-gray-800">{{ empleado.fecha_ingreso|date:"d/m/Y" }}</p>
                                 </div>
                                 
                                 <div>
-                                    <p class="text-xs text-gray-500">Nivel Académico</p>
-                                    <p class="text-sm text-gray-800">
+                                    <p class="text-xs text-gray-500 mb-1">Nivel Académico</p>
+                                    <p class="text-sm font-medium text-gray-800">
                                         {% if empleado.nivel_academico == 'primaria' %}Primaria
                                         {% elif empleado.nivel_academico == 'secundaria' %}Secundaria
                                         {% elif empleado.nivel_academico == 'bachillerato' %}Bachillerato
@@ -223,12 +248,12 @@
                                 </div>
                                 
                                 <div>
-                                    <p class="text-xs text-gray-500">Estado</p>
-                                    <p class="text-sm text-gray-800">
+                                    <p class="text-xs text-gray-500 mb-1">Estado</p>
+                                    <p class="text-sm font-medium text-gray-800">
                                         {% if empleado.status %}
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-200 text-green-800">Activo</span>
+                                            <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Activo</span>
                                         {% else %}
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-200 text-red-800">Inactivo</span>
+                                            <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Inactivo</span>
                                         {% endif %}
                                     </p>
                                 </div>
@@ -240,58 +265,58 @@
                     <div class="space-y-6">
                         <!-- Información Personal -->
                         <div>
-                            <h4 class="text-sm font-medium text-gray-500 mb-3">INFORMACIÓN PERSONAL</h4>
-                            <div class="space-y-3">
+                            <h4 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Información Personal</h4>
+                            <div class="space-y-4">
                                 <div>
-                                    <p class="text-xs text-gray-500">Teléfono</p>
-                                    <p class="text-sm text-gray-800">{{ empleado.telefono }}</p>
+                                    <p class="text-xs text-gray-500 mb-1">Teléfono</p>
+                                    <p class="text-sm font-medium text-gray-800">{{ empleado.telefono }}</p>
                                 </div>
                                 
                                 <div>
-                                    <p class="text-xs text-gray-500">Sexo</p>
-                                    <p class="text-sm text-gray-800">
+                                    <p class="text-xs text-gray-500 mb-1">Sexo</p>
+                                    <p class="text-sm font-medium text-gray-800">
                                         {% if empleado.sexo == 'masculino' %}
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-200 text-blue-800">Masculino</span>
+                                            <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">Masculino</span>
                                         {% else %}
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-pink-200 text-pink-800">Femenino</span>
+                                            <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-pink-100 text-pink-800">Femenino</span>
                                         {% endif %}
                                     </p>
                                 </div>
                                 
                                 <div>
-                                    <p class="text-xs text-gray-500">Fecha de Nacimiento</p>
-                                    <p class="text-sm text-gray-800">{{ empleado.fecha_nacimiento|date:"d/m/Y" }}</p>
+                                    <p class="text-xs text-gray-500 mb-1">Fecha de Nacimiento</p>
+                                    <p class="text-sm font-medium text-gray-800">{{ empleado.fecha_nacimiento|date:"d/m/Y" }}</p>
                                 </div>
                                 
                                 <div>
-                                    <p class="text-xs text-gray-500">Edad</p>
-                                    <p class="text-sm text-gray-800">{{ empleado.edad }} años</p>
+                                    <p class="text-xs text-gray-500 mb-1">Edad</p>
+                                    <p class="text-sm font-medium text-gray-800">{{ empleado.edad }} años</p>
                                 </div>
                             </div>
                         </div>
                         
                         <!-- Ubicación -->
                         <div>
-                            <h4 class="text-sm font-medium text-gray-500 mb-3">UBICACIÓN</h4>
-                            <div class="space-y-3">
+                            <h4 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Ubicación</h4>
+                            <div class="space-y-4">
                                 <div>
-                                    <p class="text-xs text-gray-500">País</p>
-                                    <p class="text-sm text-gray-800">{{ empleado.pais.nombre_pais }}</p>
+                                    <p class="text-xs text-gray-500 mb-1">País</p>
+                                    <p class="text-sm font-medium text-gray-800">{{ empleado.pais.nombre_pais }}</p>
                                 </div>
                                 
                                 <div>
-                                    <p class="text-xs text-gray-500">Estado</p>
-                                    <p class="text-sm text-gray-800">{{ empleado.estado.nombre_estado }}</p>
+                                    <p class="text-xs text-gray-500 mb-1">Estado</p>
+                                    <p class="text-sm font-medium text-gray-800">{{ empleado.estado.nombre_estado }}</p>
                                 </div>
                                 
                                 <div>
-                                    <p class="text-xs text-gray-500">Ciudad</p>
-                                    <p class="text-sm text-gray-800">{{ empleado.ciudad.nombre_ciudad }}</p>
+                                    <p class="text-xs text-gray-500 mb-1">Ciudad</p>
+                                    <p class="text-sm font-medium text-gray-800">{{ empleado.ciudad.nombre_ciudad }}</p>
                                 </div>
                                 
                                 <div>
-                                    <p class="text-xs text-gray-500">Dirección</p>
-                                    <p class="text-sm text-gray-800">{{ empleado.direccion }}</p>
+                                    <p class="text-xs text-gray-500 mb-1">Dirección</p>
+                                    <p class="text-sm font-medium text-gray-800">{{ empleado.direccion }}</p>
                                 </div>
                             </div>
                         </div>
@@ -300,8 +325,12 @@
             </div>
             
             <!-- Modal Footer -->
-            <div class="px-6 py-4 border-t flex justify-end">
-                <button type="button" onclick="closeModalVerEmpleado('{{ empleado.id }}')" class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+            <div class="px-6 py-4 border-t flex justify-end space-x-3 sticky bottom-0 bg-white">
+                <button type="button" onclick="event.stopPropagation(); exportToPDF('{{ empleado.id }}')" class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 flex items-center">
+                    <i data-lucide="file-text" class="mr-2 w-4 h-4"></i>
+                    Exportar a PDF
+                </button>
+                <button type="button" onclick="closeModalVerEmpleado('{{ empleado.id }}')" class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                     Cerrar
                 </button>
             </div>
@@ -311,12 +340,12 @@
 
 <!-- Modals -->
 {% for empleado in empleados %}
-    <div id="modalEditarEmpleado{{ empleado.id }}" class="fixed inset-0 bg-gray-500 bg-opacity-75 hidden flex items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div id="modalEditarEmpleado{{ empleado.id }}" class="fixed inset-0 bg-gray-500 bg-opacity-75 hidden flex items-center justify-center z-50 p-4 transition-opacity duration-300">
+        <div class="bg-white rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto transform transition-all duration-300">
             <!-- Modal Header -->
-            <div class="px-6 py-4 border-b flex justify-between items-center">
-                <h3 class="text-lg font-medium text-gray-900">Editar Empleado</h3>
-                <button type="button" onclick="closeModalEditarEmpleado('{{ empleado.id }}')" class="text-gray-400 hover:text-gray-500">
+            <div class="px-6 py-4 border-b flex justify-between items-center sticky top-0 bg-white z-10">
+                <h3 class="text-xl font-semibold text-gray-900">Editar Empleado</h3>
+                <button type="button" onclick="closeModalEditarEmpleado('{{ empleado.id }}')" class="text-gray-400 hover:text-gray-500 rounded-full p-1 hover:bg-gray-100">
                     <i data-lucide="x" class="w-6 h-6"></i>
                 </button>
             </div>
@@ -325,17 +354,17 @@
             <form method="POST" action="{% url 'Editar_empleado' empleado.id %}" class="p-6">
                 {% csrf_token %}
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <!-- Columna 1 -->
-                    <div class="space-y-4">
+                    <div class="space-y-6">
                         <!-- Información Básica -->
                         <div>
-                            <h4 class="text-sm font-medium text-gray-500 mb-3">INFORMACIÓN BÁSICA</h4>
+                            <h4 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Información Básica</h4>
                             <div class="space-y-4">
                                 <!-- Usuario -->
                                 <div>
                                     <label for="usuario_{{empleado.id}}" class="block text-sm font-medium text-gray-700 mb-1">Usuario *</label>
-                                    <select id="usuario_{{empleado.id}}" name="usuario" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm" required>
+                                    <select id="usuario_{{empleado.id}}" name="usuario" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm" required>
                                         {% for usuario in usuarios %}
                                             <option value="{{ usuario.id }}" {% if usuario.id == empleado.usuario.id %}selected{% endif %}>{{ usuario.username }}</option>
                                         {% endfor %}
@@ -345,53 +374,53 @@
                                 <!-- Cédula -->
                                 <div>
                                     <label for="cedula_{{empleado.id}}" class="block text-sm font-medium text-gray-700 mb-1">Cédula *</label>
-                                    <input type="text" id="cedula_{{empleado.id}}" name="cedula" value="{{ empleado.cedula }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm" required>
+                                    <input type="text" id="cedula_{{empleado.id}}" name="cedula" value="{{ empleado.cedula }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm" required>
                                 </div>
                                 
                                 <!-- Nombres -->
                                 <div>
                                     <label for="nombre_{{empleado.id}}" class="block text-sm font-medium text-gray-700 mb-1">Primer Nombre *</label>
-                                    <input type="text" id="nombre_{{empleado.id}}" name="nombre" value="{{ empleado.nombre }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm" required>
+                                    <input type="text" id="nombre_{{empleado.id}}" name="nombre" value="{{ empleado.nombre }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm" required>
                                 </div>
                                 
                                 <div>
                                     <label for="nombre2_{{empleado.id}}" class="block text-sm font-medium text-gray-700 mb-1">Segundo Nombre</label>
-                                    <input type="text" id="nombre2_{{empleado.id}}" name="nombre2" value="{{ empleado.nombre2 }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm">
+                                    <input type="text" id="nombre2_{{empleado.id}}" name="nombre2" value="{{ empleado.nombre2 }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm">
                                 </div>
                                 
                                 <!-- Apellidos -->
                                 <div>
                                     <label for="apellido_{{empleado.id}}" class="block text-sm font-medium text-gray-700 mb-1">Primer Apellido *</label>
-                                    <input type="text" id="apellido_{{empleado.id}}" name="apellido" value="{{ empleado.apellido }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm" required>
+                                    <input type="text" id="apellido_{{empleado.id}}" name="apellido" value="{{ empleado.apellido }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm" required>
                                 </div>
                                 
                                 <div>
                                     <label for="apellido2_{{empleado.id}}" class="block text-sm font-medium text-gray-700 mb-1">Segundo Apellido</label>
-                                    <input type="text" id="apellido2_{{empleado.id}}" name="apellido2" value="{{ empleado.apellido2 }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm">
+                                    <input type="text" id="apellido2_{{empleado.id}}" name="apellido2" value="{{ empleado.apellido2 }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm">
                                 </div>
                             </div>
                         </div>
                         
                         <!-- Información Laboral -->
                         <div>
-                            <h4 class="text-sm font-medium text-gray-500 mb-3">INFORMACIÓN LABORAL</h4>
+                            <h4 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Información Laboral</h4>
                             <div class="space-y-4">
                                 <!-- Cargo -->
                                 <div>
                                     <label for="cargo_{{empleado.id}}" class="block text-sm font-medium text-gray-700 mb-1">Cargo *</label>
-                                    <input type="text" id="cargo_{{empleado.id}}" name="cargo" value="{{ empleado.cargo }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm" required>
+                                    <input type="text" id="cargo_{{empleado.id}}" name="cargo" value="{{ empleado.cargo }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm" required>
                                 </div>
                                 
                                 <!-- Fechas -->
                                 <div>
                                     <label for="fecha_ingreso_{{empleado.id}}" class="block text-sm font-medium text-gray-700 mb-1">Fecha de Ingreso *</label>
-                                    <input type="date" id="fecha_ingreso_{{empleado.id}}" name="fecha_ingreso" value="{{ empleado.fecha_ingreso|date:'Y-m-d' }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm" required>
+                                    <input type="date" id="fecha_ingreso_{{empleado.id}}" name="fecha_ingreso" value="{{ empleado.fecha_ingreso|date:'Y-m-d' }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm" required>
                                 </div>
                                 
                                 <!-- Nivel Académico -->
                                 <div>
                                     <label for="nivel_academico_{{empleado.id}}" class="block text-sm font-medium text-gray-700 mb-1">Nivel Académico</label>
-                                    <select id="nivel_academico_{{empleado.id}}" name="nivel_academico" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm">
+                                    <select id="nivel_academico_{{empleado.id}}" name="nivel_academico" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm">
                                         <option value="primaria" {% if empleado.nivel_academico == 'primaria' %}selected{% endif %}>Primaria</option>
                                         <option value="secundaria" {% if empleado.nivel_academico == 'secundaria' %}selected{% endif %}>Secundaria</option>
                                         <option value="bachillerato" {% if empleado.nivel_academico == 'bachillerato' %}selected{% endif %}>Bachillerato</option>
@@ -419,21 +448,21 @@
                     </div>
                     
                     <!-- Columna 2 -->
-                    <div class="space-y-4">
+                    <div class="space-y-6">
                         <!-- Información Personal -->
                         <div>
-                            <h4 class="text-sm font-medium text-gray-500 mb-3">INFORMACIÓN PERSONAL</h4>
+                            <h4 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Información Personal</h4>
                             <div class="space-y-4">
                                 <!-- Teléfono -->
                                 <div>
                                     <label for="telefono_{{empleado.id}}" class="block text-sm font-medium text-gray-700 mb-1">Teléfono *</label>
-                                    <input type="text" id="telefono_{{empleado.id}}" name="telefono" value="{{ empleado.telefono }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm" required>
+                                    <input type="text" id="telefono_{{empleado.id}}" name="telefono" value="{{ empleado.telefono }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm" required>
                                 </div>
                                 
                                 <!-- Sexo -->
                                 <div>
                                     <label for="sexo_{{empleado.id}}" class="block text-sm font-medium text-gray-700 mb-1">Sexo *</label>
-                                    <select id="sexo_{{empleado.id}}" name="sexo" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm" required>
+                                    <select id="sexo_{{empleado.id}}" name="sexo" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm" required>
                                         <option value="masculino" {% if empleado.sexo == 'masculino' %}selected{% endif %}>Masculino</option>
                                         <option value="femenino" {% if empleado.sexo == 'femenino' %}selected{% endif %}>Femenino</option>
                                     </select>
@@ -442,25 +471,25 @@
                                 <!-- Fechas -->
                                 <div>
                                     <label for="fecha_nacimiento_{{empleado.id}}" class="block text-sm font-medium text-gray-700 mb-1">Fecha de Nacimiento *</label>
-                                    <input type="date" id="fecha_nacimiento_{{empleado.id}}" name="fecha_nacimiento" value="{{ empleado.fecha_nacimiento|date:'Y-m-d' }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm" required>
+                                    <input type="date" id="fecha_nacimiento_{{empleado.id}}" name="fecha_nacimiento" value="{{ empleado.fecha_nacimiento|date:'Y-m-d' }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm" required>
                                 </div>
                                 
                                 <!-- Edad -->
                                 <div>
                                     <label for="edad_{{empleado.id}}" class="block text-sm font-medium text-gray-700 mb-1">Edad *</label>
-                                    <input type="number" id="edad_{{empleado.id}}" name="edad" value="{{ empleado.edad }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm" required>
+                                    <input type="number" id="edad_{{empleado.id}}" name="edad" value="{{ empleado.edad }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm" required>
                                 </div>
                             </div>
                         </div>
                         
                         <!-- Ubicación -->
                         <div>
-                            <h4 class="text-sm font-medium text-gray-500 mb-3">UBICACIÓN</h4>
+                            <h4 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Ubicación</h4>
                             <div class="space-y-4">
                                 <!-- País -->
                                 <div>
                                     <label for="pais_{{empleado.id}}" class="block text-sm font-medium text-gray-700 mb-1">País *</label>
-                                    <select id="pais_{{empleado.id}}" name="pais" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm" required>
+                                    <select id="pais_{{empleado.id}}" name="pais" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm" required>
                                         {% for pais in paises %}
                                             <option value="{{ pais.id }}" {% if pais.id == empleado.pais.id %}selected{% endif %}>{{ pais.nombre_pais }}</option>
                                         {% endfor %}
@@ -470,7 +499,7 @@
                                 <!-- Estado -->
                                 <div>
                                     <label for="estado_{{empleado.id}}" class="block text-sm font-medium text-gray-700 mb-1">Estado *</label>
-                                    <select id="estado_{{empleado.id}}" name="estado" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm" required>
+                                    <select id="estado_{{empleado.id}}" name="estado" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm" required>
                                         {% for estado in estados %}
                                             <option value="{{ estado.id }}" {% if estado.id == empleado.estado.id %}selected{% endif %}>{{ estado.nombre_estado }}</option>
                                         {% endfor %}
@@ -480,7 +509,7 @@
                                 <!-- Ciudad -->
                                 <div>
                                     <label for="ciudad_{{empleado.id}}" class="block text-sm font-medium text-gray-700 mb-1">Ciudad *</label>
-                                    <select id="ciudad_{{empleado.id}}" name="ciudad" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm" required>
+                                    <select id="ciudad_{{empleado.id}}" name="ciudad" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm" required>
                                         {% for ciudad in ciudades %}
                                             <option value="{{ ciudad.id }}" {% if ciudad.id == empleado.ciudad.id %}selected{% endif %}>{{ ciudad.nombre_ciudad }}</option>
                                         {% endfor %}
@@ -490,7 +519,7 @@
                                 <!-- Dirección -->
                                 <div>
                                     <label for="direccion_{{empleado.id}}" class="block text-sm font-medium text-gray-700 mb-1">Dirección *</label>
-                                    <textarea id="direccion_{{empleado.id}}" name="direccion" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm" required>{{ empleado.direccion }}</textarea>
+                                    <textarea id="direccion_{{empleado.id}}" name="direccion" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm" required>{{ empleado.direccion }}</textarea>
                                 </div>
                             </div>
                         </div>
@@ -498,7 +527,7 @@
                 </div>
                 
                 <!-- Modal Footer -->
-                <div class="px-6 py-4 border-t flex justify-end space-x-3">
+                <div class="px-6 py-4 border-t flex justify-end space-x-3 sticky bottom-0 bg-white">
                     <button type="button" onclick="closeModalEditarEmpleado('{{ empleado.id }}')" class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                         Cancelar
                     </button>
@@ -511,11 +540,29 @@
     </div>
 {% endfor %}
 
+<!-- Include jsPDF library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
 <script>
-    lucide.createIcons();
 
-    // Función para filtrar empleados en el cliente (búsqueda instantánea)
+    // Mostrar SweetAlert si hay mensajes
+    document.addEventListener('DOMContentLoaded', function() {
+        {% if messages %}
+            {% for message in messages %}
+                Swal.fire({
+                    title: '{{ message.tags|title }}',
+                    text: '{{ message }}',
+                    icon: '{{ message.tags }}',
+                    confirmButtonText: 'Entendido',
+                    timer: 3000,
+                    timerProgressBar: true
+                });
+            {% endfor %}
+        {% endif %}
+    });
+
+    // Función para filtrar pacientes
     window.filterCards = function() {
         const input = document.getElementById("searchInput").value.toLowerCase();
         const cards = document.querySelectorAll(".empleado-card");
@@ -526,34 +573,187 @@
         });
     };
 
-    // Configurar el filtrado automático
-    document.addEventListener('DOMContentLoaded', function() {
-        const filterForm = document.getElementById('filterForm');
-        const inputs = filterForm.querySelectorAll('input, select');
+    lucide.createIcons();
+    
+    // Initialize jsPDF
+    const { jsPDF } = window.jspdf;
+
+    // Función para exportar a PDF
+    async function exportToPDF(id) {
+        try {
+            const doc = new jsPDF('p', 'mm', 'a4');
+            const margin = 15;
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const pageHeight = doc.internal.pageSize.getHeight();
+            let y = 20;
         
-        // Agregar evento de cambio a todos los inputs y selects del formulario
-        inputs.forEach(input => {
-            input.addEventListener('change', function() {
-                // Para el campo de búsqueda, usamos un retraso para evitar muchas solicitudes
-                if (input.name === 'q') {
-                    clearTimeout(window.filterTimeout);
-                    window.filterTimeout = setTimeout(() => {
-                        filterForm.submit();
-                    }, 500); // 500ms de retraso después de que el usuario deja de escribir
-                } else {
-                    filterForm.submit();
-                }
-            });
-            
-            // Para el campo de búsqueda, también escuchar el evento input
-            if (input.name === 'q') {
-                input.addEventListener('input', function() {
-                    clearTimeout(window.filterTimeout);
-                    window.filterTimeout = setTimeout(() => {
-                        filterForm.submit();
-                    }, 500);
-                });
+            // Estilos
+            const styles = {
+                title: { size: 16, color: [15, 118, 110], style: 'bold' },
+                section: { size: 13, color: [75, 85, 99], style: 'bold' },
+                label: { size: 11, color: [0, 0, 0], style: 'normal' },
+                value: { size: 11, color: [15, 118, 110], style: 'bold' },
+                footer: { size: 9, color: [100, 100, 100], style: 'normal' },
+            };
+        
+            function applyStyle({ size, color, style }) {
+                doc.setFontSize(size);
+                doc.setFont('helvetica', style);
+                doc.setTextColor(...color);
             }
+        
+            // Logo
+            const toBase64 = url => fetch(url)
+                .then(res => res.blob())
+                .then(blob => new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(blob);
+                }));
+            const logoBase64 = await toBase64('/static/creatiself.jpg');
+        
+            doc.addImage(logoBase64, 'JPEG', margin, y, 30, 30);
+            applyStyle(styles.title);
+            doc.text('Creatiself', margin + 38, y + 10);
+            applyStyle(styles.label);
+            doc.text('RIF: J-50521532-9', margin + 38, y + 18);
+            doc.text(`Generado el: ${new Date().toLocaleDateString()}`, pageWidth - margin, y + 18, { align: 'right' });
+        
+            y += 35;
+            doc.setDrawColor(15, 118, 110);
+            doc.line(margin, y, pageWidth - margin, y);
+            y += 10;
+        
+            applyStyle(styles.title);
+            doc.text('INFORMACIÓN DEL EMPLEADO', pageWidth / 2, y, { align: 'center' });
+            y += 10;
+        
+            const modal = document.getElementById(`modalVerEmpleado${id}`);
+            if (!modal) return alert('No se pudo encontrar la información del empleado');
+        
+            const nombre = modal.querySelector('h3.text-gray-900')?.textContent || 'Nombre no disponible';
+        
+            const getText = label => {
+                const fields = Array.from(modal.querySelectorAll('p.text-sm.font-medium.text-gray-800'));
+                for (const el of fields) {
+                    if (el.previousElementSibling?.textContent.includes(label)) {
+                        return el.textContent.trim();
+                    }
+                }
+                return 'No disponible';
+            };
+        
+            // Datos
+            const datosPersonales = [
+                ['Nombre completo', nombre],
+                ['Cédula', getText('Cédula')],
+                ['Teléfono', getText('Teléfono')],
+                ['Sexo', getText('Sexo')],
+                ['Fecha de nacimiento', getText('Nacimiento')],
+                ['Edad', getText('Edad')],
+            ];
+        
+            const datosLaborales = [
+                ['Cargo', getText('Cargo')],
+                ['Fecha de ingreso', getText('Ingreso')],
+                ['Nivel académico', getText('Académico')],
+            ];
+        
+            const datosUbicacion = [
+                ['País', getText('País')],
+                ['Estado', getText('Estado')],
+                ['Ciudad', getText('Ciudad')],
+                ['Dirección', getText('Dirección')],
+            ];
+        
+            // Sección helper
+            function printSection(title, data) {
+                applyStyle(styles.section);
+                doc.text(title, margin, y);
+                y += 7;
+                data.forEach(([label, value]) => {
+                    applyStyle(styles.label);
+                    doc.text(`${label}:`, margin, y);
+                    const labelWidth = doc.getTextWidth(`${label}: `);
+                    applyStyle(styles.value);
+        
+                    if (label === 'Dirección') {
+                        const textLines = doc.splitTextToSize(value, pageWidth - margin * 2 - labelWidth);
+                        doc.text(textLines, margin + labelWidth + 2, y);
+                        y += textLines.length * 6;
+                    } else {
+                        doc.text(value, margin + labelWidth + 2, y);
+                        y += 7;
+                    }
+        
+                    // Si se acerca al fondo de la página
+                    if (y > pageHeight - 30) {
+                        doc.addPage();
+                        y = 20;
+                    }
+                });
+                y += 5;
+            }
+        
+            printSection('DATOS PERSONALES', datosPersonales);
+            printSection('INFORMACIÓN LABORAL', datosLaborales);
+            printSection('UBICACIÓN', datosUbicacion);
+        
+            // Footer
+            const pageCount = doc.internal.getNumberOfPages();
+            for (let i = 1; i <= pageCount; i++) {
+                doc.setPage(i);
+                doc.setDrawColor(15, 118, 110);
+                doc.line(margin, pageHeight - 15, pageWidth - margin, pageHeight - 15);
+                applyStyle(styles.footer);
+                doc.text('Creatiself - Gestión de Empleados', margin, pageHeight - 10);
+                doc.text(`Página ${i} de ${pageCount}`, pageWidth / 2, pageHeight - 10, { align: 'center' });
+                doc.text(`Generado el ${new Date().toLocaleDateString()}`, pageWidth - margin, pageHeight - 10, { align: 'right' });
+            }
+        
+            doc.save(`Empleado_${nombre.replace(/ /g, '_')}.pdf`);
+            await Swal.fire({
+                title: 'PDF Generado',
+                text: 'El archivo PDF ha sido generado exitosamente',
+                icon: 'success',
+                confirmButtonText: 'Entendido',
+                timer: 3000,
+                timerProgressBar: true
+            });
+        } catch (error) {
+            Swal.fire({
+                title: 'Error',
+                text: 'Ocurrió un error al generar el PDF: ' + error.message,
+                icon: 'error',
+                confirmButtonText: 'Entendido'
+            });
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('filterForm');
+        const searchInput = document.getElementById('searchInput');
+        const statusSelect = form.querySelector('select[name="status"]');
+    
+        // Auto-submit cuando se cambia el select
+        statusSelect.addEventListener('change', () => {
+            form.submit();
+        });
+    
+        // Auto-submit al dejar de tipear
+        let typingTimer;
+        const typingDelay = 600; // milisegundos de espera tras dejar de escribir
+    
+        searchInput.addEventListener('keyup', () => {
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(() => {
+                form.submit();
+            }, typingDelay);
+        });
+    
+        searchInput.addEventListener('keydown', () => {
+            clearTimeout(typingTimer); // Reinicia el timer mientras se escribe
         });
     });
     

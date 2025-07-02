@@ -3,469 +3,737 @@
 {% block title %}Relaciones de Pacientes{% endblock %}
 
 {% block content %}
-<div class="mt-16 px-4 sm:px-6 lg:px-8 py-10">
+<div class="min-h-screen bg-gray-50 px-4 py-20 sm:px-6 lg:px-8">
     <div class="max-w-7xl mx-auto">
-        <!-- Header con botón -->
+        <!-- Header mejorado -->
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
-            <div>
+            <div class="flex-1">
                 <h1 class="text-3xl font-bold text-gray-900">Relaciones entre Pacientes</h1>
                 <p class="mt-2 text-lg text-gray-600">Administre las conexiones y relaciones entre sus pacientes</p>
             </div>
             <button onclick="openModalCrearRelacion()" 
-                    class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-xl shadow-sm text-white bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-700 hover:to-teal-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all">
-                <i class="fas fa-plus mr-2"></i> Nueva Relación
+                    class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-xl shadow-sm text-white bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 transform hover:-translate-y-0.5">
+                <i class="fas fa-plus mr-3"></i> Nueva Relación
             </button>
         </div>
 
-        <!-- Barra de búsqueda y filtros mejorada -->
-        <div class="bg-gray-50 p-4 rounded-lg mb-6">
-            <div class="flex flex-col md:flex-row gap-4">
-                <!-- Barra de búsqueda principal -->
-                <div class="relative flex-grow">
-                    <i data-lucide="search" class="absolute left-3 top-3 text-gray-500"></i>
-                    <input 
-                        type="text" 
-                        id="searchInput"
-                        placeholder="Buscar por nombre, cédula, teléfono..." 
-                        class="pl-10 pr-4 py-2 w-full border border-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        onkeyup="filterCards()"
-                    />
+        <div class="flex flex-col lg:flex-row gap-8">
+            <!-- Listado de relaciones (columna izquierda) - Más ancha -->
+            <div class="lg:w-3/4">
+                <!-- Barra de búsqueda mejorada -->
+                <div class="mb-8">
+                    <div class="relative rounded-xl shadow-sm">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i class="fas fa-search text-gray-500 text-lg"></i>
+                        </div>
+                        <input type="text" id="searchInput" onkeyup="filterCards()"
+                               class="block w-full pl-12 pr-16 py-3 text-lg border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                               placeholder="Buscar relaciones...">
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                            <select name="tipo" class="h-full py-0 pl-3 pr-8 border-transparent bg-transparent text-gray-600 text-lg rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">Todos los tipos</option>
+                                <option value="pareja">Pareja</option>
+                                <option value="familiar">Familiar</option>
+                                <option value="otro">Otro</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
-                
-                <!-- Filtros adicionales -->
-                <div class="flex gap-2">
-                    <select name="tipo" class="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500">
-                        <option value="">Tipo de relación</option>
-                        <option value="pareja" {% if request.GET.tipo == 'pareja' %}selected{% endif %}>Pareja</option>
-                        <option value="familiar" {% if request.GET.tipo == 'familiar' %}selected{% endif %}>Familiar</option>
-                        <option value="otro" {% if request.GET.tipo == 'otro' %}selected{% endif %}>Otro</option>
-                    </select>
-                    
-                    <button type="submit" 
-                            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                        Filtrar
-                    </button>
-                </div>
-            </div>
-        </div>
 
-        <!-- Lista de relaciones -->
-        <div class="bg-white shadow overflow-hidden sm:rounded-xl mb-8">
-            <ul class="divide-y divide-gray-200"> 
-                {% for relacion in relaciones %}
-                <li class= " relacion-card hover:bg-gray-50 transition-colors duration-150">
-                    <div class="px-6 py-5 flex items-center justify-between">
-                        <div class="flex items-center">
-                            <div class="flex-shrink-0 h-12 w-12 rounded-full 
-                                {% if relacion.tipo_relacion == 'pareja' %}bg-gradient-to-r from-pink-500 to-rose-500
-                                {% elif relacion.tipo_relacion == 'familiar' %}bg-gradient-to-r from-blue-500 to-indigo-500
-                                {% else %}bg-gradient-to-r from-gray-500 to-gray-700{% endif %}
-                                flex items-center justify-center text-white">
-                                {% if relacion.tipo_relacion == 'pareja' %}
-                                <i class="fas fa-heart text-xl"></i>
-                                {% elif relacion.tipo_relacion == 'familiar' %}
-                                <i class="fas fa-users text-xl"></i>
-                                {% else %}
-                                <i class="fas fa-link text-xl"></i>
-                                {% endif %}
+                <!-- Lista de relaciones mejorada -->
+                <div class="bg-white shadow-lg rounded-xl overflow-hidden">
+                    <ul class="divide-y divide-gray-200">
+                        {% for relacion in relaciones %}
+                        <li class="relacion-card hover:bg-gray-50 transition-all duration-200">
+                            <div class="px-6 py-5 flex items-center justify-between">
+                                <div class="flex items-center min-w-0 flex-1">
+                                    <div class="flex-shrink-0 h-14 w-14 rounded-full 
+                                        {% if relacion.tipo_relacion == 'pareja' %}bg-pink-100 text-pink-600
+                                        {% elif relacion.tipo_relacion == 'familiar' %}bg-blue-100 text-blue-600
+                                        {% else %}bg-gray-100 text-gray-600{% endif %}
+                                        flex items-center justify-center mr-4 text-xl">
+                                        {% if relacion.tipo_relacion == 'pareja' %}
+                                        <i class="fas fa-heart"></i>
+                                        {% elif relacion.tipo_relacion == 'familiar' %}
+                                        <i class="fas fa-users"></i>
+                                        {% else %}
+                                        <i class="fas fa-link"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <div class="flex flex-col sm:flex-row sm:items-baseline">
+                                            <p class="text-lg font-semibold text-gray-900 truncate">
+                                                {{ relacion.paciente1.nombre }} {{ relacion.paciente1.apellido }}
+                                            </p>
+                                            <p class="sm:ml-2 text-lg text-gray-500 truncate">
+                                                & {{ relacion.paciente2.nombre }} {{ relacion.paciente2.apellido }}
+                                            </p>
+                                        </div>
+                                        <div class="mt-2 flex flex-wrap items-center gap-2">
+                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium 
+                                                {% if relacion.tipo_relacion == 'pareja' %}bg-pink-100 text-pink-800
+                                                {% elif relacion.tipo_relacion == 'familiar' %}bg-blue-100 text-blue-800
+                                                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                                {{ relacion.tipo_relacion|capfirst }}
+                                            </span>
+                                            <span class="text-sm text-gray-500">
+                                                <i class="far fa-calendar-alt mr-1"></i>{{ relacion.fecha_relacion|date:"d M Y" }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex space-x-3 ml-4">
+                                    <button onclick="openModalDetalles('{{ relacion.id }}')" 
+                                            class="text-gray-500 hover:text-gray-700 p-2 rounded-xl hover:bg-gray-100 transition-colors duration-200">
+                                        <i class="far fa-eye text-lg"></i>
+                                    </button>
+                                    <button onclick="openModalEditarRelacion('{{ relacion.id }}')" 
+                                            class="text-blue-500 hover:text-blue-700 p-2 rounded-xl hover:bg-blue-50 transition-colors duration-200">
+                                        <i class="far fa-edit text-lg"></i>
+                                    </button>
+                        
+                                </div>
                             </div>
-                            <div class="ml-4">
-                                <h3 class="text-lg font-medium text-gray-900">
-                                    {{ relacion.paciente1.nombre }} {{ relacion.paciente1.apellido }} 
-                                    <span class="text-gray-500 font-normal">&</span> 
-                                    {{ relacion.paciente2.nombre }} {{ relacion.paciente2.apellido }}
-                                </h3>
-                                <div class="flex items-center mt-1">
-                                    <span class="px-2.5 py-0.5 rounded-full text-xs font-medium 
-                                        {% if relacion.tipo_relacion == 'pareja' %}bg-pink-100 text-pink-800
-                                        {% elif relacion.tipo_relacion == 'familiar' %}bg-blue-100 text-blue-800
-                                        {% else %}bg-gray-100 text-gray-800{% endif %}">
-                                        {{ relacion.tipo_relacion|capfirst }}
-                                    </span>
-                                    <span class="ml-2 text-sm text-gray-500">
-                                        <i class="far fa-calendar-alt mr-1"></i>{{ relacion.fecha_relacion|date:"d M Y" }}
-                                    </span>
+                        </li>
+                        {% empty %}
+                        <li class="px-6 py-16 text-center">
+                            <div class="mx-auto flex flex-col items-center justify-center">
+                                <div class="bg-gray-100 p-6 rounded-full mb-6">
+                                    <i class="fas fa-heart-broken text-4xl text-gray-400"></i>
+                                </div>
+                                <h3 class="text-2xl font-medium text-gray-900 mb-2">No se encontraron relaciones</h3>
+                                <p class="text-lg text-gray-500 max-w-md">No hay relaciones registradas que coincidan con tu búsqueda.</p>
+                                <button onclick="openModalCrearRelacion()" 
+                                        class="mt-6 inline-flex items-center px-6 py-3 border border-transparent text-lg font-medium rounded-xl shadow-sm text-white bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 transform hover:-translate-y-0.5">
+                                    <i class="fas fa-plus mr-3"></i> Crear primera relación
+                                </button>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <!-- Paginación mejorada -->
+                {% if relaciones.paginator.num_pages > 1 %}
+                <div class="mt-8 flex items-center justify-between border-t border-gray-200 pt-4">
+                    <div class="flex flex-1 justify-between sm:justify-end gap-4">
+                        {% if relaciones.has_previous %}
+                        <a href="?page=1" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-lg font-medium rounded-xl text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200">
+                            <i class="fas fa-angle-double-left mr-2"></i>
+                            Primera
+                        </a>
+                        <a href="?page={{ relaciones.previous_page_number }}" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-lg font-medium rounded-xl text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200">
+                            <i class="fas fa-angle-left mr-2"></i>
+                            Anterior
+                        </a>
+                        {% endif %}
+                        
+                        {% if relaciones.has_next %}
+                        <a href="?page={{ relaciones.next_page_number }}" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-lg font-medium rounded-xl text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200">
+                            Siguiente
+                            <i class="fas fa-angle-right ml-2"></i>
+                        </a>
+                        <a href="?page={{ relaciones.paginator.num_pages }}" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-lg font-medium rounded-xl text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200">
+                            Última
+                            <i class="fas fa-angle-double-right ml-2"></i>
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Estadísticas (columna derecha) -->
+            <div class="lg:w-1/4">
+                <div class="bg-white shadow-lg rounded-xl overflow-hidden">
+                    <div class="p-6">
+                        <h3 class="text-xl font-semibold text-gray-900 mb-6">Estadísticas de Relaciones</h3>
+                        
+                        <div class="space-y-6">
+                        
+                            
+                            <div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-base font-medium text-gray-700">Parejas</span>
+                                    <span class="text-lg font-semibold text-gray-900">{{ relaciones_pareja.count }}</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                    <div class="bg-gradient-to-r from-pink-500 to-pink-400 h-2.5 rounded-full" 
+                                         style="width: {% widthratio relaciones_pareja.count relaciones.count 100 %}%"></div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-base font-medium text-gray-700">Familiares</span>
+                                    <span class="text-lg font-semibold text-gray-900">{{ relaciones_familiares.count }}</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                    <div class="bg-gradient-to-r from-blue-500 to-blue-400 h-2.5 rounded-full" 
+                                         style="width: {% widthratio relaciones_familiares.count relaciones.count 100 %}%"></div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-base font-medium text-gray-700">Otras relaciones</span>
+                                    <span class="text-lg font-semibold text-gray-900">{{ relaciones_otros.count }}</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                    <div class="bg-gradient-to-r from-gray-500 to-gray-400 h-2.5 rounded-full" 
+                                         style="width: {% widthratio relaciones_otros.count relaciones.count 100 %}%"></div>
                                 </div>
                             </div>
                         </div>
-                        <div class="flex space-x-3">
-                            <button onclick="openModalDetalles('{{ relacion.id }}')" 
-                                    class="text-blue-600 hover:text-blue-900 p-2 rounded-full hover:bg-blue-50 transition-colors">
-                                <i data-lucide="eye" class="w-5 h-5"></i>
-                                <span class="sr-only">Ver detalles</span>
-                            </button>
-                            <button onclick="openModalEditarRelacion('{{ relacion.id }}')" 
-                                    class="text-blue-600 hover:text-blue-900 p-2 rounded-full hover:bg-yellow-50 transition-colors">
-                                <i data-lucide="pencil" class="w-5 h-5"></i>
-                                <span class="sr-only">Editar</span>
-                            </button>
-                        </div>
-                    </div>
-                </li>
-                {% empty %}
-                <li class="px-6 py-12 text-center">
-                    <i class="fas fa-heart-broken text-4xl text-gray-300 mb-4"></i>
-                    <h3 class="text-lg font-medium text-gray-900">No se encontraron relaciones</h3>
-                    <p class="mt-1 text-gray-500">No hay relaciones registradas que coincidan con tu búsqueda.</p>
-                    <button onclick="openModalCrearRelacion()" 
-                            class="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
-                        <i class="fas fa-plus mr-2"></i> Crear primera relación
-                    </button>
-                </li>
-                {% endfor %}
-            </ul>
-        </div>
-
-        <!-- Paginación -->
-        {% if relaciones.paginator.num_pages > 1 %}
-        <nav class="flex items-center justify-between border-t border-gray-200 px-4 sm:px-0 mb-12">
-            <div class="-mt-px w-0 flex-1 flex">
-                {% if relaciones.has_previous %}
-                <a href="?page=1" class="border-t-2 border-transparent pt-4 pr-1 inline-flex items-center text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
-                    <i class="fas fa-angle-double-left mr-3"></i>
-                    Primera
-                </a>
-                {% endif %}
-            </div>
-            <div class="hidden md:-mt-px md:flex">
-                {% for i in relaciones.paginator.page_range %}
-                    {% if relaciones.number == i %}
-                    <span class="border-emerald-500 text-emerald-600 border-t-2 pt-4 px-4 inline-flex items-center text-sm font-medium">
-                        {{ i }}
-                    </span>
-                    {% elif i > relaciones.number|add:'-3' and i < relaciones.number|add:'3' %}
-                    <a href="?page={{ i }}" class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 border-t-2 pt-4 px-4 inline-flex items-center text-sm font-medium">
-                        {{ i }}
-                    </a>
-                    {% endif %}
-                {% endfor %}
-            </div>
-            <div class="-mt-px w-0 flex-1 flex justify-end">
-                {% if relaciones.has_next %}
-                <a href="?page={{ relaciones.paginator.num_pages }}" class="border-t-2 border-transparent pt-4 pl-1 inline-flex items-center text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
-                    Última
-                    <i class="fas fa-angle-double-right ml-3"></i>
-                </a>
-                {% endif %}
-            </div>
-        </nav>
-        {% endif %}
-    </div>
-
-    <!-- Modal Detalles -->
-{% for relacion in relaciones %}
-<div id="modalDetalles{{ relacion.id }}" class="fixed inset-0 z-50 hidden overflow-y-auto">
-    <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-        <!-- Fondo oscuro -->
-        <div class="fixed inset-0 transition-opacity" aria-hidden="true">
-            <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
-        </div>
-        
-        <!-- Truco para centrado vertical -->
-        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-        
-        <!-- Contenido del modal -->
-        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-            <div class="bg-white px-6 py-5">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center">
-                        <div class="mr-3 h-10 w-10 rounded-full 
-                            {% if relacion.tipo_relacion == 'pareja' %}bg-gradient-to-r from-pink-500 to-rose-500
-                            {% elif relacion.tipo_relacion == 'familiar' %}bg-gradient-to-r from-blue-500 to-indigo-500
-                            {% else %}bg-gradient-to-r from-gray-500 to-gray-700{% endif %}
-                            flex items-center justify-center text-white">
-                            {% if relacion.tipo_relacion == 'pareja' %}
-                            <i class="fas fa-heart"></i>
-                            {% elif relacion.tipo_relacion == 'familiar' %}
-                            <i class="fas fa-users"></i>
-                            {% else %}
-                            <i class="fas fa-link"></i>
-                            {% endif %}
-                        </div>
-                        <h3 class="text-2xl font-bold text-gray-900">Detalles de Relación</h3>
-                    </div>
-                    <button onclick="closeModalDetalles('{{ relacion.id }}')" class="text-gray-400 hover:text-gray-500">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <div class="mt-6 space-y-4">
-                    <div class="flex items-start">
-                        <div class="flex-shrink-0 h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
-                            <i class="fas fa-user"></i>
-                        </div>
-                        <div class="ml-4">
-                            <h4 class="text-sm font-medium text-gray-500">Paciente 1</h4>
-                            <p class="text-lg font-medium text-gray-900">{{ relacion.paciente1.nombre }} {{ relacion.paciente1.apellido }}</p>
-                            <p class="text-sm text-gray-500">{{ relacion.paciente1.documento }}</p>
-                        </div>
-                    </div>
-                    <div class="flex items-start">
-                        <div class="flex-shrink-0 h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
-                            <i class="fas fa-user"></i>
-                        </div>
-                        <div class="ml-4">
-                            <h4 class="text-sm font-medium text-gray-500">Paciente 2</h4>
-                            <p class="text-lg font-medium text-gray-900">{{ relacion.paciente2.nombre }} {{ relacion.paciente2.apellido }}</p>
-                            <p class="text-sm text-gray-500">{{ relacion.paciente2.documento }}</p>
-                        </div>
-                    </div>
-                    <div class="pt-4 border-t border-gray-200">
-                        <div class="flex justify-between">
-                            <span class="text-sm font-medium text-gray-500">Tipo de relación</span>
-                            <span class="text-sm font-medium text-gray-900">
-                                {% if relacion.tipo_relacion == 'pareja' %}
-                                <i class="fas fa-heart text-pink-500 mr-1"></i>
-                                {% elif relacion.tipo_relacion == 'familiar' %}
-                                <i class="fas fa-users text-blue-500 mr-1"></i>
-                                {% else %}
-                                <i class="fas fa-link text-gray-500 mr-1"></i>
-                                {% endif %}
-                                {{ relacion.tipo_relacion|capfirst }}
-                            </span>
-                        </div>
-                        <div class="flex justify-between mt-2">
-                            <span class="text-sm font-medium text-gray-500">Fecha de registro</span>
-                            <span class="text-sm font-medium text-gray-900">{{ relacion.fecha_relacion|date:"d M Y" }}</span>
+                        
+                        <div class="mt-8 pt-6 border-t border-gray-200">
+                            <h4 class="text-base font-medium text-gray-700 mb-4">Distribución por tipo</h4>
+                            <div class="flex justify-between text-sm text-gray-500 mb-1">
+                                <span>Parejas</span>
+                                <span>Familiares</span>
+                                <span>Otros</span>
+                            </div>
+                            <div class="flex h-3 rounded-full overflow-hidden">
+                                <div class="bg-gradient-to-r from-pink-500 to-pink-400" style="width: {% widthratio relaciones_pareja.count relaciones.count 100 %}%"></div>
+                                <div class="bg-gradient-to-r from-blue-500 to-blue-400" style="width: {% widthratio relaciones_familiares.count relaciones.count 100 %}%"></div>
+                                <div class="bg-gradient-to-r from-gray-500 to-gray-400" style="width: {% widthratio relaciones_otros.count relaciones.count 100 %}%"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="bg-gray-50 px-6 py-4 rounded-b-lg flex justify-end">
-                <button type="button" onclick="closeModalDetalles('{{ relacion.id }}')" class="px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                    Cerrar
-                </button>
+                
+
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modal Editar -->
-<div id="modalEditarRelacion{{ relacion.id }}" class="fixed inset-0 z-50 hidden overflow-y-auto">
+<!-- Modal Detalles (mejorado) -->
+{% for relacion in relaciones %}
+<div id="modalDetalles{{ relacion.id }}" class="fixed z-50 inset-0 overflow-y-auto hidden" aria-modal="true">
     <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-        <!-- Fondo oscuro -->
         <div class="fixed inset-0 transition-opacity" aria-hidden="true">
             <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
         </div>
-        
-        <!-- Truco para centrado vertical -->
         <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-        
-        <!-- Contenido del modal -->
-        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-            <div class="bg-white px-6 py-5">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center">
-                        <div class="mr-3 h-10 w-10 rounded-full 
-                            {% if relacion.tipo_relacion == 'pareja' %}bg-gradient-to-r from-pink-500 to-rose-500
-                            {% elif relacion.tipo_relacion == 'familiar' %}bg-gradient-to-r from-blue-500 to-indigo-500
-                            {% else %}bg-gradient-to-r from-gray-500 to-gray-700{% endif %}
-                            flex items-center justify-center text-white">
-                            {% if relacion.tipo_relacion == 'pareja' %}
-                            <i class="fas fa-heart"></i>
-                            {% elif relacion.tipo_relacion == 'familiar' %}
-                            <i class="fas fa-users"></i>
-                            {% else %}
-                            <i class="fas fa-link"></i>
-                            {% endif %}
+        <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+            <div class="bg-white px-6 pt-6 pb-4 sm:p-6">
+                <div class="sm:flex sm:items-start">
+                    <div class="mx-auto flex-shrink-0 flex items-center justify-center h-16 w-16 rounded-full 
+                        {% if relacion.tipo_relacion == 'pareja' %}bg-pink-100 text-pink-600
+                        {% elif relacion.tipo_relacion == 'familiar' %}bg-blue-100 text-blue-600
+                        {% else %}bg-gray-100 text-gray-600{% endif %} sm:mx-0 sm:h-14 sm:w-14 text-2xl">
+                        {% if relacion.tipo_relacion == 'pareja' %}
+                        <i class="fas fa-heart"></i>
+                        {% elif relacion.tipo_relacion == 'familiar' %}
+                        <i class="fas fa-users"></i>
+                        {% else %}
+                        <i class="fas fa-link"></i>
+                        {% endif %}
+                    </div>
+                    <div class="mt-4 sm:mt-0 sm:ml-6 sm:text-left w-full">
+                        <h3 class="text-2xl leading-7 font-bold text-gray-900 mb-2">
+                            Relación entre {{ relacion.paciente1.nombre }} y {{ relacion.paciente2.nombre }}
+                        </h3>
+                        <div class="mt-4">
+                            <div class="bg-gray-50 p-5 rounded-xl">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                    <div>
+                                        <p class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Tipo de relación</p>
+                                        <p class="mt-2 text-lg text-gray-900">
+                                            <span class="px-3 py-1.5 rounded-full text-sm font-medium 
+                                                {% if relacion.tipo_relacion == 'pareja' %}bg-pink-100 text-pink-800
+                                                {% elif relacion.tipo_relacion == 'familiar' %}bg-blue-100 text-blue-800
+                                                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                                {{ relacion.tipo_relacion|capfirst }}
+                                            </span>
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Fecha de registro</p>
+                                        <p class="mt-2 text-lg text-gray-900">
+                                            <i class="far fa-calendar-alt mr-2 text-gray-400"></i>
+                                            {{ relacion.fecha_relacion|date:"d M Y" }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <div class="border border-gray-200 rounded-xl p-4 bg-white">
+                                    <h4 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Paciente 1</h4>
+                                    <div class="flex items-center">
+                                        <div class="flex-shrink-0 h-12 w-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 mr-3">
+                                            <i class="fas fa-user"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-lg font-semibold text-gray-900">{{ relacion.paciente1.nombre }} {{ relacion.paciente1.apellido }}</p>
+                                            <p class="text-sm text-gray-500 mt-1">{{ relacion.paciente1.documento }}</p>
+                                            <p class="text-sm text-gray-500">
+                                                <i class="fas fa-phone-alt mr-1 text-gray-400"></i>
+                                                {{ relacion.paciente1.telefono|default:"Teléfono no registrado" }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="border border-gray-200 rounded-xl p-4 bg-white">
+                                    <h4 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Paciente 2</h4>
+                                    <div class="flex items-center">
+                                        <div class="flex-shrink-0 h-12 w-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 mr-3">
+                                            <i class="fas fa-user"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-lg font-semibold text-gray-900">{{ relacion.paciente2.nombre }} {{ relacion.paciente2.apellido }}</p>
+                                            <p class="text-sm text-gray-500 mt-1">{{ relacion.paciente2.documento }}</p>
+                                            <p class="text-sm text-gray-500">
+                                                <i class="fas fa-phone-alt mr-1 text-gray-400"></i>
+                                                {{ relacion.paciente2.telefono|default:"Teléfono no registrado" }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <h3 class="text-2xl font-bold text-gray-900">Editar Relación</h3>
                     </div>
-                    <button onclick="closeModalEditarRelacion('{{ relacion.id }}')" class="text-gray-400 hover:text-gray-500">
-                        <i class="fas fa-times"></i>
-                    </button>
                 </div>
-                <form method="POST" action="{% url 'Editar_relacion' relacion.id %}" class="mt-6 space-y-6">
-                    {% csrf_token %}
-                    
-                    <!-- Campo Paciente 1 -->
-                    <div>
-                        <label for="paciente1_{{ relacion.id }}" class="block text-sm font-medium text-gray-700 mb-1">Paciente 1</label>
-                        <select id="paciente1_{{ relacion.id }}" name="paciente1" class="mt-1 block w-full pl-3 pr-10 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                            {% for paciente in pacientes %}
-                                <option value="{{ paciente.id }}" {% if paciente.id == relacion.paciente1.id %}selected{% endif %}>
-                                    {{ paciente.nombre }} {{ paciente.apellido }} ({{ paciente.documento }})
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    
-                    <!-- Campo Paciente 2 -->
-                    <div>
-                        <label for="paciente2_{{ relacion.id }}" class="block text-sm font-medium text-gray-700 mb-1">Paciente 2</label>
-                        <select id="paciente2_{{ relacion.id }}" name="paciente2" class="mt-1 block w-full pl-3 pr-10 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                            {% for paciente in pacientes %}
-                                <option value="{{ paciente.id }}" {% if paciente.id == relacion.paciente2.id %}selected{% endif %}>
-                                    {{ paciente.nombre }} {{ paciente.apellido }} ({{ paciente.documento }})
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    
-                    <!-- Campo Tipo de Relación -->
-                    <div>
-                        <label for="tipo_relacion_{{ relacion.id }}" class="block text-sm font-medium text-gray-700 mb-1">Tipo de Relación</label>
-                        <select id="tipo_relacion_{{ relacion.id }}" name="tipo_relacion" class="mt-1 block w-full pl-3 pr-10 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                            <option value="pareja" {% if relacion.tipo_relacion == 'pareja' %}selected{% endif %}>Pareja</option>
-                            <option value="familiar" {% if relacion.tipo_relacion == 'familiar' %}selected{% endif %}>Familiar</option>
-                            <option value="otro" {% if relacion.tipo_relacion == 'otro' %}selected{% endif %}>Otro</option>
-                        </select>
-                    </div>
-                    
-                    <!-- Botones -->
-                    <div class="pt-4 border-t border-gray-200 flex justify-end space-x-3">
-                        <button type="button" onclick="closeModalEditarRelacion('{{ relacion.id }}')" class="px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                            Cancelar
-                        </button>
-                        <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                            Guardar cambios
-                        </button>
-                    </div>
-                </form>
+            </div>
+            <div class="bg-gray-50 px-6 py-4 sm:flex sm:flex-row-reverse rounded-b-2xl">
+                <button type="button" onclick="closeModalDetalles('{{ relacion.id }}')" class="w-full inline-flex justify-center rounded-xl border border-transparent shadow-sm px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-500 text-base font-medium text-white hover:from-blue-700 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-lg transition-all duration-200 transform hover:-translate-y-0.5">
+                    Cerrar
+                </button>
+                <button onclick="openModalEditarRelacion('{{ relacion.id }}')" class="mt-3 w-full inline-flex justify-center rounded-xl border border-gray-300 shadow-sm px-6 py-3 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-lg transition-all duration-200 transform hover:-translate-y-0.5">
+                    Editar
+                </button>
             </div>
         </div>
     </div>
 </div>
 {% endfor %}
 
-<!-- Modal Crear Nueva Relación -->
-<div id="modalCrearRelacion" class="fixed inset-0 z-50 hidden overflow-y-auto">
+<!-- Modal Editar (mejorado) -->
+{% for relacion in relaciones %}
+<div id="modalEditarRelacion{{ relacion.id }}" class="fixed z-50 inset-0 overflow-y-auto hidden" aria-modal="true">
     <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-        <!-- Fondo oscuro -->
         <div class="fixed inset-0 transition-opacity" aria-hidden="true">
             <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
         </div>
-        
-        <!-- Truco para centrado vertical -->
         <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-        
-        <!-- Contenido del modal -->
-        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
-            <div class="bg-white px-6 py-5">
-                <div class="flex items-center justify-between">
-                    <h3 class="text-2xl font-bold text-gray-900">Nueva Relación</h3>
-                    <button onclick="closeModalCrearRelacion()" class="text-gray-400 hover:text-gray-500">
-                        <i class="fas fa-times"></i>
-                    </button>
+        <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+            <div class="bg-white px-6 pt-6 pb-4 sm:p-6">
+                <div class="sm:flex sm:items-start">
+                    <div class="mx-auto flex-shrink-0 flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 text-blue-600 sm:mx-0 sm:h-14 sm:w-14 text-2xl">
+                        <i class="fas fa-edit"></i>
+                    </div>
+                    <div class="mt-4 sm:mt-0 sm:ml-6 sm:text-left w-full">
+                        <h3 class="text-2xl leading-7 font-bold text-gray-900 mb-2">
+                            Editar relación
+                        </h3>
+                        <div class="mt-4">
+                            <form method="POST" action="{% url 'Editar_relacion' relacion.id %}">
+                                {% csrf_token %}
+                                <div class="space-y-5">
+                                    <div>
+                                        <label for="paciente1_{{ relacion.id }}" class="block text-sm font-semibold text-gray-700 uppercase tracking-wider mb-2">Paciente 1</label>
+                                        <select id="paciente1_{{ relacion.id }}" name="paciente1" class="mt-1 block w-full pl-4 pr-10 py-3 text-base border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-lg rounded-xl">
+                                            {% for paciente in pacientes %}
+                                                <option value="{{ paciente.id }}" {% if paciente.id == relacion.paciente1.id %}selected{% endif %}>
+                                                    {{ paciente.nombre }} {{ paciente.apellido }} ({{ paciente.documento }})
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    
+                                    <div>
+                                        <label for="paciente2_{{ relacion.id }}" class="block text-sm font-semibold text-gray-700 uppercase tracking-wider mb-2">Paciente 2</label>
+                                        <select id="paciente2_{{ relacion.id }}" name="paciente2" class="mt-1 block w-full pl-4 pr-10 py-3 text-base border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-lg rounded-xl">
+                                            {% for paciente in pacientes %}
+                                                <option value="{{ paciente.id }}" {% if paciente.id == relacion.paciente2.id %}selected{% endif %}>
+                                                    {{ paciente.nombre }} {{ paciente.apellido }} ({{ paciente.documento }})
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    
+                                    <div>
+                                        <label for="tipo_relacion_{{ relacion.id }}" class="block text-sm font-semibold text-gray-700 uppercase tracking-wider mb-2">Tipo de relación</label>
+                                        <select id="tipo_relacion_{{ relacion.id }}" name="tipo_relacion" class="mt-1 block w-full pl-4 pr-10 py-3 text-base border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-lg rounded-xl">
+                                            <option value="pareja" {% if relacion.tipo_relacion == 'pareja' %}selected{% endif %}>Pareja</option>
+                                            <option value="familiar" {% if relacion.tipo_relacion == 'familiar' %}selected{% endif %}>Familiar</option>
+                                            <option value="otro" {% if relacion.tipo_relacion == 'otro' %}selected{% endif %}>Otro</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="mt-8 sm:grid sm:grid-cols-2 sm:gap-4 sm:grid-flow-row-dense">
+                                    <button type="submit" class="w-full inline-flex justify-center rounded-xl border border-transparent shadow-sm px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-500 text-base font-medium text-white hover:from-blue-700 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:col-start-2 sm:text-lg transition-all duration-200 transform hover:-translate-y-0.5">
+                                        Guardar cambios
+                                    </button>
+                                    <button type="button" onclick="closeModalEditarRelacion('{{ relacion.id }}')" class="mt-3 w-full inline-flex justify-center rounded-xl border border-gray-300 shadow-sm px-6 py-3 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:col-start-1 sm:text-lg transition-all duration-200 transform hover:-translate-y-0.5">
+                                        Cancelar
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                 </div>
-                <form method="POST" action="{% url 'Listar_relaciones' %}" class="mt-6 space-y-6">
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<!-- Modal Crear Nueva Relación (mejorado) -->
+<div id="modalCrearRelacion" class="fixed z-50 inset-0 overflow-y-auto hidden" aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+            <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+        </div>
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+        <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+            <div class="bg-white px-6 pt-6 pb-4 sm:p-6">
+                <div class="sm:flex sm:items-start">
+                    <div class="mx-auto flex-shrink-0 flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 text-blue-600 sm:mx-0 sm:h-14 sm:w-14 text-2xl">
+                        <i class="fas fa-plus"></i>
+                    </div>
+                    <div class="mt-4 sm:mt-0 sm:ml-6 sm:text-left w-full">
+                        <h3 class="text-2xl leading-7 font-bold text-gray-900 mb-2">
+                            Crear nueva relación
+                        </h3>
+                        <div class="mt-4">
+                            <form method="POST" action="{% url 'Listar_relaciones' %}">
+                                {% csrf_token %}
+                                <div class="space-y-5">
+                                    <div>
+                                        <label for="paciente1" class="block text-sm font-semibold text-gray-700 uppercase tracking-wider mb-2">Primer paciente</label>
+                                        <select id="paciente1" name="paciente1" required class="mt-1 block w-full pl-4 pr-10 py-3 text-base border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-lg rounded-xl">
+                                            <option value="" selected disabled>Seleccione un paciente</option>
+                                            {% for paciente in pacientes %}
+                                                <option value="{{ paciente.id }}">{{ paciente.nombre }} {{ paciente.apellido }} ({{ paciente.documento }})</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    
+                                    <div>
+                                        <label for="paciente2" class="block text-sm font-semibold text-gray-700 uppercase tracking-wider mb-2">Segundo paciente</label>
+                                        <select id="paciente2" name="paciente2" required class="mt-1 block w-full pl-4 pr-10 py-3 text-base border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-lg rounded-xl">
+                                            <option value="" selected disabled>Seleccione un paciente</option>
+                                            {% for paciente in pacientes %}
+                                                <option value="{{ paciente.id }}">{{ paciente.nombre }} {{ paciente.apellido }} ({{ paciente.documento }})</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    
+                                    <div>
+                                        <label for="tipo_relacion" class="block text-sm font-semibold text-gray-700 uppercase tracking-wider mb-2">Tipo de relación</label>
+                                        <select id="tipo_relacion" name="tipo_relacion" required class="mt-1 block w-full pl-4 pr-10 py-3 text-base border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-lg rounded-xl">
+                                            <option value="pareja">Pareja</option>
+                                            <option value="familiar">Familiar</option>
+                                            <option value="otro">Otro</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="mt-8 sm:grid sm:grid-cols-2 sm:gap-4 sm:grid-flow-row-dense">
+                                    <button type="submit" class="w-full inline-flex justify-center rounded-xl border border-transparent shadow-sm px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-500 text-base font-medium text-white hover:from-blue-700 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:col-start-2 sm:text-lg transition-all duration-200 transform hover:-translate-y-0.5">
+                                        Crear relación
+                                    </button>
+                                    <button type="button" onclick="closeModalCrearRelacion()" class="mt-3 w-full inline-flex justify-center rounded-xl border border-gray-300 shadow-sm px-6 py-3 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:col-start-1 sm:text-lg transition-all duration-200 transform hover:-translate-y-0.5">
+                                        Cancelar
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Confirmación de Eliminación (mejorado) -->
+<div id="modalConfirmarEliminar" class="fixed z-50 inset-0 overflow-y-auto hidden" aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+            <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+        </div>
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+        <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+            <div class="bg-white px-6 pt-6 pb-4 sm:p-6">
+                <div class="sm:flex sm:items-start">
+                    <div class="mx-auto flex-shrink-0 flex items-center justify-center h-16 w-16 rounded-full bg-red-100 sm:mx-0 sm:h-14 sm:w-14 text-2xl">
+                        <i class="fas fa-exclamation-triangle text-red-600"></i>
+                    </div>
+                    <div class="mt-4 sm:mt-0 sm:ml-6 sm:text-left">
+                        <h3 class="text-2xl leading-7 font-bold text-gray-900" id="modal-title">Eliminar relación</h3>
+                        <div class="mt-4">
+                            <p class="text-lg text-gray-500">¿Estás seguro que deseas eliminar esta relación? Esta acción no se puede deshacer.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-6 py-4 sm:flex sm:flex-row-reverse rounded-b-2xl">
+                <form id="deleteForm" method="POST" action="">
                     {% csrf_token %}
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label for="paciente1" class="block text-sm font-medium text-gray-700 mb-1">Primer Paciente</label>
-                            <select name="paciente1" id="paciente1" required class="mt-1 block w-full pl-3 pr-10 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                                <option value="" disabled selected>Seleccione un paciente</option>
-                                {% for paciente in pacientes %}
-                                    <option value="{{ paciente.id }}">{{ paciente.nombre }} {{ paciente.apellido }} ({{ paciente.documento }})</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div>
-                            <label for="paciente2" class="block text-sm font-medium text-gray-700 mb-1">Segundo Paciente</label>
-                            <select name="paciente2" id="paciente2" required class="mt-1 block w-full pl-3 pr-10 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                                <option value="" disabled selected>Seleccione un paciente</option>
-                                {% for paciente in pacientes %}
-                                    <option value="{{ paciente.id }}">{{ paciente.nombre }} {{ paciente.apellido }} ({{ paciente.documento }})</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                    </div>
-                    <div>
-                        <label for="tipo_relacion" class="block text-sm font-medium text-gray-700 mb-1">Tipo de Relación</label>
-                        <select name="tipo_relacion" id="tipo_relacion" required class="mt-1 block w-full pl-3 pr-10 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                            <option value="pareja">Pareja</option>
-                            <option value="familiar">Familiar</option>
-                            <option value="otro">Otro</option>
-                        </select>
-                    </div>
-                    <div class="pt-4 border-t border-gray-200 flex justify-end space-x-3">
-                        <button type="button" onclick="closeModalCrearRelacion()" class="px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                            Cancelar
-                        </button>
-                        <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-700 hover:to-teal-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
-                            <i class="fas fa-save mr-2"></i> Guardar Relación
-                        </button>
-                    </div>
+                    <button type="submit" class="w-full inline-flex justify-center rounded-xl border border-transparent shadow-sm px-6 py-3 bg-gradient-to-r from-red-600 to-red-500 text-base font-medium text-white hover:from-red-700 hover:to-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-lg transition-all duration-200 transform hover:-translate-y-0.5">
+                        Eliminar
+                    </button>
                 </form>
+                <button type="button" onclick="closeModalConfirmarEliminar()" class="mt-3 w-full inline-flex justify-center rounded-xl border border-gray-300 shadow-sm px-6 py-3 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-lg transition-all duration-200 transform hover:-translate-y-0.5">
+                    Cancelar
+                </button>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    lucide.createIcons();
-
-    // Funciones para manejar los modales
+    // Funciones para manejar los modales (mejoradas con feedback visual)
     function openModalDetalles(id) {
         const modal = document.getElementById("modalDetalles" + id);
         modal.classList.remove('hidden');
         document.body.classList.add('overflow-hidden');
+        
+        // Efecto de entrada
+        setTimeout(() => {
+            modal.querySelector('.transform').classList.remove('opacity-0', 'translate-y-4', 'sm:translate-y-0', 'sm:scale-95');
+            modal.querySelector('.transform').classList.add('opacity-100', 'translate-y-0', 'sm:scale-100');
+        }, 10);
     }
 
     function closeModalDetalles(id) {
-        document.getElementById("modalDetalles" + id).classList.add('hidden');
-        document.body.classList.remove('overflow-hidden');
+        const modal = document.getElementById("modalDetalles" + id);
+        modal.querySelector('.transform').classList.remove('opacity-100', 'translate-y-0', 'sm:scale-100');
+        modal.querySelector('.transform').classList.add('opacity-0', 'translate-y-4', 'sm:translate-y-0', 'sm:scale-95');
+        
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        }, 200);
     }
 
     function openModalEditarRelacion(id) {
         const modal = document.getElementById("modalEditarRelacion" + id);
         modal.classList.remove('hidden');
         document.body.classList.add('overflow-hidden');
+        
+        setTimeout(() => {
+            modal.querySelector('.transform').classList.remove('opacity-0', 'translate-y-4', 'sm:translate-y-0', 'sm:scale-95');
+            modal.querySelector('.transform').classList.add('opacity-100', 'translate-y-0', 'sm:scale-100');
+        }, 10);
     }
 
     function closeModalEditarRelacion(id) {
-        document.getElementById("modalEditarRelacion" + id).classList.add('hidden');
-        document.body.classList.remove('overflow-hidden');
+        const modal = document.getElementById("modalEditarRelacion" + id);
+        modal.querySelector('.transform').classList.remove('opacity-100', 'translate-y-0', 'sm:scale-100');
+        modal.querySelector('.transform').classList.add('opacity-0', 'translate-y-4', 'sm:translate-y-0', 'sm:scale-95');
+        
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        }, 200);
     }
 
     function openModalCrearRelacion() {
         const modal = document.getElementById("modalCrearRelacion");
         modal.classList.remove('hidden');
         document.body.classList.add('overflow-hidden');
+        
+        setTimeout(() => {
+            modal.querySelector('.transform').classList.remove('opacity-0', 'translate-y-4', 'sm:translate-y-0', 'sm:scale-95');
+            modal.querySelector('.transform').classList.add('opacity-100', 'translate-y-0', 'sm:scale-100');
+        }, 10);
     }
 
     function closeModalCrearRelacion() {
-        document.getElementById("modalCrearRelacion").classList.add('hidden');
-        document.body.classList.remove('overflow-hidden');
+        const modal = document.getElementById("modalCrearRelacion");
+        modal.querySelector('.transform').classList.remove('opacity-100', 'translate-y-0', 'sm:scale-100');
+        modal.querySelector('.transform').classList.add('opacity-0', 'translate-y-4', 'sm:translate-y-0', 'sm:scale-95');
+        
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        }, 200);
     }
 
-    // Función para filtrar pacientes
-    window.filterCards = function() {
+    // Función para confirmar eliminación
+    function confirmDelete(id) {
+        document.getElementById('deleteForm').action = `/eliminar-relacion/${id}/`;
+        const modal = document.getElementById('modalConfirmarEliminar');
+        modal.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+        
+        setTimeout(() => {
+            modal.querySelector('.transform').classList.remove('opacity-0', 'translate-y-4', 'sm:translate-y-0', 'sm:scale-95');
+            modal.querySelector('.transform').classList.add('opacity-100', 'translate-y-0', 'sm:scale-100');
+        }, 10);
+    }
+
+    function closeModalConfirmarEliminar() {
+        const modal = document.getElementById('modalConfirmarEliminar');
+        modal.querySelector('.transform').classList.remove('opacity-100', 'translate-y-0', 'sm:scale-100');
+        modal.querySelector('.transform').classList.add('opacity-0', 'translate-y-4', 'sm:translate-y-0', 'sm:scale-95');
+        
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        }, 200);
+    }
+
+    // Función para filtrar relaciones
+    function filterCards() {
         const input = document.getElementById("searchInput").value.toLowerCase();
+        const tipo = document.querySelector("select[name='tipo']").value.toLowerCase();
         const cards = document.querySelectorAll(".relacion-card");
         
         cards.forEach(card => {
             const text = card.textContent.toLowerCase();
-            card.style.display = text.includes(input) ? "" : "none";
+            const cardTipo = card.querySelector("span[class*='bg-']").textContent.toLowerCase();
+            
+            const matchesSearch = text.includes(input);
+            const matchesType = tipo === "" || cardTipo.includes(tipo);
+            
+            card.style.display = (matchesSearch && matchesType) ? "" : "none";
         });
-    };
+    }
 
     // Cerrar modal al hacer clic fuera del contenido
     document.addEventListener('click', function(event) {
         if (event.target.classList.contains('fixed')) {
-            event.target.classList.add('hidden');
-            document.body.classList.remove('overflow-hidden');
+            const modals = document.querySelectorAll('[id^="modal"]');
+            modals.forEach(modal => {
+                if (!modal.classList.contains('hidden')) {
+                    modal.querySelector('.transform').classList.remove('opacity-100', 'translate-y-0', 'sm:scale-100');
+                    modal.querySelector('.transform').classList.add('opacity-0', 'translate-y-4', 'sm:translate-y-0', 'sm:scale-95');
+                    
+                    setTimeout(() => {
+                        modal.classList.add('hidden');
+                        document.body.classList.remove('overflow-hidden');
+                    }, 200);
+                }
+            });
+        }
+    });
+
+    // Inicializar tooltips (si se usan)
+    document.addEventListener('DOMContentLoaded', function() {
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function(tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+        
+        // Mejorar la experiencia de búsqueda
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                filterCards();
+            });
+        }
+        
+        const tipoSelect = document.querySelector("select[name='tipo']");
+        if (tipoSelect) {
+            tipoSelect.addEventListener('change', function() {
+                filterCards();
+            });
         }
     });
 </script>
 
 <style>
-    /* Transiciones suaves para los modales */
+    /* Transiciones y animaciones mejoradas */
     .transform {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        opacity: 0;
+        transform: translateY(4px) scale(0.95);
+    }
+    
+    .transform.transition-all {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+    
+    /* Efectos hover mejorados */
+    .transition-all {
         transition: all 0.3s ease;
     }
     
-    /* Efecto de escala al abrir el modal */
-    .transform.transition-all {
-        transform: scale(0.95);
+    .transition-colors {
+        transition: background-color 0.3s ease, color 0.3s ease;
     }
     
-    .flex.transform.transition-all {
-        transform: scale(1);
+    /* Efecto de elevación en hover */
+    .hover\:-translate-y-0\.5:hover {
+        transform: translateY(-0.125rem);
     }
     
-    /* Mejor scroll en modales largos */
-    .overflow-hidden {
-        overflow: hidden;
+    /* Sombras más pronunciadas */
+    .shadow-lg {
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    
+    /* Bordes redondeados más pronunciados */
+    .rounded-xl {
+        border-radius: 1rem;
+    }
+    
+    /* Mejor espaciado y tamaño de fuente */
+    body {
+        font-size: 16px;
+        line-height: 1.6;
+    }
+    
+    /* Animación de entrada para las tarjetas */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .relacion-card {
+        animation: fadeInUp 0.4s ease-out forwards;
+        opacity: 0;
+        animation-fill-mode: both;
+    }
+    
+    /* Retrasos escalonados para la animación */
+    .relacion-card:nth-child(1) { animation-delay: 0.05s; }
+    .relacion-card:nth-child(2) { animation-delay: 0.1s; }
+    .relacion-card:nth-child(3) { animation-delay: 0.15s; }
+    .relacion-card:nth-child(4) { animation-delay: 0.2s; }
+    .relacion-card:nth-child(5) { animation-delay: 0.25s; }
+    .relacion-card:nth-child(n+6) { animation-delay: 0.3s; }
+    
+    /* Mejor contraste para texto */
+    .text-gray-900 {
+        color: #1a202c;
+    }
+    
+    .text-gray-700 {
+        color: #4a5568;
+    }
+    
+    /* Gradientes para botones */
+    .bg-gradient-to-r {
+        background-image: linear-gradient(to right, var(--tw-gradient-stops));
+    }
+    
+    /* Mejor visualización en móviles */
+    @media (max-width: 640px) {
+        .sm\:text-lg {
+            font-size: 1rem;
+        }
+        
+        .px-6 {
+            padding-left: 1.25rem;
+            padding-right: 1.25rem;
+        }
+        
+        .py-3 {
+            padding-top: 0.75rem;
+            padding-bottom: 0.75rem;
+        }
     }
 </style>
 {% endblock %}

@@ -154,15 +154,10 @@
             <div class="bg-white p-6 rounded-lg shadow-lg">
                 <div class="flex items-center mb-4">
                     <div class="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-2xl">
-
-                            {{ user.username|slice:":1"|upper }}
-                        
+                        {{ user.username|slice:":1"|upper }}
                     </div>
                     <div class="ml-4">
-                        <h3 class="text-xl font-bold">
-
-                                {{ user.username }}
-                        </h3>
+                        <h3 class="text-xl font-bold">{{ user.username }}</h3>
                         <p class="text-gray-500">{{ user.rol}}</p>
                     </div>
                 </div>
@@ -215,7 +210,7 @@
     <div class="max-w-7xl mx-auto mt-8">
         <h2 class="text-xl font-bold text-gray-700 mb-4">Pacientes Destacados</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {% for paciente in pacientes %}
+            {% for paciente in pacientes_destacados %}
             <div class="bg-white p-4 rounded-lg shadow-lg">
                 <div class="flex items-center">
                     <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
@@ -255,12 +250,49 @@
             <input type="hidden" id="modalFecha" name="fecha" value="">
             
             <div class="space-y-4">
+                <!-- Tipo de Cita (Individual/Pareja) -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de Paciente</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <label class="flex items-center space-x-2 cursor-pointer">
+                            <input type="radio" name="tipo_cita" value="paciente" checked class="h-4 w-4 text-teal-600 focus:ring-teal-500">
+                            <span>Individual</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer">
+                            <input type="radio" name="tipo_cita" value="relacion" class="h-4 w-4 text-teal-600 focus:ring-teal-500">
+                            <span>Relación</span>
+                        </label>
+                    </div>
+                </div>
+            
+                <!-- Campo Paciente (Individual) -->
+                <div id="paciente-individual-field">
+                    <label for="paciente" class="block text-sm font-medium text-gray-700">Paciente</label>
+                    <select id="paciente" name="paciente" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 rounded-md transition duration-200">
+                        {% for paciente in pacientes %}
+                        <option value="{{ paciente.id }}">{{ paciente.nombre }} {{ paciente.apellido }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            
+                <!-- Campo Relación (Pareja) - Inicialmente oculto -->
+                <div id="paciente-pareja-field" class="hidden">
+                    <label for="relacion" class="block text-sm font-medium text-gray-700">Pareja/Relación</label>
+                    <select id="relacion" name="relacion" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 rounded-md transition duration-200">
+                        {% for relacion in relaciones %}
+                            <option value="{{ relacion.id }}">
+                                {{ relacion.paciente1.nombre }} & {{ relacion.paciente2.nombre }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
                 <!-- Campo Hora con formato automático -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Hora de la Cita</label>
                     <div class="relative mt-1">
                         <input type="text" name="hora" id="hora" required maxlength="5"
-                            class="block w-full pl-4 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-800 focus:border-teal-800 transition duration-200"
+                            class="block w-full pl-4 pr-10 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition duration-200"
                             placeholder="HHMM (ej: 1430)"
                             value="{{ form.hora.value|default:'' }}">
                         <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
@@ -280,42 +312,47 @@
                 <!-- Campo Modalidad -->
                 <div>
                     <label for="modalidad" class="block text-sm font-medium text-gray-700">Modalidad</label>
-                    <select id="modalidad" name="modalidad" class="mt-1 block w-full pl-3 pr-10 py-3 text-base border border-gray-300 focus:outline-none focus:ring-2 focus:ring-teal-800 focus:border-teal-800 rounded-lg transition duration-200">
+                    <select id="modalidad" name="modalidad" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 rounded-md transition duration-200">
                         <option value="virtual">Virtual</option>
                         <option value="presencial">Presencial</option>
                     </select>
+                </div>
+
+                <div class="mb-4 space-y-2">
+                    <label class="block text-sm font-medium text-gray-700">Estatus</label>
+                    <select name="estatus" class="block w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition duration-200">
+                        <option value="pendiente" {% if form.estatus.value == 'pendiente' %}selected{% endif %}>Pendiente</option>
+                        <option value="completada" {% if form.estatus.value == 'completada' %}selected{% endif %}>Completada</option>
+                        <option value="cancelada" {% if form.estatus.value == 'cancelada' %}selected{% endif %}>Cancelada</option>
+                    </select>
+                    {% if form.estatus.errors %}
+                        <div class="mt-1 text-red-600 text-sm">
+                            {{ form.estatus.errors }}
+                        </div>
+                    {% endif %}
                 </div>
 
                 <!-- Campo Motivo de Consulta con capitalización automática -->
                 <div>
                     <label for="motivo_consulta" class="block text-sm font-medium text-gray-700">Motivo de la Consulta</label>
                     <textarea id="motivo_consulta" name="motivo_consulta" rows="3" 
-                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-800 focus:border-teal-800 transition duration-200 capitalize-first"
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition duration-200 capitalize-first"
                         required></textarea>
-                </div>
-
-                <!-- Campo Paciente -->
-                <div>
-                    <label for="paciente" class="block text-sm font-medium text-gray-700">Paciente</label>
-                    <select id="paciente" name="paciente" class="mt-1 block w-full pl-3 pr-10 py-3 text-base border border-gray-300 focus:outline-none focus:ring-2 focus:ring-teal-800 focus:border-teal-800 rounded-lg transition duration-200">
-                        {% for paciente in pacientes %}
-                        <option value="{{ paciente.id }}">{{ paciente.nombre }} {{ paciente.apellido }}</option>
-                        {% endfor %}
-                    </select>
                 </div>
             </div>
 
             <div class="mt-6 flex justify-between space-x-4">
-                <button type="submit" class="flex-1 bg-teal-700 hover:bg-teal-800 text-white font-medium py-2 px-4 rounded-lg transition duration-200 focus:outline-none focus:ring-2 focus:ring-teal-600 focus:ring-offset-2">
+                <button type="submit" class="flex-1 bg-teal-600 hover:bg-teal-700 text-white font-medium py-2 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2">
                     Guardar Cita
                 </button>
-                <button type="button" id="closeModal" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2">
+                <button type="button" id="closeModal" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2">
                     Cerrar
                 </button>
             </div>
         </form>
     </div>
 </div>
+
 
 <!-- Modal de Historial del Paciente -->
 {% for paciente in pacientes %}
@@ -418,7 +455,112 @@
     .capitalize-first::first-letter {
         text-transform: uppercase;
     }
+    
+    /* Estilo para tooltip */
+    .tooltip {
+        position: relative;
+        display: inline-block;
+    }
+    
+    .tooltip .tooltiptext {
+        visibility: hidden;
+        width: 200px;
+        background-color: #555;
+        color: #fff;
+        text-align: center;
+        border-radius: 6px;
+        padding: 5px;
+        position: absolute;
+        z-index: 1;
+        bottom: 125%;
+        left: 50%;
+        margin-left: -100px;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+    
+    .tooltip .tooltiptext::after {
+        content: "";
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        margin-left: -5px;
+        border-width: 5px;
+        border-style: solid;
+        border-color: #555 transparent transparent transparent;
+    }
+    
+    .tooltip:hover .tooltiptext {
+        visibility: visible;
+        opacity: 1;
+    }
+
+    /* Estilo para los días con citas */
+    .day-with-appointments {
+        background-color: #7c3aed !important; /* purple-600 */
+        color: white !important;
+        border: 2px solid #5b21b6 !important; /* purple-800 */
+    }
+
+    .day-with-appointments:hover {
+        background-color: #6d28d9 !important; /* purple-700 */
+    }
+
+    /* Mejora para tooltips */
+    .tooltip .tooltiptext {
+        visibility: hidden;
+        width: 220px;
+        background-color: #1f2937; /* gray-800 */
+        color: #fff;
+        text-align: left;
+        border-radius: 0.5rem;
+        padding: 0.5rem;
+        position: absolute;
+        z-index: 10;
+        bottom: 125%;
+        left: 50%;
+        transform: translateX(-50%);
+        opacity: 0;
+        transition: opacity 0.3s;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+
+    .tooltip .tooltiptext::after {
+        content: "";
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        margin-left: -5px;
+        border-width: 5px;
+        border-style: solid;
+        border-color: #1f2937 transparent transparent transparent;
+    }
+
+    .tooltip:hover .tooltiptext {
+        visibility: visible;
+        opacity: 1;
+    }
 </style>
+
+<script>
+    // Datos de citas iniciales
+    const citasIniciales = {{ citas_json|safe }};
+    
+    // Mapa de citas por mes y año para el calendario
+    const citasPorMes = {};
+    citasIniciales.forEach(cita => {
+        const fecha = new Date(cita.fecha);
+        const mes = fecha.getMonth();
+        const año = fecha.getFullYear();
+        const clave = `${año}-${mes}`;
+        
+        if (!citasPorMes[clave]) {
+            citasPorMes[clave] = [];
+        }
+        
+        citasPorMes[clave].push(cita);
+    });
+</script>
 
 <!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -536,15 +678,55 @@
         let currentYear = today.getFullYear();
         let currentMonth = today.getMonth();
 
-        function renderCalendar() {
+        async function fetchCitasAgendadas(year, month) {
+            const clave = `${year}-${month}`;
+            
+            // Primero buscar en los datos iniciales
+            if (citasPorMes[clave]) {
+                return citasPorMes[clave];
+            }
+            
+            // Si no están en los datos iniciales, hacer petición al backend
+            try {
+                const response = await fetch(`/api/citas/?year=${year}&month=${month + 1}`);
+                if (!response.ok) throw new Error('Error al obtener citas');
+                const citas = await response.json();
+                
+                // Guardar en el mapa para futuras referencias
+                citasPorMes[clave] = citas;
+                return citas;
+            } catch (error) {
+                console.error('Error:', error);
+                return [];
+            }
+        }
+
+        async function renderCalendar() {
             calendarDaysElement.innerHTML = "";
         
             const firstDay = new Date(currentYear, currentMonth, 1).getDay();
             const lastDate = new Date(currentYear, currentMonth + 1, 0).getDate();
             const prevLastDate = new Date(currentYear, currentMonth, 0).getDate();
-            const firstDayIndex = firstDay === 0 ? 6 : firstDay - 1;
+            const firstDayIndex = firstDay === 0 ? 6 : firstDay - 1; // Ajuste para que lunes sea el primer día
             const today = new Date();
-            const currentDate = new Date(currentYear, currentMonth, 1);
+            today.setHours(0, 0, 0, 0); // Normalizar la fecha de hoy
+            
+            // Obtener citas para el mes actual
+            const citas = await fetchCitasAgendadas(currentYear, currentMonth);
+            
+            // Crear un mapa de citas por día para fácil acceso
+            const citasPorDia = {};
+            citas.forEach(cita => {
+                const fechaCita = new Date(cita.fecha);
+                // Asegurarnos de que estamos comparando con el mes correcto
+                if (fechaCita.getMonth() === currentMonth && fechaCita.getFullYear() === currentYear) {
+                    const dia = fechaCita.getDate();
+                    if (!citasPorDia[dia]) {
+                        citasPorDia[dia] = [];
+                    }
+                    citasPorDia[dia].push(cita);
+                }
+            });
         
             // Días del mes anterior (siempre deshabilitados)
             for (let i = firstDayIndex; i > 0; i--) {
@@ -558,32 +740,77 @@
             for (let i = 1; i <= lastDate; i++) {
                 const dayElement = document.createElement("div");
                 const dayDate = new Date(currentYear, currentMonth, i);
+                dayDate.setHours(0, 0, 0, 0); // Normalizar la fecha
                 
                 // Determinar si el día es pasado, hoy o futuro
-                const isPastDay = dayDate < new Date(today.getFullYear(), today.getMonth(), today.getDate());
-                const isToday = i === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear();
+                const isPastDay = dayDate < today;
+                const isToday = dayDate.getTime() === today.getTime();
         
+                // Verificar si hay citas para este día
+                const tieneCitas = citasPorDia[i] && citasPorDia[i].length > 0;
+                
+                // Clases base para todos los días
+                let dayClasses = "py-3 text-center text-sm font-medium rounded-lg cursor-pointer";
+                
                 if (isPastDay && !isToday) {
                     // Días pasados (no clickeables)
-                    dayElement.className = "py-3 text-center text-sm text-gray-400 cursor-not-allowed";
+                    dayClasses = "py-3 text-center text-sm text-gray-400 cursor-not-allowed";
+                    dayElement.className = dayClasses;
                     dayElement.textContent = i;
                 } else {
                     // Días presentes/futuros (clickeables)
-                    dayElement.className = "py-3 text-center text-sm font-medium rounded-lg cursor-pointer hover:bg-blue-100 text-gray-700";
-                    
                     if (isToday) {
-                        dayElement.classList.add("bg-blue-500", "text-white", "hover:bg-blue-600");
+                        dayClasses += " bg-blue-500 text-white hover:bg-blue-600";
+                    } else if (tieneCitas) {
+                        // Días con citas - color morado más intenso con borde
+                        dayClasses += " bg-purple-600 text-white hover:bg-purple-700 border-2 border-purple-800";
+                    } else {
+                        dayClasses += " hover:bg-blue-100 text-gray-700";
                     }
-        
+                    
+                    dayElement.className = dayClasses;
                     dayElement.textContent = i;
+                    
+                    // Si tiene citas, agregar tooltip
+                    if (tieneCitas) {
+                        const tooltip = document.createElement("span");
+                        tooltip.className = "tooltiptext absolute z-10 invisible bg-gray-800 text-white p-2 rounded-lg text-xs";
+                        tooltip.style.width = "220px";
+                        
+                        let tooltipContent = `<div class="text-left">`;
+                        citasPorDia[i].forEach(cita => {
+                            // Formatear hora (HH:MM)
+                            const hora = cita.hora.slice(0, 2) + ":" + cita.hora.slice(2);
+                            tooltipContent += `
+                                <div class="mb-1 border-b border-gray-700 pb-1">
+                                    <p class="font-semibold">${hora} - ${cita.paciente_nombre || 'Pareja'}</p>
+                                    <p class="truncate">${cita.motivo_consulta}</p>
+                                    <p class="${cita.modalidad === 'virtual' ? 'text-purple-300' : 'text-green-300'}">
+                                        ${cita.modalidad === 'virtual' ? 'Virtual' : 'Presencial'}
+                                    </p>
+                                </div>
+                            `;
+                        });
+                        tooltipContent += `</div>`;
+                        
+                        tooltip.innerHTML = tooltipContent;
+                        
+                        const tooltipContainer = document.createElement("div");
+                        tooltipContainer.className = "tooltip relative";
+                        tooltipContainer.appendChild(dayElement);
+                        tooltipContainer.appendChild(tooltip);
+                        
+                        calendarDaysElement.appendChild(tooltipContainer);
+                    } else {
+                        calendarDaysElement.appendChild(dayElement);
+                    }
+                    
                     dayElement.addEventListener("click", function() {
                         const fechaSeleccionada = new Date(currentYear, currentMonth, i);
                         document.getElementById("modalFecha").value = fechaSeleccionada.toISOString().split('T')[0];
                         citaModal.classList.remove("hidden");
                     });
                 }
-                
-                calendarDaysElement.appendChild(dayElement);
             }
         
             // Días del siguiente mes (si el mes actual no es el futuro)
@@ -639,12 +866,54 @@
     };
 
     // Funcionalidades para el modal de citas
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener("DOMContentLoaded", function() {
         // Elementos del modal de citas
         const closeModalBtn = document.getElementById('closeModalBtn');
         const closeModalButton = document.getElementById('closeModal');
         const citaModal = document.getElementById('citaModal');
         const citaForm = document.getElementById('citaForm');
+        
+        // Toggle entre campos de paciente individual y pareja
+        const tipoCitaRadios = document.querySelectorAll('input[name="tipo_cita"]');
+        const pacienteIndividualField = document.getElementById('paciente-individual-field');
+        const pacienteParejaField = document.getElementById('paciente-pareja-field');
+        const pacienteSelect = document.getElementById('paciente');
+        const relacionSelect = document.getElementById('relacion');
+    
+        // Función para alternar entre campos
+        function toggleFields() {
+            const tipoSeleccionado = document.querySelector('input[name="tipo_cita"]:checked').value;
+            
+            if (tipoSeleccionado === 'paciente') {
+                // Mostrar campo de paciente individual y ocultar relación
+                pacienteIndividualField.classList.remove('hidden');
+                pacienteParejaField.classList.add('hidden');
+                
+                // Configurar requeridos
+                pacienteSelect.required = true;
+                relacionSelect.required = false;
+                // Limpiar el campo no requerido
+                relacionSelect.value = '';
+            } else {
+                // Mostrar campo de relación y ocultar paciente individual
+                pacienteIndividualField.classList.add('hidden');
+                pacienteParejaField.classList.remove('hidden');
+                
+                // Configurar requeridos
+                pacienteSelect.required = false;
+                relacionSelect.required = true;
+                // Limpiar el campo no requerido
+                pacienteSelect.value = '';
+            }
+        }
+    
+        // Agregar event listeners a los radio buttons
+        tipoCitaRadios.forEach(radio => {
+            radio.addEventListener('change', toggleFields);
+        });
+    
+        // Inicializar campos al cargar la página
+        toggleFields();
         
         // Función para cerrar el modal
         function closeModal() {
@@ -660,7 +929,7 @@
         citaModal.addEventListener('click', function(e) {
             if(e.target === citaModal) closeModal();
         });
-
+    
         // Formatear automáticamente la hora con dos puntos
         const horaInput = document.getElementById('hora');
         if(horaInput) {
@@ -688,7 +957,7 @@
                 }
             });
         }
-
+    
         // Capitalizar primera letra en motivo de consulta
         const motivoConsulta = document.getElementById('motivo_consulta');
         if(motivoConsulta) {
@@ -704,12 +973,29 @@
                 }
             });
         }
-
-        // Validación del formulario de citas
+    
+        // Validación del formulario de citas - VERSIÓN CORREGIDA
         if(citaForm) {
             citaForm.addEventListener('submit', function(e) {
                 const hora = document.getElementById('hora').value;
+                const tipoCita = document.querySelector('input[name="tipo_cita"]:checked').value;
+                const paciente = document.getElementById('paciente').value;
+                const relacion = document.getElementById('relacion').value;
                 
+                // Validar selección de paciente/relación - LÓGICA CORREGIDA
+                if (tipoCita === 'paciente' && !paciente) {
+                    e.preventDefault();
+                    alert('Por favor seleccione un paciente');
+                    return false;
+                }
+                
+                if (tipoCita === 'relacion' && !relacion) {
+                    e.preventDefault();
+                    alert('Por favor seleccione una relación/pareja');
+                    return false;
+                }
+                
+                // Validar formato de hora
                 if (!/^([0-1][0-9]|2[0-3]):[0-5][0-9]$/.test(hora)) {
                     e.preventDefault();
                     alert('Por favor ingrese una hora válida en formato HH:MM');
@@ -727,6 +1013,29 @@
             });
         }
     });
+    
+    // Función para abrir el modal con una fecha específica
+    window.openCitaModal = function(fecha) {
+        const modal = document.getElementById('citaModal');
+        const fechaInput = document.getElementById('modalFecha');
+        
+        if(fechaInput) fechaInput.value = fecha;
+        modal.classList.remove('hidden');
+        
+        // Resetear los campos al abrir el modal
+        const pacienteSelect = document.getElementById('paciente');
+        const relacionSelect = document.getElementById('relacion');
+        if(pacienteSelect) pacienteSelect.value = '';
+        if(relacionSelect) relacionSelect.value = '';
+        
+        // Forzar la actualización de los campos visibles
+        const tipoCitaRadios = document.querySelectorAll('input[name="tipo_cita"]');
+        if(tipoCitaRadios.length > 0) {
+            tipoCitaRadios[0].checked = true;
+            const event = new Event('change');
+            tipoCitaRadios[0].dispatchEvent(event);
+        }
+    };
 
     // Estilos dinámicos para capitalización
     const style = document.createElement('style');
@@ -739,5 +1048,16 @@
         }
     `;
     document.head.appendChild(style);
+</script>
+
+<script>
+    // Función para abrir el modal con una fecha específica
+    window.openCitaModal = function(fecha) {
+        const modal = document.getElementById('citaModal');
+        const fechaInput = document.getElementById('modalFecha');
+        
+        if(fechaInput) fechaInput.value = fecha;
+        modal.classList.remove('hidden');
+    };
 </script>
 {% endblock %}

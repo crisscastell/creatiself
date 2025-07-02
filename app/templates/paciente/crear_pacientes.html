@@ -4,9 +4,10 @@
 
 {% block content %}
 <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 py-20 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-6xl mx-auto">
-        <!-- Tarjeta principal -->
-        <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
+    <div class="max-w-6xl mx-auto flex flex-col lg:flex-row gap-8">
+
+        <!-- Tarjeta principal del formulario -->
+        <div class="bg-white rounded-2xl shadow-2xl overflow-hidden flex-1">
             <!-- Encabezado con gradiente mejorado -->
             <div class="bg-gradient-to-r from-teal-600 to-teal-800 p-8 text-white">
                 <div class="flex items-center justify-center space-x-4">
@@ -104,7 +105,7 @@
                             <div class="relative">
                                 <input 
                                     type="text" 
-                                    id="cedula_representante" 
+                                    id="cedula" 
                                     name="cedula" 
                                     class="w-full pl-4 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white" 
                                     placeholder="Ej: 123456789" 
@@ -124,7 +125,7 @@
                             <div class="relative">
                                 <input 
                                     type="text" 
-                                    id="nombre_representante" 
+                                    id="nombre" 
                                     name="nombre" 
                                     class="w-full pl-4 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white" 
                                     placeholder="Ej: Juan" 
@@ -155,7 +156,7 @@
                             <div class="relative">
                                 <input 
                                     type="text" 
-                                    id="apellido_representante" 
+                                    id="apellido" 
                                     name="apellido" 
                                     class="w-full pl-4 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white" 
                                     placeholder="Ej: Juan" 
@@ -203,7 +204,7 @@
                         <div class="relative">
                             <label for="telefono" class="block text-sm font-medium text-gray-700 mb-2">Teléfono <span class="text-red-500">*</span></label>
                             <div class="relative">
-                                <input type="text" id="telefono_representante" name="telefono" class="w-full pl-4 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white" placeholder="Ej: 04121234567" required>
+                                <input type="text" id="telefono" name="telefono" class="w-full pl-4 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white" placeholder="Ej: 04121234567" required>
                                 <div class="absolute inset-y-0 right-0 flex items-center pr-3">
                                     <i class="fas fa-phone text-gray-400"></i>
                                 </div>
@@ -214,7 +215,7 @@
                         <div class="relative">
                             <label for="edad" class="block text-sm font-medium text-gray-700 mb-2">Edad <span class="text-red-500">*</span></label>
                             <div class="relative">
-                                <input type="number" id="edad_representante" name="edad" class="w-full pl-4 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white" placeholder="Ej: 35" required>
+                                <input type="number" id="edad" name="edad" class="w-full pl-4 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white" placeholder="Ej: 35" required>
                                 <div class="absolute inset-y-0 right-0 flex items-center pr-3">
                                     <i class="fas fa-birthday-cake text-gray-400"></i>
                                 </div>
@@ -361,7 +362,7 @@
                                     <select id="estado" name="estado" class="appearance-none w-full pl-4 pr-10 py-3 border border-gray-300 rounded-l-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white" required disabled>
                                         <option value="">Primero seleccione un país</option>
                                         {% for estado in estados %}
-                                            <option value="{{ estado.id }}">{{ estado.nombre_estado }}</option>
+                                            <option value="{{ estado.id }}" data-pais="{{ estado.pais.id }}">{{ estado.nombre_estado }}</option>
                                         {% endfor %}
                                     </select>
                                     <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
@@ -382,7 +383,7 @@
                                     <select id="ciudad" name="ciudad" class="appearance-none w-full pl-4 pr-10 py-3 border border-gray-300 rounded-l-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white" required disabled>
                                         <option value="">Primero seleccione un estado</option>
                                         {% for ciudad in ciudades %}
-                                            <option value="{{ ciudad.id }}">{{ ciudad.nombre_ciudad }}</option>
+                                            <option value="{{ ciudad.id }}" data-estado="{{ ciudad.estado.id }}">{{ ciudad.nombre_ciudad }}</option>
                                         {% endfor %}
                                     </select>
                                     <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
@@ -419,6 +420,31 @@
                 </div>
             </form>
         </div>
+        <!-- Barra lateral de estadísticas -->
+        <div class="lg:w-80 xl:w-96 flex-shrink-0">
+            <div class="bg-white rounded-2xl shadow-2xl overflow-hidden sticky top-6">
+                <!-- Encabezado -->
+                <div class="bg-gradient-to-r from-cyan-900 to-cyan-800 p-5 text-white">
+                    <h3 class="text-xl font-bold flex items-center">
+                        <i class="fas fa-chart-bar mr-3"></i>
+                        Estadísticas en Tiempo Real
+                    </h3>
+                    <p class="text-xs opacity-80 mt-1">Actualizado al guardar</p>
+                </div>
+
+                <!-- Contenido -->
+                <div class="p-5 space-y-6" id="stats-container">
+                    <!-- Se llenará dinámicamente con JavaScript -->
+                    <div class="text-center py-10">
+                        <i class="fas fa-spinner fa-spin text-2xl text-gray-400"></i>
+                        <p class="mt-2 text-gray-500">Cargando estadísticas...</p>
+                    </div>
+                </div>
+            </div>
+            <div id="stats-data" style="display:none;">{{ stats_data|safe }}</div>
+        </div>
+
+        
     </div>
 </div>
 
@@ -849,7 +875,253 @@
     </div>
 </div>
 
+
+<style>
+    /* Animación para las barras de progreso */
+@keyframes growProgressBar {
+    from { width: 0; }
+    to { width: var(--progress-width); }
+}
+
+.progress-bar {
+    animation: growProgressBar 1s ease-out forwards;
+}
+
+/* Efecto hover para las tarjetas de estadísticas */
+#stats-container > div {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+#stats-container > div:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+</style>
+
 <script>
+
+    // Cargar datos de ubicación
+    const paisSelect = document.getElementById('pais');
+    const estadoSelect = document.getElementById('estado');
+    const ciudadSelect = document.getElementById('ciudad');
+    
+    const estadosData = {
+        {% for pais in paises %}
+            '{{ pais.id }}': [
+                {% for estado in pais.estado_set.all %}
+                    {id: '{{ estado.id }}', nombre: '{{ estado.nombre_estado }}'},
+                {% endfor %}
+            ],
+        {% endfor %}
+    };
+    
+    const ciudadesData = {
+        {% for estado in estados %}
+            '{{ estado.id }}': [
+                {% for ciudad in estado.ciudad_set.all %}
+                    {id: '{{ ciudad.id }}', nombre: '{{ ciudad.nombre_ciudad }}'},
+                {% endfor %}
+            ],
+        {% endfor %}
+    };
+
+    // =============================================
+    // ESTADÍSTICAS EN TIEMPO REAL - VERSIÓN CORREGIDA
+    // =============================================
+
+    // Objeto para almacenar estadísticas
+    let estadisticas = {
+        total: 0,
+        hombres: 0,
+        mujeres: 0,
+        infantiles: 0,
+        adultos: 0,
+        condiciones: []
+    };
+
+    // Función para actualizar las estadísticas en la UI
+    function actualizarEstadisticas() {
+        const container = document.getElementById('stats-container');
+        if (!container) return;
+
+        // Calcular porcentajes
+        const porcentajeHombres = estadisticas.total > 0 ? Math.round((estadisticas.hombres / estadisticas.total) * 100) : 0;
+        const porcentajeMujeres = estadisticas.total > 0 ? Math.round((estadisticas.mujeres / estadisticas.total) * 100) : 0;
+
+        // Generar HTML de las estadísticas
+        container.innerHTML = `
+            <!-- Resumen general -->
+            <div class="bg-blue-50 rounded-xl p-4">
+                <h4 class="font-semibold text-blue-800 mb-3 flex items-center">
+                    <i class="fas fa-users mr-2"></i> Resumen General
+                </h4>
+                <div class="space-y-2">
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">Total:</span>
+                        <span class="font-bold text-indigo-700">${estadisticas.total}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">Hombres:</span>
+                        <span class="font-bold text-blue-600">${estadisticas.hombres} (${porcentajeHombres}%)</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">Mujeres:</span>
+                        <span class="font-bold text-pink-600">${estadisticas.mujeres} (${porcentajeMujeres}%)</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">Infantiles:</span>
+                        <span class="font-bold text-purple-600">${estadisticas.infantiles}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">Adultos:</span>
+                        <span class="font-bold text-teal-600">${estadisticas.adultos}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gráfico circular -->
+            <div class="bg-white border border-gray-200 rounded-xl p-4">
+                <h4 class="font-semibold text-gray-800 mb-3 flex items-center">
+                    <i class="fas fa-chart-pie mr-2"></i> Distribución por Sexo
+                </h4>
+                <div class="flex justify-center">
+                    <div class="relative w-40 h-40">
+                        <div class="absolute inset-0 rounded-full border-8 border-blue-500" 
+                            style="clip-path: polygon(0 0, 50% 0, 50% 100%, 0 100%);"></div>
+                        <div class="absolute inset-0 rounded-full border-8 border-pink-500" 
+                            style="clip-path: polygon(50% 0, 100% 0, 100% 100%, 50% 100%); 
+                                    transform: rotate(${porcentajeHombres / 100}turn);"></div>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <span class="text-lg font-bold text-gray-700">
+                                ${porcentajeHombres}% H
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Condiciones más comunes -->
+            <div class="bg-white border border-gray-200 rounded-xl p-4">
+                <h4 class="font-semibold text-gray-800 mb-3 flex items-center">
+                    <i class="fas fa-heartbeat mr-2"></i> Condiciones Frecuentes
+                </h4>
+                <div class="space-y-3" id="condiciones-stats">
+                    ${estadisticas.condiciones.length > 0 ? 
+                        estadisticas.condiciones.map(cond => `
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span class="text-gray-600">${cond.condicion__nombre || 'Sin condición'}</span>
+                                    <span class="font-medium">${cond.total}</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div class="bg-purple-600 h-2 rounded-full progress-bar" 
+                                        style="--progress-width: ${(cond.total / estadisticas.total) * 100}%"></div>
+                                </div>
+                            </div>
+                        `).join('') : 
+                        '<p class="text-gray-500 text-sm">No hay datos de condiciones</p>'
+                    }
+                </div>
+            </div>
+        `;
+
+        // Animación para las barras de progreso
+        document.querySelectorAll('.progress-bar').forEach(bar => {
+            bar.style.width = '0';
+            setTimeout(() => {
+                bar.style.width = bar.style.getPropertyValue('--progress-width');
+            }, 100);
+        });
+    }
+
+    // Función para cargar estadísticas iniciales desde el servidor
+    function cargarEstadisticasIniciales() {
+        try {
+            // Obtener datos del contexto de Django
+            const statsElement = document.getElementById('stats-data');
+            if (!statsElement) {
+                throw new Error('Elemento stats-data no encontrado');
+            }
+            
+            const statsFromServer = JSON.parse(statsElement.textContent);
+            
+            // Actualizar el objeto de estadísticas
+            estadisticas = {
+                total: statsFromServer.total || 0,
+                hombres: statsFromServer.hombres || 0,
+                mujeres: statsFromServer.mujeres || 0,
+                infantiles: statsFromServer.infantiles || 0,
+                adultos: statsFromServer.adultos || 0,
+                condiciones: statsFromServer.condiciones || []
+            };
+            
+            actualizarEstadisticas();
+        } catch (error) {
+            console.error('Error cargando estadísticas:', error);
+            mostrarNotificacion('Error al cargar estadísticas', 'error');
+            
+            // Mostrar datos de ejemplo si hay error
+            estadisticas = {
+                total: 0,
+                hombres: 0,
+                mujeres: 0,
+                infantiles: 0,
+                adultos: 0,
+                condiciones: []
+            };
+            actualizarEstadisticas();
+        }
+    }
+
+    // Función para actualizar cuando se guarda un paciente
+    function actualizarStatsAlGuardar(pacienteData) {
+        // Actualizar estadísticas con los nuevos datos
+        estadisticas.total++;
+        
+        if (pacienteData.sexo === 'masculino') {
+            estadisticas.hombres++;
+        } else {
+            estadisticas.mujeres++;
+        }
+
+        if (pacienteData.tipo_paciente === 'infantil') {
+            estadisticas.infantiles++;
+        } else {
+            estadisticas.adultos++;
+        }
+
+        actualizarEstadisticas();
+    }
+
+    // Inicialización cuando se carga el DOM
+    document.addEventListener('DOMContentLoaded', function() {
+        // Cargar estadísticas iniciales
+        cargarEstadisticasIniciales();
+        
+        // Modificar la función de guardar para actualizar estadísticas
+        const pacienteForm = document.getElementById('pacienteForm');
+        if (pacienteForm) {
+            pacienteForm.addEventListener('submit', function(e) {
+                if (!validarFormularioPaciente()) {
+                    e.preventDefault();
+                    return false;
+                }
+                
+                // Obtener datos del formulario para actualizar stats
+                const formData = new FormData(this);
+                const pacienteData = {
+                    nombre: formData.get('nombre'),
+                    apellido: formData.get('apellido'),
+                    sexo: formData.get('sexo'),
+                    tipo_paciente: formData.get('tipo_paciente')
+                };
+                
+                // Actualizar estadísticas (en una app real esto sería después de éxito del submit)
+                actualizarStatsAlGuardar(pacienteData);
+            });
+        }
+    });
+
     // Objeto para almacenar temporalmente los datos del paciente
     let pacienteTempData = {
         tipo_paciente: '',
@@ -1081,7 +1353,7 @@
         mostrarNotificacion('Representante seleccionado', 'success');
     }
 
-    // Función para guardar país
+    // Función para guardar país - Versión corregida
     function guardarPais() {
         const form = document.getElementById('formPais');
         const formData = new FormData(form);
@@ -1107,22 +1379,25 @@
         })
         .then(data => {
             if (data.success) {
+                // Actualizar select principal de país
                 const selectPais = document.getElementById('pais');
-                const newOption = document.createElement('option');
-                newOption.value = data.id;
-                newOption.textContent = data.nombre;
-                newOption.selected = true;
-                selectPais.appendChild(newOption);
+                const newOption = new Option(data.nombre, data.id, true, true);
+                selectPais.add(newOption);
                 
+                // Actualizar select de país en modal de estado
                 const selectPaisEstado = document.getElementById('pais_estado');
-                const newOptionEstado = document.createElement('option');
-                newOptionEstado.value = data.id;
-                newOptionEstado.textContent = data.nombre;
-                selectPaisEstado.appendChild(newOptionEstado);
+                const newOptionEstado = new Option(data.nombre, data.id);
+                selectPaisEstado.add(newOptionEstado);
+                
+                // Habilitar el select de estado
+                document.getElementById('estado').disabled = false;
                 
                 cerrarModalPais();
                 mostrarNotificacion(data.message, 'success');
                 form.reset();
+                
+                // Disparar evento change para cargar estados si es necesario
+                selectPais.dispatchEvent(new Event('change'));
             } else {
                 throw new Error(data.message || 'Error al guardar el país');
             }
@@ -1136,8 +1411,8 @@
             submitBtn.innerHTML = originalText;
         });
     }
-    
-    // Función para guardar estado
+
+    // Función para guardar estado - Versión corregida
     function guardarEstado() {
         const form = document.getElementById('formEstado');
         const formData = new FormData(form);
@@ -1149,17 +1424,18 @@
             mostrarNotificacion('Todos los campos son requeridos', 'error');
             return;
         }
-    
+
         const submitBtn = form.querySelector('button[type="button"]');
         const originalText = submitBtn.innerHTML;
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
-    
+
         fetch("{% url 'Crear_estado' %}", {
             method: 'POST',
             body: formData,
             headers: {
-                'X-Requested-With': 'XMLHttpRequest'
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': formData.get('csrfmiddlewaretoken')
             }
         })
         .then(response => {
@@ -1170,17 +1446,31 @@
         })
         .then(data => {
             if (data.success) {
+                // Actualizar select principal de estado
                 const selectEstado = document.getElementById('estado');
                 const newOption = new Option(data.nombre, data.id, true, true);
                 selectEstado.add(newOption);
                 
+                // Actualizar select de estado en modal de ciudad
                 const selectEstadoCiudad = document.getElementById('estado_ciudad');
                 const newOptionCiudad = new Option(data.nombre, data.id);
                 selectEstadoCiudad.add(newOptionCiudad);
                 
+                // Habilitar el select de ciudad
+                document.getElementById('ciudad').disabled = false;
+                
                 cerrarModalEstado();
                 mostrarNotificacion(data.message, 'success');
                 form.reset();
+                
+                // Actualizar datos locales para dependencias
+                if (!estadosData[paisId]) {
+                    estadosData[paisId] = [];
+                }
+                estadosData[paisId].push({id: data.id, nombre: data.nombre});
+                
+                // Disparar evento change para cargar ciudades si es necesario
+                selectEstado.dispatchEvent(new Event('change'));
             } else {
                 throw new Error(data.message || 'Error al guardar el estado');
             }
@@ -1194,8 +1484,8 @@
             submitBtn.innerHTML = originalText;
         });
     }
-    
-    // Función para guardar ciudad
+
+    // Función para guardar ciudad - Versión corregida
     function guardarCiudad() {
         const form = document.getElementById('formCiudad');
         const formData = new FormData(form);
@@ -1207,17 +1497,18 @@
             mostrarNotificacion('Estado y nombre son requeridos', 'error');
             return;
         }
-    
+
         const submitBtn = form.querySelector('button[type="button"]');
         const originalText = submitBtn.innerHTML;
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Guardando...';
-    
+
         fetch("{% url 'Crear_ciudad' %}", {
             method: 'POST',
             body: formData,
             headers: {
-                'X-Requested-With': 'XMLHttpRequest'
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': formData.get('csrfmiddlewaretoken')
             }
         })
         .then(async response => {
@@ -1229,10 +1520,20 @@
         })
         .then(data => {
             if (data.success) {
-                actualizarSelectCiudad(data);
+                // Actualizar select principal de ciudad
+                const selectCiudad = document.getElementById('ciudad');
+                const newOption = new Option(data.nombre, data.id, true, true);
+                selectCiudad.add(newOption);
+                
                 cerrarModalCiudad();
                 mostrarNotificacion(data.message, 'success');
                 form.reset();
+                
+                // Actualizar datos locales para dependencias
+                if (!ciudadesData[estadoSeleccionado]) {
+                    ciudadesData[estadoSeleccionado] = [];
+                }
+                ciudadesData[estadoSeleccionado].push({id: data.id, nombre: data.nombre});
             }
         })
         .catch(error => {

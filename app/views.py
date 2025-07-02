@@ -8,10 +8,12 @@ from .models import *
 from .forms import AntecedentesPersonalesForm, CondicionForm, PaisForm, EstadoForm, CiudadForm
 from django.contrib.auth.hashers import make_password
 from django.views.decorators.http import require_POST
-from datetime import date, timedelta, datetime
+from datetime import date, timedelta, datetime, time
 from django.views import View
 from django.views.decorators.http import require_http_methods
 from django.utils import timezone
+
+import json
 
 def login(request):
     if request.method == "POST":
@@ -75,6 +77,38 @@ def index(request):
         }
     }
     
+    # Obtener todas las citas del mes actual para el calendario
+    primer_dia_mes = hoy.replace(day=1)
+    ultimo_dia_mes = (primer_dia_mes + timedelta(days=32)).replace(day=1) - timedelta(days=1)
+    
+    citas_mes_actual = Cita.objects.filter(
+        fecha__range=[primer_dia_mes, ultimo_dia_mes]
+    ).select_related('paciente').order_by('fecha', 'hora')
+    
+    # Formatear citas para el calendario
+    citas_calendario = []
+    for cita in citas_mes_actual:
+        # Asegurarse de que la fecha esté en formato correcto
+        fecha_iso = cita.fecha.strftime('%Y-%m-%d')  # Formato ISO: YYYY-MM-DD
+        
+        # Manejar la hora correctamente
+        if isinstance(cita.hora, time):
+            hora_str = cita.hora.strftime('%H%M')
+        elif isinstance(cita.hora, str):
+            # Si es string, quitar posibles ':' y formatear
+            hora_str = cita.hora.replace(':', '')[:4]
+        else:
+            hora_str = '0000'
+        
+        citas_calendario.append({
+            'id': str(cita.id),
+            'fecha': fecha_iso,  # Usamos string en formato ISO
+            'hora': hora_str,
+            'paciente_nombre': f"{cita.paciente.nombre} {cita.paciente.apellido}" if cita.paciente else "Pareja",
+            'motivo_consulta': cita.motivo_consulta,
+            'modalidad': cita.modalidad
+        })
+    
     # Estadísticas mensuales para los gráficos
     meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
     año_actual = datetime.now().year
@@ -101,6 +135,8 @@ def index(request):
     
     # Datos existentes
     pacientes_destacados = Paciente.objects.all()[:6]
+    pacientes = Paciente.objects.all()
+    relaciones = RelacionPaciente.objects.all()
     proximas_citas = Cita.objects.filter(fecha__gte=hoy).order_by('fecha', 'hora')[:3]
 
     context = {
@@ -108,11 +144,14 @@ def index(request):
         "usuario_rol": usuario.rol.nombre_rol,
         "stats": stats,
         "proximas_citas": proximas_citas,
-        "pacientes": pacientes_destacados,
+        "pacientes_destacados": pacientes_destacados,
+        "pacientes": pacientes,
+        "relaciones": relaciones,
         "hoy": hoy,
         "presencial_mensual": presencial_mensual,
         "virtual_mensual": virtual_mensual,
-        "meses": meses
+        "meses": meses,
+        "citas_json": json.dumps(citas_calendario, default=str)  # Usamos default=str para serializar fechas
     }
 
     return render(request, "index.html", context)
@@ -491,8 +530,7 @@ def crear_ciudad(request):
         'success': False,
         'message': 'Método no permitido'
     }, status=405)
-    
-    return redirect('Tablas')
+   
 
 def editar_ciudad(request, id):
     ciudad = get_object_or_404(Ciudad, id=id)
@@ -509,20 +547,51 @@ def editar_ciudad(request, id):
     return redirect('Tablas')
 
 def tablas(request):
-    paises = Pais.objects.all()
-    estados = Estado.objects.all()
-    ciudades = Ciudad.objects.all()
+    # Obtener todos los parámetros de la URL
+    pais_query = request.GET.get('pais_query', '')
+    estado_query = request.GET.get('estado_query', '')
+    ciudad_query = request.GET.get('ciudad_query', '')
+    pais_page = request.GET.get('pais_page', 1)
+    estado_page = request.GET.get('estado_page', 1)
+    ciudad_page = request.GET.get('ciudad_page', 1)
 
-    if request.method == 'GET' and 'pais' in request.GET:
-        estados = Estado.objects.filter(pais_id=request.GET.get('pais'))
-        if 'estado' in request.GET:
-            ciudades = Ciudad.objects.filter(estado_id=request.GET.get('estado'))
+    # Búsqueda y paginación para países
+    pais_list = Pais.objects.all().order_by('nombre_pais')
+    if pais_query:
+        pais_list = pais_list.filter(nombre_pais__icontains=pais_query)
+    pais_paginator = Paginator(pais_list, 5)
+    paises = pais_paginator.get_page(pais_page)
+
+    # Búsqueda y paginación para estados
+    estado_list = Estado.objects.all().order_by('nombre_estado')
+    if estado_query:
+        estado_list = estado_list.filter(nombre_estado__icontains=estado_query)
+    estado_paginator = Paginator(estado_list, 5)
+    estados = estado_paginator.get_page(estado_page)
+
+    # Búsqueda y paginación para ciudades
+    ciudad_list = Ciudad.objects.all().order_by('nombre_ciudad')
+    if ciudad_query:
+        ciudad_list = ciudad_list.filter(nombre_ciudad__icontains=ciudad_query)
+    ciudad_paginator = Paginator(ciudad_list, 5)
+    ciudades = ciudad_paginator.get_page(ciudad_page)
+
+    # Construir contexto con todos los parámetros actuales
+    context = {
+        'paises': paises,
+        'estados': estados,
+        'ciudades': ciudades,
+        'current_params': {
+            'pais_query': pais_query,
+            'estado_query': estado_query,
+            'ciudad_query': ciudad_query,
+            'pais_page': paises.number,
+            'estado_page': estados.number,
+            'ciudad_page': ciudades.number,
+        }
+    }
     
-    return render(request, "tablas.html", {
-        'paises': paises, 
-        'estados': estados, 
-        'ciudades': ciudades
-    })
+    return render(request, "tablas.html", context)
 
 class GetAppointmentCounts(View):
     def get(self, request):

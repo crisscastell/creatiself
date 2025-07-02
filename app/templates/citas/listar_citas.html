@@ -1,9 +1,24 @@
 {% extends 'base.html' %}
 
-{% block title %}Lista de Citas{% endblock %}
+{% block title %}Gestión de Citas{% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-gray-50 py-20 px-4 sm:px-6 lg:px-8">
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-20 px-4 sm:px-6 lg:px-8">
+
+    {% if messages %}
+    <div class="fixed top-4 right-4 z-50 space-y-2">
+        {% for message in messages %}
+        <div class="px-6 py-3 rounded-lg shadow-lg text-white font-medium 
+                    {% if message.tags == 'error' %}bg-red-500{% else %}bg-green-500{% endif %} 
+                    flex items-center animate__animated animate__fadeInRight">
+            <i data-lucide="{% if message.tags == 'error' %}alert-circle{% else %}check-circle{% endif %}" 
+            class="w-5 h-5 mr-2"></i>
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
     <div class="max-w-7xl mx-auto">
         <!-- Header con título y botón -->
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
@@ -11,136 +26,224 @@
                 <h1 class="text-3xl font-bold text-gray-800">Gestión de Citas</h1>
                 <p class="text-gray-600 mt-2">Visualiza y gestiona todas las citas programadas</p>
             </div>
-            <a href="{% url 'Crear_citas' %}" class="inline-flex items-center px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-sm">
-                <i data-lucide="plus" class="w-5 h-5 mr-2"></i>
+            <a href="{% url 'Crear_citas' %}" class="inline-flex items-center px-5 py-3 bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 text-white font-medium rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 group">
+                <i data-lucide="plus" class="w-5 h-5 mr-2 transition-transform duration-300 group-hover:rotate-90"></i>
                 Nueva Cita
             </a>
         </div>
 
-        <!-- Panel de filtros y búsqueda -->
-        <div class="bg-white rounded-lg shadow-sm p-4 mb-6 border border-gray-200">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <!-- Barra de búsqueda -->
-                <div class="md:col-span-3">
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i data-lucide="search" class="text-gray-400"></i>
+        <!-- Estadísticas mejoradas -->
+        <div class="mb-8">
+            <div class="bg-white rounded-2xl shadow-xl p-6">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                    <i data-lucide="activity" class="w-5 h-5 mr-2 text-teal-600"></i>
+                    Resumen de Citas
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Tarjeta de Total -->
+                    <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-5 border border-blue-200">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-sm font-medium text-blue-800">Total Citas</p>
+                                <p class="text-3xl font-bold text-gray-800 mt-1">{{ citas.paginator.count }}</p>
+                            </div>
+                            <div class="p-3 rounded-lg bg-blue-100 text-blue-600">
+                                <i data-lucide="calendar-days" class="w-6 h-6"></i>
+                            </div>
                         </div>
-                        <input 
-                            type="text" 
-                            id="searchInput"
-                            placeholder="Buscar por paciente, cédula, motivo..." 
-                            class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
-                        />
+                        <div class="mt-4 pt-4 border-t border-blue-200 border-dashed">
+                            <div class="flex justify-between text-sm text-blue-700">
+                                <span>Hoy: {{ citas_hoy }}</span>
+                                <span>Esta semana: {{ citas_semana }}</span>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                
-                <!-- Filtro por estado -->
-                <div>
-                    <select id="filtroEstado" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
-                        <option value="">Todos los estados</option>
-                        <option value="pendiente">Pendiente</option>
-                        <option value="completada">Completada</option>
-                        <option value="cancelada">Cancelada</option>
-                    </select>
+                    
+                    <!-- Tarjeta de Estados -->
+                    <div class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-5 border border-gray-200">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-sm font-medium text-gray-700">Distribución por Estado</p>
+                                <div class="mt-3 space-y-2">
+                                    <div class="flex items-center">
+                                        <span class="w-3 h-3 rounded-full bg-yellow-400 mr-2"></span>
+                                        <span class="text-sm text-gray-700">Pendientes: {{ citas_pendientes }}</span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <span class="w-3 h-3 rounded-full bg-green-500 mr-2"></span>
+                                        <span class="text-sm text-gray-700">Completadas: {{ citas_completadas }}</span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <span class="w-3 h-3 rounded-full bg-red-500 mr-2"></span>
+                                        <span class="text-sm text-gray-700">Canceladas: {{ citas_canceladas }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="p-3 rounded-lg bg-gray-200 text-gray-600">
+                                <i data-lucide="pie-chart" class="w-6 h-6"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tarjeta de Modalidades -->
+                    <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-5 border border-purple-200">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-sm font-medium text-purple-800">Distribución por Modalidad</p>
+                                <div class="mt-3 space-y-2">
+                                    <div class="flex items-center">
+                                        <span class="w-3 h-3 rounded-full bg-blue-500 mr-2"></span>
+                                        <span class="text-sm text-gray-700">Virtual: {{ citas_virtuales }}</span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <span class="w-3 h-3 rounded-full bg-purple-500 mr-2"></span>
+                                        <span class="text-sm text-gray-700">Presencial: {{ citas_presenciales }}</span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <span class="w-3 h-3 rounded-full bg-gray-500 mr-2"></span>
+                                        <span class="text-sm text-gray-700">Relaciones: {{ citas_relaciones }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="p-3 rounded-lg bg-purple-100 text-purple-600">
+                                <i data-lucide="smartphone" class="w-6 h-6"></i>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Lista de citas -->
-        <div class="bg-white shadow-sm rounded-lg overflow-hidden">
+        <!-- Panel de filtros y búsqueda -->
+        <div class="bg-white rounded-2xl shadow-xl p-6 mb-8 border border-gray-200">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                <i data-lucide="filter" class="w-5 h-5 mr-2 text-teal-600"></i>
+                Filtros y Búsqueda
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <!-- Barra de búsqueda -->
+                <div class="relative flex-grow">
+                    <i data-lucide="search" class="absolute left-3 top-3 text-gray-500"></i>
+                    <input 
+                        type="text" 
+                        id="searchInput"
+                        placeholder="Buscar por nombre, cédula, teléfono..." 
+                        class="pl-10 pr-4 py-2 w-full border border-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        onkeyup="filterCards()"
+                    />
+                </div>
+            
+            </div>
+        </div>
+
+        <!-- Lista de citas mejorada -->
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+                <h2 class="text-xl font-semibold text-gray-800 flex items-center">
+                    <i data-lucide="list" class="w-5 h-5 mr-2 text-teal-600"></i>
+                    Listado de Citas
+                </h2>
+                <div class="text-sm text-gray-500">
+                    Mostrando <span class="font-medium">{{ citas.start_index }}-{{ citas.end_index }}</span> de <span class="font-medium">{{ citas.paginator.count }}</span>
+                </div>
+            </div>
+            
             {% if citas %}
-                <div class="grid grid-cols-1 gap-4 p-4" id="citasContainer">
+                <div class="cita-card divide-y divide-gray-200" id="citasContainer">
                     {% for cita in citas %}
-                    <div class="cita-card bg-white rounded-lg border border-gray-200 hover:border-teal-300 transition-all duration-200 shadow-sm hover:shadow-md overflow-hidden"
+                    <div class="cita-card hover:bg-gray-50 transition-colors duration-200"
                         data-estatus="{{ cita.estatus }}"
                         data-tipo="{% if cita.paciente %}individual{% else %}relacion{% endif %}"
                         data-cedula="{% if cita.paciente %}{{ cita.paciente.identificacion }}{% elif cita.relacion %}{{ cita.relacion.paciente1.identificacion }} {{ cita.relacion.paciente2.identificacion }}{% endif %}"
                         data-nombre="{% if cita.paciente %}{{ cita.paciente.nombre }} {{ cita.paciente.apellido }}{% elif cita.relacion %}Relación: {{ cita.relacion.paciente1.nombre }} & {{ cita.relacion.paciente2.nombre }}{% endif %}"
                         data-motivo="{{ cita.motivo_consulta|lower }}">
-                        <!-- Encabezado de la cita -->
-                        <div class="px-5 py-4 border-b border-gray-100 flex justify-between items-center">
-                            <div class="flex items-center">
-                                <div class="mr-3">
-                                    <div class="text-lg font-semibold text-gray-900">
-                                        {% if cita.paciente %}
-                                            {{ cita.paciente.nombre }} {{ cita.paciente.apellido }}
-                                        {% elif cita.relacion %}
-                                            Relación: {{ cita.relacion.paciente1.nombre }} & {{ cita.relacion.paciente2.nombre }}
-                                        {% endif %}
-                                    </div>
-                                    <div class="flex items-center mt-1">
-                                        <span class="text-sm text-gray-500 mr-3 flex items-center">
-                                            <i data-lucide="calendar" class="w-4 h-4 mr-1"></i>
-                                            {{ cita.fecha|date:"d/m/Y" }}
-                                        </span>
-                                        <span class="text-sm text-gray-500 flex items-center">
-                                            <i data-lucide="clock" class="w-4 h-4 mr-1"></i>
-                                            {{ cita.hora|time:"H:i" }}
-                                        </span>
-                                        <span class="text-sm text-gray-500 flex items-center ml-3">
-                                            <i data-lucide="id-card" class="w-4 h-4 mr-1"></i>
-                                            {% if cita.paciente %}
-                                                {{ cita.paciente.identificacion }}
-                                            {% elif cita.relacion %}
-                                                {{ cita.relacion.paciente1.identificacion }} / {{ cita.relacion.paciente2.identificacion }}
-                                            {% endif %}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Estado -->
-                            <div class="flex items-center">
-                                <span class="px-3 py-1 rounded-full text-xs font-medium 
-                                    {% if cita.estatus == 'completada' %}bg-green-100 text-green-800
-                                    {% elif cita.estatus == 'cancelada' %}bg-red-100 text-red-800
-                                    {% else %}bg-yellow-100 text-yellow-800{% endif %}">
-                                    {{ cita.get_estatus_display }}
-                                </span>
-                            </div>
-                        </div>
                         
-                        <!-- Detalles de la cita -->
-                        <div class="px-5 py-3">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <h3 class="text-sm font-medium text-gray-500">Motivo de consulta</h3>
-                                    <p class="text-gray-800 mt-1">{{ cita.motivo_consulta|truncatechars:60 }}</p>
+                        <div class="px-6 py-4">
+                            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                                <!-- Columna izquierda - Información principal -->
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center mb-2">
+                                        {% if cita.paciente %}
+                                        <div class="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center text-teal-600 mr-3 shrink-0">
+                                            <i data-lucide="user" class="w-5 h-5"></i>
+                                        </div>
+                                        {% else %}
+                                        <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 mr-3 shrink-0">
+                                            <i data-lucide="users" class="w-5 h-5"></i>
+                                        </div>
+                                        {% endif %}
+                                        
+                                        <div class="min-w-0">
+                                            <h3 class="text-lg font-semibold text-gray-800 truncate">
+                                                {% if cita.paciente %}
+                                                    {{ cita.paciente.nombre }} {{ cita.paciente.apellido }}
+                                                {% elif cita.relacion %}
+                                                    {{ cita.relacion.paciente1.nombre }} & {{ cita.relacion.paciente2.nombre }}
+                                                {% endif %}
+                                            </h3>
+                                            <p class="text-sm text-gray-500 truncate">
+                                                {% if cita.paciente %}
+                                                    {{ cita.paciente.identificacion }}
+                                                {% elif cita.relacion %}
+                                                    {{ cita.relacion.paciente1.identificacion }} / {{ cita.relacion.paciente2.identificacion }}
+                                                {% endif %}
+                                            </p>
+                                        </div>
+                                    </div>
                                     
-                                    <div class="mt-3 flex items-center">
-                                        <span class="px-2 py-1 rounded text-xs font-medium 
-                                            {% if cita.modalidad == 'virtual' %}bg-blue-100 text-blue-800
-                                            {% else %}bg-purple-100 text-purple-800{% endif %}">
-                                            {{ cita.modalidad|title }}
-                                        </span>
-                                        <span class="ml-2 px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-800">
-                                            {% if cita.paciente %}Individual{% else %}Relación{% endif %}
-                                        </span>
+                                    <div class="ml-13 pl-1">
+                                        <p class="text-gray-700 mb-2">{{ cita.motivo_consulta|truncatechars:100 }}</p>
+                                        
+                                        <div class="flex flex-wrap gap-2 mt-2">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                                                {% if cita.estatus == 'completada' %}bg-green-100 text-green-800
+                                                {% elif cita.estatus == 'cancelada' %}bg-red-100 text-red-800
+                                                {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                                                {{ cita.get_estatus_display }}
+                                            </span>
+                                            
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                                                {% if cita.modalidad == 'virtual' %}bg-blue-100 text-blue-800
+                                                {% else %}bg-purple-100 text-purple-800{% endif %}">
+                                                {{ cita.modalidad|title }}
+                                            </span>
+                                            
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                                {% if cita.paciente %}Individual{% else %}Relación{% endif %}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
                                 
-                                <!-- Acciones -->
-                                <div class="flex space-x-2">
+                                <!-- Columna central - Fecha y hora -->
+                                <div class="flex flex-col items-center px-4 py-2 bg-gray-50 rounded-lg border border-gray-200 min-w-[140px]">
+                                    <div class="text-sm font-medium text-gray-500">Fecha</div>
+                                    <div class="text-lg font-bold text-gray-800">{{ cita.fecha|date:"d/m/Y" }}</div>
+                                    <div class="text-sm font-medium text-gray-500 mt-1">Hora</div>
+                                    <div class="text-lg font-bold text-gray-800">{{ cita.hora|time:"H:i" }}</div>
+                                </div>
+                                
+                                <!-- Columna derecha - Acciones -->
+                                <div class="flex flex-col sm:flex-row md:flex-col lg:flex-row gap-2 justify-center">
                                     <!-- Botón de Detalles -->
                                     <button onclick="openModalDetalleCita({{ cita.id }})" 
-                                            class="p-2 rounded-lg text-gray-500 hover:text-teal-600 hover:bg-teal-50 transition-colors"
-                                            title="Ver detalles">
-                                        <i data-lucide="eye" class="w-5 h-5"></i>
-                                    </button>
-                                    
-                                    <!-- Botón Agregar Detalle -->
-                                    <button onclick="openModalAgregarDetalle({{ cita.id }})" 
-                                            class="p-2 rounded-lg text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
-                                            title="Agregar detalle">
-                                        <i data-lucide="plus-circle" class="w-5 h-5"></i>
+                                            class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition duration-200 group">
+                                        <i data-lucide="eye" class="w-4 h-4 mr-1 text-gray-500 group-hover:text-teal-600"></i>
+                                        Detalles
                                     </button>
                                     
                                     <!-- Botón Editar -->
                                     <button onclick="openModalEditarCita({{ cita.id }})" 
-                                            class="p-2 rounded-lg text-gray-500 hover:text-blue-600 hover:bg-blue-50 transition-colors"
-                                            title="Editar">
-                                        <i data-lucide="edit" class="w-5 h-5"></i>
+                                            class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition duration-200 group">
+                                        <i data-lucide="edit" class="w-4 h-4 mr-1 text-gray-500 group-hover:text-blue-600"></i>
+                                        Editar
+                                    </button>
+                                    
+                                    <!-- Botón Agregar Detalle -->
+                                    <button onclick="openModalAgregarDetalle({{ cita.id }})" 
+                                            class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition duration-200 group">
+                                        <i data-lucide="plus-circle" class="w-4 h-4 mr-1 text-gray-500 group-hover:text-indigo-600"></i>
+                                        Nota
                                     </button>
                                 </div>
                             </div>
@@ -149,88 +252,68 @@
                     {% endfor %}
                 </div>
 
-                <!-- Paginación -->
+                <!-- Paginación mejorada -->
                 {% if citas.paginator.num_pages > 1 %}
-                <div class="px-4 py-4 bg-gray-50 border-t border-gray-200 sm:px-6">
-                    <div class="flex-1 flex justify-between sm:hidden">
-                        {% if citas.has_previous %}
-                        <a href="?page={{ citas.previous_page_number }}{% if query %}&q={{ query }}{% endif %}" 
-                        class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                            Anterior
-                        </a>
-                        {% endif %}
-                        {% if citas.has_next %}
-                        <a href="?page={{ citas.next_page_number }}{% if query %}&q={{ query }}{% endif %}" 
-                        class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                            Siguiente
-                        </a>
-                        {% endif %}
-                    </div>
-                    <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-                        <div>
-                            <p class="text-sm text-gray-700">
-                                Mostrando <span class="font-medium">{{ citas.start_index }}</span> a 
-                                <span class="font-medium">{{ citas.end_index }}</span> de 
-                                <span class="font-medium">{{ citas.paginator.count }}</span> resultados
-                            </p>
+                <div class="px-6 py-4 bg-gray-50 border-t border-gray-200">
+                    <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div class="text-sm text-gray-500">
+                            Mostrando <span class="font-medium">{{ citas.start_index }}-{{ citas.end_index }}</span> de <span class="font-medium">{{ citas.paginator.count }}</span> resultados
                         </div>
-                        <div>
-                            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                                {% if citas.has_previous %}
-                                <a href="?page=1{% if query %}&q={{ query }}{% endif %}" 
-                                class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                                    <span class="sr-only">Primera</span>
-                                    <i data-lucide="chevrons-left" class="h-5 w-5"></i>
-                                </a>
-                                <a href="?page={{ citas.previous_page_number }}{% if query %}&q={{ query }}{% endif %}" 
-                                class="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                                    <span class="sr-only">Anterior</span>
-                                    <i data-lucide="chevron-left" class="h-5 w-5"></i>
+                        
+                        <nav class="flex items-center space-x-1">
+                            {% if citas.has_previous %}
+                            <a href="?page=1{% if query %}&q={{ query }}{% endif %}" 
+                               class="p-2 rounded-lg border border-gray-300 bg-white text-gray-500 hover:bg-gray-50 transition duration-200">
+                                <i data-lucide="chevrons-left" class="w-5 h-5"></i>
+                                <span class="sr-only">Primera</span>
+                            </a>
+                            <a href="?page={{ citas.previous_page_number }}{% if query %}&q={{ query }}{% endif %}" 
+                               class="p-2 rounded-lg border border-gray-300 bg-white text-gray-500 hover:bg-gray-50 transition duration-200">
+                                <i data-lucide="chevron-left" class="w-5 h-5"></i>
+                                <span class="sr-only">Anterior</span>
+                            </a>
+                            {% endif %}
+                            
+                            {% for num in citas.paginator.page_range %}
+                                {% if citas.number == num %}
+                                <span class="px-4 py-2 border border-teal-500 bg-teal-50 text-teal-600 font-medium rounded-lg">
+                                    {{ num }}
+                                </span>
+                                {% elif num > citas.number|add:'-3' and num < citas.number|add:'3' %}
+                                <a href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}" 
+                                   class="px-4 py-2 border border-gray-300 bg-white text-gray-500 hover:bg-gray-50 rounded-lg transition duration-200">
+                                    {{ num }}
                                 </a>
                                 {% endif %}
-                                
-                                {% for num in citas.paginator.page_range %}
-                                    {% if citas.number == num %}
-                                    <a href="#" aria-current="page" 
-                                    class="z-10 bg-teal-600 border-teal-500 text-white relative inline-flex items-center px-4 py-2 border text-sm font-medium">
-                                        {{ num }}
-                                    </a>
-                                    {% elif num > citas.number|add:'-3' and num < citas.number|add:'3' %}
-                                    <a href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}" 
-                                    class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
-                                        {{ num }}
-                                    </a>
-                                    {% endif %}
-                                {% endfor %}
-                                
-                                {% if citas.has_next %}
-                                <a href="?page={{ citas.next_page_number }}{% if query %}&q={{ query }}{% endif %}" 
-                                class="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                                    <span class="sr-only">Siguiente</span>
-                                    <i data-lucide="chevron-right" class="h-5 w-5"></i>
-                                </a>
-                                <a href="?page={{ citas.paginator.num_pages }}{% if query %}&q={{ query }}{% endif %}" 
-                                class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                                    <span class="sr-only">Última</span>
-                                    <i data-lucide="chevrons-right" class="h-5 w-5"></i>
-                                </a>
-                                {% endif %}
-                            </nav>
-                        </div>
+                            {% endfor %}
+                            
+                            {% if citas.has_next %}
+                            <a href="?page={{ citas.next_page_number }}{% if query %}&q={{ query }}{% endif %}" 
+                               class="p-2 rounded-lg border border-gray-300 bg-white text-gray-500 hover:bg-gray-50 transition duration-200">
+                                <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                                <span class="sr-only">Siguiente</span>
+                            </a>
+                            <a href="?page={{ citas.paginator.num_pages }}{% if query %}&q={{ query }}{% endif %}" 
+                               class="p-2 rounded-lg border border-gray-300 bg-white text-gray-500 hover:bg-gray-50 transition duration-200">
+                                <i data-lucide="chevrons-right" class="w-5 h-5"></i>
+                                <span class="sr-only">Última</span>
+                            </a>
+                            {% endif %}
+                        </nav>
                     </div>
                 </div>
                 {% endif %}
             {% else %}
-                <div class="px-4 py-12 text-center">
-                    <i data-lucide="calendar-x" class="mx-auto h-12 w-12 text-gray-400"></i>
-                    <h3 class="mt-2 text-lg font-medium text-gray-900">No hay citas registradas</h3>
-                    <p class="mt-1 text-sm text-gray-500">Comienza agregando una nueva cita.</p>
-                    <div class="mt-6">
-                        <a href="{% url 'Crear_citas' %}" class="inline-flex items-center px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-lg shadow-sm">
-                            <i data-lucide="plus" class="w-5 h-5 mr-2"></i>
-                            Nueva Cita
-                        </a>
+                <div class="px-4 py-16 text-center">
+                    <div class="mx-auto h-24 w-24 text-gray-400 mb-6">
+                        <i data-lucide="calendar-x" class="w-full h-full"></i>
                     </div>
+                    <h3 class="text-xl font-medium text-gray-900 mb-2">No hay citas registradas</h3>
+                    <p class="text-gray-500 mb-6">Comienza agregando una nueva cita para verla aparecer aquí.</p>
+                    <a href="{% url 'Crear_citas' %}" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 text-white font-medium rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
+                        <i data-lucide="plus" class="w-5 h-5 mr-2"></i>
+                        Crear primera cita
+                    </a>
                 </div>
             {% endif %}
         </div>
@@ -240,77 +323,83 @@
 <!-- Modales -->
 {% for cita in citas %}
 <!-- Modal de Edición -->
-<div id="modalEditarCita{{ cita.id }}" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden items-center justify-center z-50">
-    <div class="bg-white p-6 rounded-lg shadow-xl max-w-lg w-full mx-4">
-        <div class="flex justify-between items-center mb-4">
+<div id="modalEditarCita{{ cita.id }}" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full mx-4 transform transition-all duration-300 scale-95 opacity-0 modal-content">
+        <div class="flex justify-between items-center p-6 border-b border-gray-200">
             <h2 class="text-2xl font-bold text-gray-800">Editar Cita</h2>
-            <button onclick="closeModalEditarCita({{ cita.id }})" class="text-gray-500 hover:text-gray-700">
+            <button onclick="closeModalEditarCita({{ cita.id }})" class="text-gray-500 hover:text-gray-700 transition-colors duration-200">
                 <i data-lucide="x" class="w-6 h-6"></i>
             </button>
         </div>
         
-        {% if messages %}
-        <div class="mb-4">
-            {% for message in messages %}
-            <div class="p-3 rounded text-white {% if message.tags == 'error' %}bg-red-500{% else %}bg-green-500{% endif %}">
-                {{ message }}
-            </div>
-            {% endfor %}
-        </div>
-        {% endif %}
         
         <form method="POST" action="{% url 'Editar_cita' cita.id %}">
             {% csrf_token %}
             
-            <!-- Campo Paciente (solo lectura) -->
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Paciente</label>
-                <div class="w-full p-3 border border-gray-300 rounded-lg bg-gray-50">
-                    <p class="font-medium">
+            <!-- Campo oculto para tipo de cita -->
+            <input type="hidden" name="tipo_cita" value="{% if cita.paciente %}paciente{% else %}relacion{% endif %}">
+            
+            <!-- Campo Paciente o Relación (según corresponda) -->
+            <div class="px-6 pt-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                    {% if cita.paciente %}Paciente{% else %}Relación{% endif %}
+                </label>
+                <div class="w-full p-4 border border-gray-300 rounded-xl bg-gray-50">
+                    <div class="flex items-center">
                         {% if cita.paciente %}
+                        <div class="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center text-teal-600 mr-3">
+                            <i data-lucide="user" class="w-5 h-5"></i>
+                        </div>
+                        <p class="font-medium">
                             {{ cita.paciente.nombre }} {{ cita.paciente.apellido }}
+                        </p>
                         {% elif cita.relacion %}
+                        <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 mr-3">
+                            <i data-lucide="users" class="w-5 h-5"></i>
+                        </div>
+                        <p class="font-medium">
                             Relación: {{ cita.relacion.paciente1.nombre }} & {{ cita.relacion.paciente2.nombre }}
+                        </p>
                         {% endif %}
-                    </p>
+                    </div>
                 </div>
                 <input type="hidden" name="paciente" value="{% if cita.paciente %}{{ cita.paciente.id }}{% endif %}">
                 <input type="hidden" name="relacion" value="{% if cita.relacion %}{{ cita.relacion.id }}{% endif %}">
             </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 px-6 pt-4">
                 <!-- Fecha -->
                 <div class="mb-4">
-                    <label for="fecha" class="block text-sm font-medium text-gray-700 mb-1">Fecha</label>
+                    <label for="fecha" class="block text-sm font-medium text-gray-700 mb-2">Fecha</label>
                     <input type="date" id="fecha" name="fecha" 
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500" 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition duration-200" 
                            value="{{ cita.fecha|date:'Y-m-d' }}" required>
                 </div>
                 
                 <!-- Hora -->
                 <div class="mb-4">
-                    <label for="hora" class="block text-sm font-medium text-gray-700 mb-1">Hora</label>
+                    <label for="hora" class="block text-sm font-medium text-gray-700 mb-2">Hora</label>
                     <input type="time" id="hora" name="hora" 
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500" 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition duration-200" 
                            value="{{ cita.hora|time:'H:i' }}" required>
                 </div>
             </div>
             
             <!-- Modalidad -->
-            <div class="mb-4">
-                <label for="modalidad" class="block text-sm font-medium text-gray-700 mb-1">Modalidad</label>
+            <div class="px-6 pt-2">
+                <label for="modalidad" class="block text-sm font-medium text-gray-700 mb-2">Modalidad</label>
                 <select id="modalidad" name="modalidad" 
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500" required>
+                        class="w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition duration-200" required>
                     <option value="virtual" {% if cita.modalidad == 'virtual' %}selected{% endif %}>Virtual</option>
                     <option value="presencial" {% if cita.modalidad == 'presencial' %}selected{% endif %}>Presencial</option>
                 </select>
             </div>
             
             <!-- Estado -->
-            <div class="mb-4">
-                <label for="estatus" class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
+            <div class="px-6 pt-4">
+                <label for="estatus" class="block text-sm font-medium text-gray-700 mb-2">Estado</label>
                 <select id="estatus" name="estatus" 
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500" required>
+                        class="w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition duration-200" required>
                     <option value="pendiente" {% if cita.estatus == 'pendiente' %}selected{% endif %}>Pendiente</option>
                     <option value="completada" {% if cita.estatus == 'completada' %}selected{% endif %}>Completada</option>
                     <option value="cancelada" {% if cita.estatus == 'cancelada' %}selected{% endif %}>Cancelada</option>
@@ -318,20 +407,20 @@
             </div>
             
             <!-- Motivo de Consulta -->
-            <div class="mb-4">
-                <label for="motivo_consulta" class="block text-sm font-medium text-gray-700 mb-1">Motivo de Consulta</label>
-                <textarea id="motivo_consulta" name="motivo_consulta" rows="3" 
-                          class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500" 
+            <div class="px-6 pt-4">
+                <label for="motivo_consulta" class="block text-sm font-medium text-gray-700 mb-2">Motivo de Consulta</label>
+                <textarea id="motivo_consulta" name="motivo_consulta" rows="4" 
+                          class="w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition duration-200" 
                           placeholder="Describa el motivo de la consulta" required>{{ cita.motivo_consulta }}</textarea>
             </div>
             
-            <div class="flex justify-end space-x-3 mt-6">
+            <div class="flex justify-end space-x-3 p-6 border-t border-gray-200">
                 <button type="button" onclick="closeModalEditarCita({{ cita.id }})" 
-                        class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
+                        class="px-5 py-2.5 border border-gray-300 rounded-xl shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition duration-200">
                     Cancelar
                 </button>
                 <button type="submit" 
-                        class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
+                        class="px-5 py-2.5 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition duration-200">
                     Guardar cambios
                 </button>
             </div>
@@ -340,60 +429,89 @@
 </div>
 
 <!-- Modal de Detalles -->
-<div id="modalDetalleCita{{ cita.id }}" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden items-center justify-center z-50">
-    <div class="bg-white p-6 rounded-lg shadow-xl max-w-lg w-full mx-4">
-        <div class="flex justify-between items-center mb-4">
+<div id="modalDetalleCita{{ cita.id }}" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full mx-4 transform transition-all duration-300 scale-95 opacity-0 modal-content">
+        <div class="flex justify-between items-center p-6 border-b border-gray-200">
             <h2 class="text-2xl font-bold text-gray-800">Detalles de la Cita</h2>
-            <button onclick="closeModalDetalleCita({{ cita.id }})" class="text-gray-500 hover:text-gray-700">
+            <button onclick="closeModalDetalleCita({{ cita.id }})" class="text-gray-500 hover:text-gray-700 transition-colors duration-200">
                 <i data-lucide="x" class="w-6 h-6"></i>
             </button>
         </div>
         
-        <div class="space-y-4">
+        <div class="space-y-6 p-6">
             <div>
-                <h3 class="text-lg font-medium text-gray-900 mb-2">Información básica</h3>
-                <div class="grid grid-cols-2 gap-4">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Información básica</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <p class="text-sm text-gray-500">Paciente</p>
-                        <p class="text-lg font-semibold text-gray-900 truncate">
+                        <div class="flex items-center mt-1">
                             {% if cita.paciente %}
+                            <div class="w-8 h-8 rounded-full bg-teal-100 flex items-center justify-center text-teal-600 mr-2">
+                                <i data-lucide="user" class="w-4 h-4"></i>
+                            </div>
+                            <p class="font-semibold text-gray-900 truncate">
                                 {{ cita.paciente.nombre }} {{ cita.paciente.apellido }}
+                            </p>
                             {% elif cita.relacion %}
+                            <div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 mr-2">
+                                <i data-lucide="users" class="w-4 h-4"></i>
+                            </div>
+                            <p class="font-semibold text-gray-900 truncate">
                                 {{ cita.relacion.paciente1.nombre }} & {{ cita.relacion.paciente2.nombre }}
+                            </p>
                             {% endif %}
-                        </p>
+                        </div>
                     </div>
                     <div>
                         <p class="text-sm text-gray-500">Fecha y Hora</p>
-                        <p class="font-medium">{{ cita.fecha|date:"d/m/Y" }} a las {{ cita.hora|time:"H:i" }}</p>
+                        <p class="font-medium flex items-center mt-1">
+                            <i data-lucide="calendar" class="w-4 h-4 mr-1 text-gray-500"></i>
+                            {{ cita.fecha|date:"d/m/Y" }} a las {{ cita.hora|time:"H:i" }}
+                        </p>
                     </div>
                     <div>
                         <p class="text-sm text-gray-500">Modalidad</p>
-                        <p class="font-medium capitalize">{{ cita.modalidad }}</p>
+                        <p class="font-medium capitalize flex items-center mt-1">
+                            <i data-lucide="{% if cita.modalidad == 'virtual' %}video{% else %}map-pin{% endif %}" class="w-4 h-4 mr-1 text-gray-500"></i>
+                            {{ cita.modalidad }}
+                        </p>
                     </div>
                     <div>
                         <p class="text-sm text-gray-500">Estado</p>
-                        <p class="font-medium capitalize">{{ cita.get_estatus_display }}</p>
+                        <p class="font-medium capitalize flex items-center mt-1">
+                            <i data-lucide="{% if cita.estatus == 'completada' %}check-circle{% elif cita.estatus == 'cancelada' %}x-circle{% else %}clock{% endif %}" 
+                               class="w-4 h-4 mr-1 
+                               {% if cita.estatus == 'completada' %}text-green-500
+                               {% elif cita.estatus == 'cancelada' %}text-red-500
+                               {% else %}text-yellow-500{% endif %}"></i>
+                            {{ cita.get_estatus_display }}
+                        </p>
                     </div>
-                    <div class="col-span-2">
+                    <div class="md:col-span-2">
                         <p class="text-sm text-gray-500">Motivo</p>
-                        <p class="font-medium">{{ cita.motivo_consulta }}</p>
+                        <p class="font-medium mt-1">{{ cita.motivo_consulta }}</p>
                     </div>
                 </div>
             </div>
             
             {% if cita.detallecita_set.all %}
             <div>
-                <h3 class="text-lg font-medium text-gray-900 mb-2">Notas de consulta</h3>
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Notas de consulta</h3>
                 <div class="space-y-4">
                     {% for detalle in cita.detallecita_set.all %}
-                    <div class="border-l-4 border-teal-500 pl-4 py-2">
-                        <h4 class="font-medium text-gray-800">{{ detalle.titulo }}</h4>
-                        <p class="text-gray-600 mt-1">{{ detalle.anotacion }}</p>
+                    <div class="border-l-4 border-teal-500 pl-4 py-3 bg-gray-50 rounded-r-lg">
+                        <div class="flex justify-between items-start">
+                            <h4 class="font-medium text-gray-800">{{ detalle.titulo }}</h4>
+                            <span class="text-xs text-gray-500">{{ detalle.fecha_creacion|date:"d/m/Y H:i" }}</span>
+                        </div>
+                        <p class="text-gray-600 mt-2">{{ detalle.anotacion }}</p>
                         {% if detalle.conclusion %}
-                        <div class="mt-2 p-2 bg-blue-50 rounded">
-                            <p class="text-sm font-medium text-blue-800">Conclusión:</p>
-                            <p class="text-blue-700">{{ detalle.conclusion }}</p>
+                        <div class="mt-3 p-3 bg-blue-50 rounded-lg">
+                            <p class="text-sm font-medium text-blue-800 flex items-center">
+                                <i data-lucide="check" class="w-4 h-4 mr-1"></i>
+                                Conclusión:
+                            </p>
+                            <p class="text-blue-700 mt-1">{{ detalle.conclusion }}</p>
                         </div>
                         {% endif %}
                     </div>
@@ -402,16 +520,23 @@
             </div>
             {% else %}
             <div class="text-center py-8">
-                <i data-lucide="file-text" class="mx-auto h-12 w-12 text-gray-400"></i>
-                <h3 class="mt-2 text-sm font-medium text-gray-900">No hay detalles registrados</h3>
-                <p class="mt-1 text-sm text-gray-500">Agrega notas sobre esta consulta.</p>
+                <div class="mx-auto h-16 w-16 text-gray-400 mb-4">
+                    <i data-lucide="file-text" class="w-full h-full"></i>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900">No hay detalles registrados</h3>
+                <p class="text-gray-500 mt-1">Agrega notas sobre esta consulta.</p>
+                <button onclick="openModalAgregarDetalle({{ cita.id }})" 
+                        class="mt-4 inline-flex items-center px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-lg shadow-sm transition-colors duration-200">
+                    <i data-lucide="plus-circle" class="w-5 h-5 mr-2"></i>
+                    Agregar Detalle
+                </button>
             </div>
             {% endif %}
         </div>
         
-        <div class="flex justify-end mt-6">
+        <div class="flex justify-end p-6 border-t border-gray-200">
             <button onclick="closeModalDetalleCita({{ cita.id }})" 
-                    class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
+                    class="px-5 py-2.5 border border-gray-300 rounded-xl shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition duration-200">
                 Cerrar
             </button>
         </div>
@@ -419,11 +544,11 @@
 </div>
 
 <!-- Modal Agregar Detalle -->
-<div id="modalAgregarDetalle{{ cita.id }}" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden items-center justify-center z-50">
-    <div class="bg-white p-6 rounded-lg shadow-xl max-w-lg w-full mx-4">
-        <div class="flex justify-between items-center mb-4">
+<div id="modalAgregarDetalle{{ cita.id }}" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full mx-4 transform transition-all duration-300 scale-95 opacity-0 modal-content">
+        <div class="flex justify-between items-center p-6 border-b border-gray-200">
             <h2 class="text-2xl font-bold text-gray-800">Agregar Detalle</h2>
-            <button onclick="closeModalAgregarDetalle({{ cita.id }})" class="text-gray-500 hover:text-gray-700">
+            <button onclick="closeModalAgregarDetalle({{ cita.id }})" class="text-gray-500 hover:text-gray-700 transition-colors duration-200">
                 <i data-lucide="x" class="w-6 h-6"></i>
             </button>
         </div>
@@ -431,39 +556,39 @@
         <form method="POST" action="{% url 'Crear_detalle_cita' cita.id %}">
             {% csrf_token %}
             
-            <div class="space-y-4">
+            <div class="space-y-6 p-6">
                 <!-- Título -->
                 <div>
-                    <label for="titulo" class="block text-sm font-medium text-gray-700 mb-1">Título</label>
+                    <label for="titulo" class="block text-sm font-medium text-gray-700 mb-2">Título</label>
                     <input type="text" name="titulo" id="titulo" 
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500" 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition duration-200" 
                            placeholder="Ej: Diagnóstico inicial" required>
                 </div>
                 
                 <!-- Anotación -->
                 <div>
-                    <label for="anotacion" class="block text-sm font-medium text-gray-700 mb-1">Anotación</label>
-                    <textarea name="anotacion" id="anotacion" rows="4" 
-                              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500" 
+                    <label for="anotacion" class="block text-sm font-medium text-gray-700 mb-2">Anotación</label>
+                    <textarea name="anotacion" id="anotacion" rows="5" 
+                              class="w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition duration-200" 
                               placeholder="Describa las observaciones..." required></textarea>
                 </div>
                 
                 <!-- Conclusión -->
                 <div>
-                    <label for="conclusion" class="block text-sm font-medium text-gray-700 mb-1">Conclusión</label>
-                    <textarea name="conclusion" id="conclusion" rows="3" 
-                              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500" 
+                    <label for="conclusion" class="block text-sm font-medium text-gray-700 mb-2">Conclusión</label>
+                    <textarea name="conclusion" id="conclusion" rows="4" 
+                              class="w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition duration-200" 
                               placeholder="Describa las conclusiones..."></textarea>
                 </div>
             </div>
             
-            <div class="flex justify-end space-x-3 mt-6">
+            <div class="flex justify-end space-x-3 p-6 border-t border-gray-200">
                 <button type="button" onclick="closeModalAgregarDetalle({{ cita.id }})" 
-                        class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
+                        class="px-5 py-2.5 border border-gray-300 rounded-xl shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition duration-200">
                     Cancelar
                 </button>
                 <button type="submit" 
-                        class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
+                        class="px-5 py-2.5 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition duration-200">
                     Guardar detalle
                 </button>
             </div>
@@ -473,62 +598,138 @@
 {% endfor %}
 
 <script>
+    window.filterCards = function() {
+        const input = document.getElementById("searchInput").value.toLowerCase();
+        const cards = document.querySelectorAll(".cita-card");
+        
+        cards.forEach(card => {
+            const text = card.textContent.toLowerCase();
+            card.style.display = text.includes(input) ? "" : "none";
+        });
+    };
     // Inicializar iconos Lucide
     lucide.createIcons();
     
-    // Funciones para manejar modales
+    // Funciones para manejar modales con animaciones
     function openModalEditarCita(id) {
-        document.getElementById(`modalEditarCita${id}`).classList.remove('hidden');
-        document.getElementById(`modalEditarCita${id}`).classList.add('flex');
+        // Cerrar modal si ya está abierto
+        const modalExistente = document.querySelector('.modal-editar-cita:not(.hidden)');
+        if (modalExistente) {
+            closeModalEditarCita(modalExistente.id.replace('modalEditarCita', ''));
+        }
+
+        const modal = document.getElementById(`modalEditarCita${id}`);
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
         document.body.classList.add('overflow-hidden');
+        
+        setTimeout(() => {
+            modal.querySelector('.modal-content').classList.remove('scale-95', 'opacity-0');
+            modal.querySelector('.modal-content').classList.add('scale-100', 'opacity-100');
+        }, 10);
+        
+        // Enfocar el primer campo del formulario
+        const primerCampo = modal.querySelector('input:not([type="hidden"]), select, textarea');
+        if (primerCampo) {
+            setTimeout(() => primerCampo.focus(), 300);
+        }
     }
     
     function closeModalEditarCita(id) {
-        document.getElementById(`modalEditarCita${id}`).classList.remove('flex');
-        document.getElementById(`modalEditarCita${id}`).classList.add('hidden');
-        document.body.classList.remove('overflow-hidden');
+        const modal = document.getElementById(`modalEditarCita${id}`);
+        modal.querySelector('.modal-content').classList.remove('scale-100', 'opacity-100');
+        modal.querySelector('.modal-content').classList.add('scale-95', 'opacity-0');
+        
+        setTimeout(() => {
+            modal.classList.remove('flex');
+            modal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        }, 200);
     }
 
     function openModalDetalleCita(id) {
-        document.getElementById(`modalDetalleCita${id}`).classList.remove('hidden');
-        document.getElementById(`modalDetalleCita${id}`).classList.add('flex');
+        const modal = document.getElementById(`modalDetalleCita${id}`);
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
         document.body.classList.add('overflow-hidden');
+        
+        setTimeout(() => {
+            modal.querySelector('.modal-content').classList.remove('scale-95', 'opacity-0');
+            modal.querySelector('.modal-content').classList.add('scale-100', 'opacity-100');
+        }, 10);
     }
     
     function closeModalDetalleCita(id) {
-        document.getElementById(`modalDetalleCita${id}`).classList.remove('flex');
-        document.getElementById(`modalDetalleCita${id}`).classList.add('hidden');
-        document.body.classList.remove('overflow-hidden');
+        const modal = document.getElementById(`modalDetalleCita${id}`);
+        modal.querySelector('.modal-content').classList.remove('scale-100', 'opacity-100');
+        modal.querySelector('.modal-content').classList.add('scale-95', 'opacity-0');
+        
+        setTimeout(() => {
+            modal.classList.remove('flex');
+            modal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        }, 200);
     }
 
     function openModalAgregarDetalle(id) {
-        document.getElementById(`modalAgregarDetalle${id}`).classList.remove('hidden');
-        document.getElementById(`modalAgregarDetalle${id}`).classList.add('flex');
+        const modal = document.getElementById(`modalAgregarDetalle${id}`);
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
         document.body.classList.add('overflow-hidden');
+        
+        setTimeout(() => {
+            modal.querySelector('.modal-content').classList.remove('scale-95', 'opacity-0');
+            modal.querySelector('.modal-content').classList.add('scale-100', 'opacity-100');
+        }, 10);
     }
 
     function closeModalAgregarDetalle(id) {
-        document.getElementById(`modalAgregarDetalle${id}`).classList.remove('flex');
-        document.getElementById(`modalAgregarDetalle${id}`).classList.add('hidden');
-        document.body.classList.remove('overflow-hidden');
+        const modal = document.getElementById(`modalAgregarDetalle${id}`);
+        modal.querySelector('.modal-content').classList.remove('scale-100', 'opacity-100');
+        modal.querySelector('.modal-content').classList.add('scale-95', 'opacity-0');
+        
+        setTimeout(() => {
+            modal.classList.remove('flex');
+            modal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        }, 200);
     }
 
-    // Función principal de filtrado mejorada
+    // Función de búsqueda y filtrado mejorada
     function aplicarFiltros() {
+        const searchTerm = document.getElementById("searchInput").value.toLowerCase();
         const estadoSeleccionado = document.getElementById("filtroEstado").value;
         const cards = document.querySelectorAll(".cita-card");
         let citasVisibles = 0;
         
         cards.forEach(card => {
+            const nombre = card.dataset.nombre.toLowerCase();
+            const cedula = card.dataset.cedula.toLowerCase();
+            const motivo = card.dataset.motivo;
             const estadoCard = card.dataset.estatus;
+            const tipoCard = card.dataset.tipo;
+            
+            // Verificar coincidencia con la búsqueda
+            const coincideBusqueda = searchTerm === '' || 
+                                   nombre.includes(searchTerm) || 
+                                   cedula.includes(searchTerm) || 
+                                   motivo.includes(searchTerm);
             
             // Verificar coincidencia con el filtro de estado
             const coincideEstado = estadoSeleccionado === '' || estadoCard === estadoSeleccionado;
             
-            // Mostrar u ocultar según el filtro
-            if (coincideEstado) {
+            // Mostrar u ocultar según los filtros
+            if (coincideBusqueda && coincideEstado) {
                 card.style.display = "";
                 citasVisibles++;
+                
+                // Efecto de resaltado si hay término de búsqueda
+                if (searchTerm !== '') {
+                    card.classList.add('bg-yellow-50');
+                    setTimeout(() => {
+                        card.classList.remove('bg-yellow-50');
+                    }, 1000);
+                }
             } else {
                 card.style.display = "none";
             }
@@ -541,18 +742,31 @@
                 const container = document.getElementById("citasContainer");
                 const message = document.createElement("div");
                 message.id = "noResultsMessage";
-                message.className = "col-span-full text-center py-12";
+                message.className = "px-6 py-16 text-center col-span-full";
                 message.innerHTML = `
-                    <i data-lucide="search-x" class="mx-auto h-12 w-12 text-gray-400"></i>
-                    <h3 class="mt-2 text-lg font-medium text-gray-900">No se encontraron citas</h3>
-                    <p class="mt-1 text-sm text-gray-500">Intenta con otros criterios de búsqueda.</p>
+                    <div class="mx-auto h-20 w-20 text-gray-400 mb-4">
+                        <i data-lucide="search-x" class="w-full h-full"></i>
+                    </div>
+                    <h3 class="text-xl font-medium text-gray-900 mb-2">No se encontraron citas</h3>
+                    <p class="text-gray-500 mb-4">No hay resultados que coincidan con tus criterios de búsqueda.</p>
+                    <button onclick="resetFilters()" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition duration-200">
+                        <i data-lucide="rotate-ccw" class="w-4 h-4 mr-2"></i>
+                        Restablecer filtros
+                    </button>
                 `;
                 container.appendChild(message);
-                lucide.createIcons(); // Recrear iconos para el nuevo elemento
+                lucide.createIcons();
             }
         } else if (noResultsMessage) {
             noResultsMessage.remove();
         }
+    }
+    
+    // Función para restablecer filtros
+    function resetFilters() {
+        document.getElementById("searchInput").value = "";
+        document.getElementById("filtroEstado").value = "";
+        aplicarFiltros();
     }
     
     // Configurar event listeners para los filtros
@@ -560,11 +774,31 @@
         // Inicializar iconos
         lucide.createIcons();
         
-        // Asignar eventos al filtro de estado
+        // Asignar eventos a los filtros
+        document.getElementById("searchInput").addEventListener("input", aplicarFiltros);
         document.getElementById("filtroEstado").addEventListener("change", aplicarFiltros);
         
         // Aplicar filtros al cargar la página
         aplicarFiltros();
+    });
+
+    // Cerrar modales con ESC
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            const modals = document.querySelectorAll('[id^="modal"]');
+            modals.forEach(modal => {
+                if (modal.classList.contains('flex')) {
+                    const id = modal.id.replace(/\D+/g, '');
+                    if (modal.id.startsWith('modalEditarCita')) {
+                        closeModalEditarCita(id);
+                    } else if (modal.id.startsWith('modalDetalleCita')) {
+                        closeModalDetalleCita(id);
+                    } else if (modal.id.startsWith('modalAgregarDetalle')) {
+                        closeModalAgregarDetalle(id);
+                    }
+                }
+            });
+        }
     });
 </script>
 
@@ -572,10 +806,22 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         Swal.fire({
+            position: 'top-end',
             icon: 'success',
-            title: '¡La cita ha sido registrada exitosamente!',
-            showConfirmButton: true,
-            timer: 3000
+            title: '¡Operación exitosa!',
+            text: 'La cita ha sido registrada correctamente',
+            showConfirmButton: false,
+            timer: 3000,
+            backdrop: false,
+            background: '#f0fdf4',
+            iconColor: '#10b981',
+            toast: true,
+            showClass: {
+                popup: 'animate__animated animate__fadeInDown'
+            },
+            hideClass: {
+                popup: 'animate__animated animate__fadeOutUp'
+            }
         });
     });
 </script>

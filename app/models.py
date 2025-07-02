@@ -194,7 +194,7 @@ class Cita(models.Model):
         on_delete=models.CASCADE, 
         null=True, 
         blank=True,
-        verbose_name='Relación/Pareja'  # Mejor nombre para admin
+        verbose_name='Relación/Pareja'
     )
     estatus = models.CharField(
         max_length=20, 
@@ -205,36 +205,42 @@ class Cita(models.Model):
     def __str__(self):
         if self.paciente:
             return f"Cita de {self.paciente.nombre} - {self.fecha} {self.hora}"
-        elif self.relacion:  # Cambiado de 'pareja' a 'relacion'
+        elif self.relacion:
             tipo = self.relacion.get_tipo_relacion_display() if hasattr(self.relacion, 'tipo_relacion') else 'Relación'
             return f"Cita de {tipo}: {self.relacion.paciente1.nombre} & {self.relacion.paciente2.nombre} - {self.fecha} {self.hora}"
         return f"Cita sin asignar - {self.fecha} {self.hora}"
 
     def clean(self):
-        # Validación de paciente/relación
-        if not self.paciente and not self.relacion:  # Cambiado de 'pareja' a 'relacion'
+        # Validación básica de paciente/relación
+        if not self.paciente and not self.relacion:
             raise ValidationError('Debe asignar un paciente o una relación/pareja')
-        if self.paciente and self.relacion:  # Cambiado de 'pareja' a 'relacion'
+        if self.paciente and self.relacion:
             raise ValidationError('No puede asignar ambos, paciente y relación/pareja')
         
-        # Validación de fecha
-        if self.fecha and self.fecha < datetime.today().date():
+        # Validación de fecha SOLO para nuevas citas
+        if not self.pk and self.fecha and self.fecha < timezone.localdate():
             raise ValidationError('No puede agendar citas en fechas pasadas')
 
-        # Validación de solapamiento
+        # Validación de solapamiento SOLO para citas pendientes futuras
         if self.estatus == 'pendiente' and self.fecha and self.hora:
-            fecha_hora_inicio = datetime.combine(self.fecha, self.hora)
+            fecha_hora_inicio = timezone.make_aware(
+                datetime.combine(self.fecha, self.hora),
+                timezone.get_current_timezone()
+            )
             fecha_hora_fin = fecha_hora_inicio + timedelta(hours=2)
+            ahora = timezone.now()
 
-            citas_solapadas = Cita.objects.filter(
-                fecha=self.fecha,
-                hora__gte=self.hora,
-                hora__lt=fecha_hora_fin.time(),
-                estatus='pendiente'
-            ).exclude(pk=self.pk if self.pk else None)
+            # Solo validar solapamiento si la cita es futura
+            if fecha_hora_inicio > ahora:
+                citas_solapadas = Cita.objects.filter(
+                    fecha=self.fecha,
+                    hora__gte=self.hora,
+                    hora__lt=fecha_hora_fin.time(),
+                    estatus='pendiente'
+                ).exclude(pk=self.pk if self.pk else None)
 
-            if citas_solapadas.exists():
-                raise ValidationError('Debe haber al menos 2 horas entre citas pendientes')
+                if citas_solapadas.exists():
+                    raise ValidationError('Debe haber al menos 2 horas entre citas pendientes futuras')
 
     def save(self, *args, **kwargs):
         self.full_clean()

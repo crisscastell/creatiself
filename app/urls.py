@@ -36,6 +36,7 @@ urlpatterns = [
     path('cita/<int:cita_id>/detalle/crear/', crear_detalle_cita, name='Crear_detalle_cita'),
     path('cita/<int:cita_id>/detalle/listar/', listar_detalles_cita, name='Listar_detalles_cita'),
     path('detalle/editar/<int:detalle_cita_id>/', editar_detalle_cita, name='Editar_detalle_cita'),
+    path('api/citas/', api_citas, name='api_citas'),
 
     path('tablas/', tablas, name='Tablas'),
 

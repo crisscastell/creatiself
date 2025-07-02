@@ -208,17 +208,34 @@ class CitaForm(forms.ModelForm):
         widgets = {
             'hora': forms.TimeInput(attrs={'type': 'time'}),
             'fecha': forms.DateInput(attrs={'type': 'date'}),
-            'modalidad': forms.Select(attrs={'class': 'form-control'}),
-            'motivo_consulta': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
         }
 
     def __init__(self, *args, **kwargs):
+        self.editing = kwargs.pop('editing', False)
         super().__init__(*args, **kwargs)
-        self.fields['relacion'].queryset = RelacionPaciente.objects.all()
         
-        # Configurar campos como no requeridos inicialmente
+        self.fields['relacion'].queryset = RelacionPaciente.objects.all()
         self.fields['paciente'].required = False
         self.fields['relacion'].required = False
+        
+        if self.instance and self.instance.pk:
+            self.fields['tipo_cita'].disabled = True
+            self.fields['tipo_cita'].initial = 'paciente' if self.instance.paciente else 'relacion'
+            
+            if self.instance.paciente:
+                self.fields['paciente'].widget = forms.HiddenInput()
+                self.fields['relacion'].widget = forms.HiddenInput()
+                self.fields['paciente'].initial = self.instance.paciente
+            elif self.instance.relacion:
+                self.fields['paciente'].widget = forms.HiddenInput()
+                self.fields['relacion'].widget = forms.HiddenInput()
+                self.fields['relacion'].initial = self.instance.relacion
+
+    def clean_fecha(self):
+        fecha = self.cleaned_data.get('fecha')
+        if fecha and fecha < timezone.localdate():
+            raise forms.ValidationError('No puede agendar citas en fechas pasadas')
+        return fecha
 
     def clean(self):
         cleaned_data = super().clean()
@@ -236,11 +253,20 @@ class CitaForm(forms.ModelForm):
     def save(self, commit=True):
         instance = super().save(commit=False)
         
-        # Limpiar el campo no utilizado
-        if self.cleaned_data['tipo_cita'] == 'paciente':
-            instance.relacion = None
+        if self.instance and self.instance.pk:
+            if self.instance.paciente:
+                instance.tipo_cita = 'paciente'
+                instance.paciente = self.instance.paciente
+                instance.relacion = None
+            elif self.instance.relacion:
+                instance.tipo_cita = 'relacion'
+                instance.relacion = self.instance.relacion
+                instance.paciente = None
         else:
-            instance.paciente = None
+            if self.cleaned_data['tipo_cita'] == 'paciente':
+                instance.relacion = None
+            else:
+                instance.paciente = None
         
         if commit:
             instance.save()

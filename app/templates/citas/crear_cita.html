@@ -508,10 +508,44 @@
         border-radius: 0.5rem;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     }
+    /* Estilos para errores de campo */
+    .field-error {
+        color: #dc2626;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+    
+    /* Resaltar campos con error */
+    .has-error {
+        border-color: #dc2626 !important;
+        box-shadow: 0 0 0 1px #dc2626 !important;
+    }
+    
+    /* Para radio buttons con error */
+    .has-error-radio {
+        border-color: #dc2626 !important;
+        box-shadow: 0 0 0 2px #fecaca !important;
+    }
+
 </style>
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
+        // Mostrar errores de validación del formulario con SweetAlert
+        {% if form.errors %}
+        Swal.fire({
+            icon: 'error',
+            title: 'Error en el formulario',
+            html: `
+                {% for field, errors in form.errors.items %}
+                    <p><strong>{{ field|title }}:</strong> {{ errors|join:", " }}</p>
+                {% endfor %}
+            `,
+            confirmButtonColor: '#1e4a4a',
+            backdrop: 'rgba(0,0,0,0.4)'
+        });
+        {% endif %}
+    
         // Initialize Select2 for patient and relation search
         $('.select2-search').select2({
             placeholder: "Buscar...",
@@ -553,6 +587,20 @@
             defaultDate: "{% now 'Y-m-d' %}",
             onChange: function(selectedDates, dateStr, instance) {
                 fechaInput.value = dateStr;
+                clearFieldError('fecha');
+                
+                // Si la fecha seleccionada es hoy, validar que la hora sea futura
+                const hoy = new Date();
+                hoy.setHours(0, 0, 0, 0);
+                const fechaSeleccionada = selectedDates[0];
+                fechaSeleccionada.setHours(0, 0, 0, 0);
+                
+                if (fechaSeleccionada.getTime() === hoy.getTime()) {
+                    const horaInput = document.getElementById('hora');
+                    if (horaInput.value) {
+                        validarHoraParaHoy(horaInput.value);
+                    }
+                }
             },
             onDayCreate: function(dObj, dStr, fp, dayElem) {
                 // Solo procesar días del mes actual (no días de relleno)
@@ -560,8 +608,6 @@
                 
                 const date = new Date(dayElem.dateObj);
                 const day = date.getDate();
-                const month = date.getMonth() + 1;
-                const year = date.getFullYear();
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
                 
@@ -629,7 +675,7 @@
         const tipoRelacion = document.querySelector('input[name="tipo_cita"][value="relacion"]');
         const pacienteField = document.getElementById('paciente-field');
         const relacionField = document.getElementById('relacion-field');
-
+    
         function toggleFields() {
             const isRelacion = tipoRelacion.checked;
             pacienteField.style.display = isRelacion ? 'none' : 'block';
@@ -650,12 +696,91 @@
         // Initialize fields
         toggleFields();
     
+        // Función para validar hora cuando la fecha es hoy
+        function validarHoraParaHoy(horaValue) {
+            const timeRegex = /^(0[8-9]|1[0-8]):[0-5][0-9]$/;
+            if (!timeRegex.test(horaValue)) {
+                showFieldError('hora', 'Por favor ingrese una hora válida entre 08:00 y 18:00');
+                return false;
+            }
+    
+            const [hours, minutes] = horaValue.split(':').map(Number);
+            const ahora = new Date();
+            const horaSeleccionada = new Date();
+            horaSeleccionada.setHours(hours, minutes);
+            
+            if (horaSeleccionada < ahora) {
+                showFieldError('hora', 'Para citas el día de hoy, la hora debe ser posterior a la hora actual');
+                return false;
+            }
+            
+            clearFieldError('hora');
+            return true;
+        }
+    
         // Time input validation
         const horaInput = document.getElementById('hora');
         horaInput.addEventListener('input', function() {
-            const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
             if (this.value.length === 2 && !this.value.includes(':')) {
                 this.value += ':';
+            }
+        });
+    
+        horaInput.addEventListener('blur', function() {
+            const timeRegex = /^(0[8-9]|1[0-8]):[0-5][0-9]$/;
+            if (!timeRegex.test(this.value)) {
+                showFieldError('hora', 'Por favor ingrese una hora válida entre 08:00 y 18:00');
+                return;
+            }
+    
+            // Si la fecha seleccionada es hoy, validar que la hora sea futura
+            const fechaSeleccionada = new Date(fechaInput.value);
+            const hoy = new Date();
+            hoy.setHours(0, 0, 0, 0);
+            fechaSeleccionada.setHours(0, 0, 0, 0);
+            
+            if (fechaSeleccionada.getTime() === hoy.getTime()) {
+                validarHoraParaHoy(this.value);
+            } else {
+                clearFieldError('hora');
+            }
+        });
+    
+        // Funciones para manejo de errores de campos
+        function showFieldError(fieldName, message) {
+            const field = document.querySelector(`[name="${fieldName}"]`);
+            if (!field) return;
+            
+            field.classList.add('has-error');
+            
+            // Crear o actualizar elemento de error
+            let errorElement = field.nextElementSibling;
+            if (!errorElement || !errorElement.classList.contains('field-error')) {
+                errorElement = document.createElement('div');
+                errorElement.className = 'mt-1 text-red-600 text-sm field-error';
+                field.parentNode.insertBefore(errorElement, field.nextSibling);
+            }
+            errorElement.textContent = message;
+        }
+    
+        function clearFieldError(fieldName) {
+            const field = document.querySelector(`[name="${fieldName}"]`);
+            if (!field) return;
+            
+            field.classList.remove('has-error');
+            
+            const errorElement = field.nextElementSibling;
+            if (errorElement && errorElement.classList.contains('field-error')) {
+                errorElement.remove();
+            }
+        }
+    
+        // Validación en tiempo real para motivo de consulta
+        document.querySelector('textarea[name="motivo_consulta"]').addEventListener('blur', function() {
+            if (!this.value.trim()) {
+                showFieldError('motivo_consulta', 'Por favor describa el motivo de la consulta');
+            } else {
+                clearFieldError('motivo_consulta');
             }
         });
     
@@ -666,6 +791,10 @@
         form.addEventListener('submit', async function(e) {
             e.preventDefault();
             
+            // Limpiar errores previos
+            document.querySelectorAll('.has-error').forEach(el => el.classList.remove('has-error'));
+            document.querySelectorAll('.field-error').forEach(el => el.remove());
+            
             // Validate required fields
             const isRelacion = tipoRelacion.checked;
             const paciente = $('#id_paciente').val();
@@ -675,76 +804,81 @@
             const modalidad = document.querySelector('input[name="modalidad"]:checked');
             const motivo = document.querySelector('textarea[name="motivo_consulta"]').value;
             
-            // Basic validation
+            let isValid = true;
+            
+            // Validación de selección de paciente/relación
             if ((!isRelacion && !paciente) || (isRelacion && !relacion)) {
-                await Swal.fire({
-                    icon: 'error',
-                    title: 'Selección requerida',
-                    text: isRelacion ? 'Debe seleccionar una relación/pareja' : 'Debe seleccionar un paciente',
-                    confirmButtonColor: '#115e59',
-                    backdrop: 'rgba(0,0,0,0.4)'
-                });
-                return;
+                showFieldError(isRelacion ? 'relacion' : 'paciente', 'Este campo es obligatorio');
+                isValid = false;
             }
             
-            if (!fecha || !hora || !modalidad || !motivo) {
+            // Validación de fecha
+            if (!fecha) {
+                showFieldError('fecha', 'Por favor seleccione una fecha');
+                isValid = false;
+            } else {
+                const fechaObj = new Date(fecha);
+                const hoy = new Date();
+                hoy.setHours(0, 0, 0, 0);
+                
+                if (fechaObj < hoy) {
+                    showFieldError('fecha', 'No puedes seleccionar una fecha anterior al día de hoy');
+                    isValid = false;
+                }
+            }
+            
+            // Validación de hora
+            const timeRegex = /^(0[8-9]|1[0-8]):[0-5][0-9]$/;
+            if (!hora) {
+                showFieldError('hora', 'Por favor ingrese una hora');
+                isValid = false;
+            } else if (!timeRegex.test(hora)) {
+                showFieldError('hora', 'Por favor ingrese una hora válida entre 08:00 y 18:00 en formato HH:MM');
+                isValid = false;
+            } else if (fecha) {
+                // Si la fecha es hoy, validar que la hora sea futura
+                const fechaObj = new Date(fecha);
+                const hoy = new Date();
+                hoy.setHours(0, 0, 0, 0);
+                
+                if (fechaObj.getTime() === hoy.getTime()) {
+                    if (!validarHoraParaHoy(hora)) {
+                        isValid = false;
+                    }
+                }
+            }
+            
+            // Validación de modalidad
+            if (!modalidad) {
+                // Mostrar error cerca de los radio buttons
+                const modalidadContainer = document.querySelector('div[name="modalidad-container"]') || 
+                                          document.querySelector('input[name="modalidad"]').closest('div');
+                showFieldError('modalidad', 'Por favor seleccione una modalidad');
+                isValid = false;
+            }
+            
+            // Validación de motivo
+            if (!motivo.trim()) {
+                showFieldError('motivo_consulta', 'Por favor describa el motivo de la consulta');
+                isValid = false;
+            }
+            
+            if (!isValid) {
+                // Desplazar al primer error
+                const firstError = document.querySelector('.has-error');
+                if (firstError) {
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    firstError.focus();
+                }
+                
                 await Swal.fire({
                     icon: 'error',
                     title: 'Campos requeridos',
-                    text: 'Por favor complete todos los campos obligatorios',
+                    text: 'Por favor complete todos los campos obligatorios correctamente',
                     confirmButtonColor: '#115e59',
                     backdrop: 'rgba(0,0,0,0.4)'
                 });
                 return;
-            }
-            
-            // Validate time format (HH:MM)
-            const timeRegex = /^(0[8-9]|1[0-8]):[0-5][0-9]$/;
-            if (!timeRegex.test(hora)) {
-                await Swal.fire({
-                    icon: 'error',
-                    title: 'Hora inválida',
-                    text: 'Por favor ingrese una hora válida entre 08:00 y 18:00 en formato HH:MM',
-                    confirmButtonColor: '#115e59',
-                    backdrop: 'rgba(0,0,0,0.4)'
-                });
-                horaInput.focus();
-                return;
-            }
-            
-            // Date validation
-            const fechaObj = new Date(fecha);
-            const hoy = new Date();
-            hoy.setHours(0, 0, 0, 0);
-            
-            if (fechaObj < hoy) {
-                await Swal.fire({
-                    icon: 'error',
-                    title: 'Fecha inválida',
-                    text: 'No puedes seleccionar una fecha anterior al día de hoy.',
-                    confirmButtonColor: '#115e59',
-                    backdrop: 'rgba(0,0,0,0.4)'
-                });
-                return;
-            }
-            
-            // If date is today, validate time
-            if (fechaObj.getTime() === hoy.getTime()) {
-                const horaActual = new Date();
-                const [hours, minutes] = hora.split(':');
-                const horaSeleccionada = new Date();
-                horaSeleccionada.setHours(parseInt(hours), parseInt(minutes));
-                
-                if (horaSeleccionada < horaActual) {
-                    await Swal.fire({
-                        icon: 'error',
-                        title: 'Hora inválida',
-                        text: 'Para citas el día de hoy, la hora debe ser posterior a la hora actual.',
-                        confirmButtonColor: '#115e59',
-                        backdrop: 'rgba(0,0,0,0.4)'
-                    });
-                    return;
-                }
             }
             
             // Show loading state
@@ -764,4 +898,6 @@
         });
     });
 </script>
+    
+
 {% endblock %}

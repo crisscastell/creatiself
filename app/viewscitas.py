@@ -11,6 +11,9 @@ from django.core.exceptions import ValidationError
 from datetime import datetime
 from django.db.models import Count
 from datetime import time
+from django.http import JsonResponse
+from django.utils import timezone
+from datetime import timedelta
 
 def crear_cita(request):
     hoy = timezone.now().date()
@@ -20,8 +23,8 @@ def crear_cita(request):
         form = CitaForm(request.POST)
         if form.is_valid():
             cita = form.save(commit=False)
-            
-            # Asignación correcta según selección
+    
+          # Asignación correcta según selección
             if form.cleaned_data.get('relacion'):  # Si se seleccionó una relación
                 cita.relacion = form.cleaned_data['relacion']
                 cita.paciente = None
@@ -81,6 +84,8 @@ def crear_cita(request):
     
     return render(request, 'citas/crear_cita.html', context)
 
+
+
 def listar_citas(request):
     # Obtener el parámetro de búsqueda si existe
     query = request.GET.get('q')
@@ -93,10 +98,15 @@ def listar_citas(request):
         citas_list = citas_list.filter(
             Q(paciente__nombre__icontains=query) |
             Q(paciente__apellido__icontains=query) |
+            Q(paciente__identificacion__icontains=query) |
             Q(fecha__icontains=query) |
             Q(hora__icontains=query) |
             Q(modalidad__icontains=query) |
-            Q(motivo_consulta__icontains=query)
+            Q(motivo_consulta__icontains=query) |
+            Q(relacion__paciente1__nombre__icontains=query) |
+            Q(relacion__paciente1__apellido__icontains=query) |
+            Q(relacion__paciente2__nombre__icontains=query) |
+            Q(relacion__paciente2__apellido__icontains=query)
         )
     
     # Configurar la paginación (10 items por página)
@@ -112,13 +122,55 @@ def listar_citas(request):
         # Si la página está fuera de rango, mostrar la última página
         citas = paginator.page(paginator.num_pages)
     
+    # Calcular estadísticas
+    hoy = timezone.now().date()
+    inicio_semana = hoy - timedelta(days=hoy.weekday())
+    fin_semana = inicio_semana + timedelta(days=6)
+    
+    # Total de citas
+    total_citas = Cita.objects.count()
+    
+    # Citas por estado
+    citas_pendientes = Cita.objects.filter(estatus='pendiente').count()
+    citas_completadas = Cita.objects.filter(estatus='completada').count()
+    citas_canceladas = Cita.objects.filter(estatus='cancelada').count()
+    
+    # Citas por modalidad
+    citas_virtuales = Cita.objects.filter(modalidad='virtual').count()
+    citas_presenciales = Cita.objects.filter(modalidad='presencial').count()
+    
+    # Citas por tipo (individual vs relación)
+    citas_individuales = Cita.objects.filter(paciente__isnull=False).count()
+    citas_relaciones = Cita.objects.filter(relacion__isnull=False).count()
+    
+    # Citas para hoy y esta semana
+    citas_hoy = Cita.objects.filter(fecha=hoy).count()
+    citas_semana = Cita.objects.filter(fecha__range=[inicio_semana, fin_semana]).count()
+    
     # Manejar la alerta de creación exitosa
     mostrar_alerta = request.session.pop('mostrar_alerta', False) if 'mostrar_alerta' in request.session else False
     
     return render(request, 'citas/listar_citas.html', {
         'citas': citas,
         'mostrar_alerta': mostrar_alerta,
-        'query': query  # Pasar el término de búsqueda al template
+        'query': query,  # Pasar el término de búsqueda al template
+        
+        # Estadísticas
+        'citas_pendientes': citas_pendientes,
+        'citas_completadas': citas_completadas,
+        'citas_canceladas': citas_canceladas,
+        'citas_virtuales': citas_virtuales,
+        'citas_presenciales': citas_presenciales,
+        'citas_relaciones': citas_relaciones,
+        'citas_hoy': citas_hoy,
+        'citas_semana': citas_semana,
+        'citas_individuales': citas_individuales,
+        'total_citas': total_citas,
+        
+        # Rangos de fecha para el resumen
+        'hoy': hoy,
+        'inicio_semana': inicio_semana,
+        'fin_semana': fin_semana,
     })
 
 
@@ -126,22 +178,35 @@ def editar_cita(request, id):
     cita = get_object_or_404(Cita, id=id)
     
     if request.method == 'POST':
-        # Creamos una copia mutable del POST
-        post_data = request.POST.copy()
-        # Forzamos el paciente original para evitar modificaciones
-        post_data['paciente'] = cita.paciente.id
-        form = CitaForm(post_data, instance=cita)
+        # Añadir editing=True para desactivar validación de fechas pasadas
+        form = CitaForm(request.POST, instance=cita, editing=True)
         
         if form.is_valid():
-            form.save()
+            cita_editada = form.save(commit=False)
+            
+            # Corrección: 'tipo_cita' (no 'tipo_cita')
+            if cita.paciente:
+                cita_editada.tipo_cita = 'paciente'  # Corregido el typo
+                cita_editada.paciente = cita.paciente
+                cita_editada.relacion = None
+            elif cita.relacion:
+                cita_editada.tipo_cita = 'relacion'
+                cita_editada.relacion = cita.relacion
+                cita_editada.paciente = None
+            
+            cita_editada.save()
             messages.success(request, "Cita actualizada correctamente")
             return redirect('Listar_citas')
         else:
-            for error in form.errors.values():
-                messages.error(request, error)
+            for campo, errores in form.errors.items():
+                for error in errores:
+                    messages.error(request, f"{campo}: {error}")
+            
+            request.session['editar_cita_form_errors'] = form.errors
+            request.session['editar_cita_form_data'] = request.POST
+            return redirect('Listar_citas')
     
-    return redirect('Listar_citas') 
-
+    return redirect('Listar_citas')
 
 def crear_detalle_cita(request, cita_id):
     cita = get_object_or_404(Cita, id=cita_id)  # Obtén la cita relacionada
@@ -197,3 +262,24 @@ def historial(request):
         'este_mes_count': este_mes_count,
         'pendientes_count':pendientes_count
     })
+
+def api_citas(request):
+    year = int(request.GET.get('year'))
+    month = int(request.GET.get('month'))
+    
+    citas = Cita.objects.filter(
+        fecha__year=year,
+        fecha__month=month
+    ).select_related('paciente')
+    
+    citas_data = []
+    for cita in citas:
+        citas_data.append({
+            'fecha': cita.fecha.isoformat(),
+            'hora': cita.hora.strftime('%H%M') if hasattr(cita.hora, 'strftime') else cita.hora,
+            'paciente_nombre': f"{cita.paciente.nombre} {cita.paciente.apellido}" if cita.paciente else "Pareja",
+            'motivo_consulta': cita.motivo_consulta,
+            'modalidad': cita.modalidad
+        })
+    
+    return JsonResponse(citas_data, safe=False)

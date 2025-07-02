@@ -218,7 +218,7 @@
                 <h3 class="mt-4 text-xl font-medium text-gray-900">No hay sesiones registradas</h3>
                 <p class="mt-2 text-gray-500">No se encontraron registros de sesiones terapéuticas.</p>
                 <div class="mt-8">
-                    <a href="{% url 'crear_cita' %}" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg shadow-sm text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-all">
+                    <a href="{% url 'Crear_citas' %}" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg shadow-sm text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-all">
                         <svg class="-ml-1 mr-3 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                         </svg>
@@ -525,21 +525,55 @@
             });
         }
     
+        // --- UTILITY: texto multilínea con salto de página ---
+        function addMultilineText(title, text, style, extraSpace = 5) {
+            if (yPosition > pageHeight - 30) {
+                doc.addPage();
+                yPosition = 20;
+            }
+    
+            if (title) {
+                applyStyle(subtitleStyle);
+                doc.text(title, marginLeft, yPosition);
+                yPosition += 7;
+            }
+    
+            applyStyle(style);
+            const lines = doc.splitTextToSize(text, pageWidth - marginLeft - marginRight);
+    
+            lines.forEach(line => {
+                if (yPosition > pageHeight - 20) {
+                    doc.addPage();
+                    yPosition = 20;
+                }
+                doc.text(line, marginLeft, yPosition);
+                yPosition += 5;
+            });
+    
+            yPosition += extraSpace;
+        }
+    
         // --- DATOS DEL PACIENTE ---
         applyStyle(subtitleStyle);
         doc.text('DATOS DEL PACIENTE', marginLeft, yPosition);
         yPosition += 7;
     
         applyStyle(normalStyle);
-        doc.text(`Nombre completo:`, marginLeft, yPosition);
-        const label1Width = doc.getTextWidth('Nombre completo:');
+        const label1 = 'Nombre completo:';
+        doc.text(label1, marginLeft, yPosition);
+        const label1Width = doc.getTextWidth(label1);
+        const splitNombre = doc.splitTextToSize(nombre, pageWidth - marginLeft - marginRight - label1Width - 4);
         applyStyle(highlightStyle);
-        doc.text(nombre, marginLeft + label1Width + 2, yPosition);
-        yPosition += 6;
+        splitNombre.forEach((linea, index) => {
+            const y = yPosition + index * 5;
+            doc.text(linea, marginLeft + label1Width + 4, y);
+        });
+        yPosition += splitNombre.length * 5 + 1;
     
         applyStyle(normalStyle);
-        doc.text(`Cédula de identidad:`, marginLeft, yPosition);
-        const label2Width = doc.getTextWidth('Cédula de identidad:');
+        const label2 = 'Cédula de identidad:';
+        doc.text(label2, marginLeft, yPosition);
+        const label2Width = doc.getTextWidth(label2);
         applyStyle(highlightStyle);
         doc.text(cedula, marginLeft + label2Width + 2, yPosition);
         yPosition += 10;
@@ -550,8 +584,12 @@
         yPosition += 7;
     
         const addInfoLine = (label, value) => {
+            if (yPosition > pageHeight - 20) {
+                doc.addPage();
+                yPosition = 20;
+            }
             applyStyle(normalStyle);
-            doc.text(`${label}`, marginLeft, yPosition);
+            doc.text(label, marginLeft, yPosition);
             const labelWidth = doc.getTextWidth(label);
             applyStyle(highlightStyle);
             doc.text(value, marginLeft + labelWidth + 2, yPosition);
@@ -564,49 +602,17 @@
         addInfoLine('Estado:', estado);
         yPosition += 4;
     
-        // --- MOTIVO DE CONSULTA ---
-        applyStyle(subtitleStyle);
-        doc.text('MOTIVO DE CONSULTA', marginLeft, yPosition);
-        yPosition += 7;
+        // --- MOTIVO, ANOTACIONES, CONCLUSIÓN, TAREAS ---
+        addMultilineText('MOTIVO DE CONSULTA', motivo, normalStyle);
+        addMultilineText('ANOTACIONES DE LA SESIÓN', `Título: ${titulo}`, normalStyle, 2);
+        addMultilineText('', anotacion, normalStyle);
     
-        applyStyle(normalStyle);
-        const splitMotivo = doc.splitTextToSize(motivo, pageWidth - marginLeft - marginRight);
-        doc.text(splitMotivo, marginLeft, yPosition);
-        yPosition += splitMotivo.length * 5 + 5;
-    
-        // --- ANOTACIONES ---
-        applyStyle(subtitleStyle);
-        doc.text('ANOTACIONES DE LA SESIÓN', marginLeft, yPosition);
-        yPosition += 7;
-    
-        applyStyle(normalStyle);
-        doc.text(`Título: ${titulo}`, marginLeft, yPosition);
-        yPosition += 6;
-    
-        const splitAnotacion = doc.splitTextToSize(anotacion, pageWidth - marginLeft - marginRight);
-        doc.text(splitAnotacion, marginLeft, yPosition);
-        yPosition += splitAnotacion.length * 5 + 5;
-    
-        // --- CONCLUSIÓN ---
         if (conclusion) {
-            if (yPosition > pageHeight - 50) {
-                doc.addPage();
-                yPosition = 20;
-            }
-    
-            applyStyle(subtitleStyle);
-            doc.text('CONCLUSIÓN', marginLeft, yPosition);
-            yPosition += 7;
-    
-            applyStyle(normalStyle);
-            const splitConclusion = doc.splitTextToSize(conclusion, pageWidth - marginLeft - marginRight);
-            doc.text(splitConclusion, marginLeft, yPosition);
-            yPosition += splitConclusion.length * 5 + 5;
+            addMultilineText('CONCLUSIÓN', conclusion, normalStyle);
         }
     
-        // --- TAREAS ASIGNADAS ---
         if (tareas.length > 0) {
-            if (yPosition > pageHeight - 50) {
+            if (yPosition > pageHeight - 30) {
                 doc.addPage();
                 yPosition = 20;
             }
@@ -616,17 +622,21 @@
             yPosition += 7;
     
             applyStyle(normalStyle);
-            tareas.forEach((tarea, index) => {
-                if (yPosition > pageHeight - 20) {
-                    doc.addPage();
-                    yPosition = 20;
-                }
-                doc.text(`• ${tarea}`, marginLeft + 5, yPosition);
-                yPosition += 6;
+            tareas.forEach(tarea => {
+                const splitTarea = doc.splitTextToSize(`• ${tarea}`, pageWidth - marginLeft - marginRight);
+                splitTarea.forEach(line => {
+                    if (yPosition > pageHeight - 20) {
+                        doc.addPage();
+                        yPosition = 20;
+                    }
+                    doc.text(line, marginLeft + 5, yPosition);
+                    yPosition += 5;
+                });
+                yPosition += 3;
             });
         }
     
-        // --- FOOTER ---
+        // --- FOOTER EN CADA PÁGINA ---
         const pageCount = doc.internal.getNumberOfPages();
         for (let i = 1; i <= pageCount; i++) {
             doc.setPage(i);

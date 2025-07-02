@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.shortcuts import render, redirect
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
-from django.db.models import Q
+from django.db.models import Count, Q
 from .models import *
 from .forms import PacienteForm, RelacionPacienteForm, RepresentanteForm
 from django.shortcuts import render, get_object_or_404
@@ -9,6 +9,8 @@ from django.http import JsonResponse
 from .models import Pais, Estado, Ciudad
 from django.contrib import messages
 from django.views.decorators.http import require_POST
+import json
+from django.core.serializers.json import DjangoJSONEncoder
 
 
 
@@ -49,6 +51,17 @@ def crear_pacientes(request, representante_id=None):
     estados = Estado.objects.all()
     ciudades = Ciudad.objects.all()
 
+    total_pacientes = Paciente.objects.count()
+    pacientes_hombres = Paciente.objects.filter(sexo='masculino').count()
+    pacientes_mujeres = Paciente.objects.filter(sexo='femenino').count()
+    pacientes_infantiles = Paciente.objects.filter(tipo_paciente='infantil').count()
+    pacientes_adultos = Paciente.objects.filter(tipo_paciente='individual').count()
+    
+    # Estadísticas por condición (top 5)
+    condiciones_stats = Paciente.objects.values('condicion__nombre').annotate(
+        total=Count('condicion')
+    ).order_by('-total')[:5]
+
     return render(request, 'paciente/crear_pacientes.html', {
         'form': form,
         'condiciones': condiciones,
@@ -56,7 +69,15 @@ def crear_pacientes(request, representante_id=None):
         'paises': paises,
         'estados': estados,
         'ciudades': ciudades,
-        'representante_id': representante_id,  # Pasamos el ID al template
+        'representante_id': representante_id,
+        'stats_data': json.dumps({
+            'total': total_pacientes,
+            'hombres': pacientes_hombres,
+            'mujeres': pacientes_mujeres,
+            'infantiles': pacientes_infantiles,
+            'adultos': pacientes_adultos,
+            'condiciones': list(condiciones_stats),
+        }, cls=DjangoJSONEncoder)
     })
 
 def listar_pacientes(request):
@@ -141,10 +162,18 @@ def listar_relaciones(request):
         relaciones = RelacionPaciente.objects.filter(
             Q(paciente1__nombre__icontains=query) |
             Q(paciente2__nombre__icontains=query)
-        )
+        ).distinct()
     else:
         relaciones = RelacionPaciente.objects.all()
 
+    # Estadísticas de relaciones
+    total_relaciones = relaciones.count()
+    relaciones_pareja = relaciones.filter(tipo_relacion='pareja')
+    relaciones_familiares = relaciones.filter(tipo_relacion='familiar')
+    relaciones_otros = relaciones.filter(tipo_relacion='otro')
+
+
+    # Paginación
     paginator = Paginator(relaciones, 10)
     page = request.GET.get('page')
     relaciones_pag = paginator.get_page(page)
@@ -155,7 +184,13 @@ def listar_relaciones(request):
         'relaciones': relaciones_pag,
         'query': query,
         'pacientes': pacientes,
-        'form': form  # Por si quieres reutilizarlo en el modal
+        'form': form,
+        # Estadísticas
+        'total_relaciones': total_relaciones,
+        'relaciones_pareja': relaciones_pareja,
+        'relaciones_familiares': relaciones_familiares,
+        'relaciones_otros': relaciones_otros,
+        
     })
 
 

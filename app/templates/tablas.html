@@ -1,135 +1,330 @@
 {% extends 'base.html' %}
 
-{% block title %}Lugares{% endblock %}
+{% block title %}Lugares - CreatiseLF{% endblock %}
 
 {% block content %}
 
 <div class="flex flex-col flex-grow ml-20">
-    <main class="p-8">
-        <div class="max-w-6xl mx-auto p-8 mt-8 bg-white rounded-lg shadow-lg">
-            <h2 class="text-3xl font-bold text-gray-900 mb-6 text-center">Lugares</h2>
+    <main class="p-20">
+        <div class="max-w-7xl mx-auto bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <!-- Encabezado mejorado -->
+            <div class="bg-gradient-to-r from-teal-600 to-teal-800 px-8 py-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <div class="bg-white/20 p-3 rounded-lg backdrop-blur-sm">
+                            <i data-lucide="map-pin" class="w-8 h-8 text-white"></i>
+                        </div>
+                        <h1 class="text-2xl font-bold text-white">Administración de Lugares</h1>
+                    </div>
+                </div>
+            </div>
 
-            <!-- Mostrar mensajes -->
+            <!-- Mensajes de alerta -->
             {% if messages %}
-            <div class="mb-6">
+            <div class="px-8 pt-6">
                 {% for message in messages %}
-                <div class="px-4 py-2 rounded-md {% if message.tags == 'success' %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
-                    {{ message }}
+                <div class="mb-4 px-4 py-3 rounded-lg {% if message.tags == 'success' %}bg-green-50 text-green-800 border border-green-200{% else %}bg-red-50 text-red-800 border border-red-200{% endif %} flex items-start">
+                    <i data-lucide="{% if message.tags == 'success' %}check-circle{% else %}alert-circle{% endif %}" class="w-5 h-5 mr-2 mt-0.5 flex-shrink-0"></i>
+                    <span>{{ message }}</span>
                 </div>
                 {% endfor %}
             </div>
             {% endif %}
 
-            <div class="flex flex-col md:flex-row gap-8">
-                <!-- Columna izquierda para los botones - Versión mejorada -->
-                <div class="w-full md:w-1/4 space-y-6">
-                    <!-- Botón País (teal) -->
-                    <button onclick="openModal('pais-modal')" class="w-full flex flex-col items-center justify-center bg-gradient-to-br from-teal-500 to-teal-600 text-white font-semibold py-6 px-4 rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02]">
-                        <div class="bg-white/20 p-3 rounded-full mb-2">
-                            <i data-lucide="globe" class="w-8 h-8"></i>
+            <div class="flex flex-col lg:flex-row">
+                <!-- Panel lateral de acciones -->
+                <div class="w-full lg:w-1/4 p-6 bg-gray-50 border-r border-gray-200 flex flex-col">
+                    <div class="space-y-4 flex-grow flex flex-col justify-between">
+                        <!-- Tarjeta País -->
+                        <div onclick="openModal('pais-modal')" class="bg-white p-6 rounded-xl border border-gray-200 shadow-xs hover:shadow-md transition-all cursor-pointer group h-full flex flex-col justify-center">
+                            <div class="flex flex-col items-center text-center">
+                                <div class="bg-teal-100 p-4 rounded-full text-teal-600 group-hover:bg-teal-600 group-hover:text-white transition-colors mb-4">
+                                    <i data-lucide="globe" class="w-8 h-8"></i>
+                                </div>
+                                <h3 class="text-xl font-semibold text-gray-800 group-hover:text-teal-600 transition-colors">Países</h3>
+                                <p class="text-sm text-gray-500 mt-2">Administrar listado de países</p>
+                                <button class="mt-4 text-sm bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 mx-auto">
+                                    <i data-lucide="plus" class="w-4 h-4"></i>
+                                    <span>Agregar</span>
+                                </button>
+                            </div>
                         </div>
-                        <span class="text-lg">País</span>
-                        <span class="text-sm font-normal opacity-80 mt-1">Administrar países</span>
-                    </button>
 
-                    <!-- Botón Estado (blue) -->
-                    <button onclick="openModal('estado-modal')" class="w-full flex flex-col items-center justify-center bg-gradient-to-br from-blue-500 to-blue-600 text-white font-semibold py-6 px-4 rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02]">
-                        <div class="bg-white/20 p-3 rounded-full mb-2">
-                            <i data-lucide="map" class="w-8 h-8"></i>
+                        <!-- Tarjeta Estado -->
+                        <div onclick="openModal('estado-modal')" class="bg-white p-6 rounded-xl border border-gray-200 shadow-xs hover:shadow-md transition-all cursor-pointer group h-full flex flex-col justify-center">
+                            <div class="flex flex-col items-center text-center">
+                                <div class="bg-blue-100 p-4 rounded-full text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors mb-4">
+                                    <i data-lucide="map" class="w-8 h-8"></i>
+                                </div>
+                                <h3 class="text-xl font-semibold text-gray-800 group-hover:text-blue-600 transition-colors">Estados</h3>
+                                <p class="text-sm text-gray-500 mt-2">Administrar estados/provincias</p>
+                                <button class="mt-4 text-sm bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 mx-auto">
+                                    <i data-lucide="plus" class="w-4 h-4"></i>
+                                    <span>Agregar</span>
+                                </button>
+                            </div>
                         </div>
-                        <span class="text-lg">Estado</span>
-                        <span class="text-sm font-normal opacity-80 mt-1">Administrar estados</span>
-                    </button>
 
-                    <!-- Botón Ciudad (purple) -->
-                    <button onclick="openModal('ciudad-modal')" class="w-full flex flex-col items-center justify-center bg-gradient-to-br from-purple-500 to-purple-600 text-white font-semibold py-6 px-4 rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02]">
-                        <div class="bg-white/20 p-3 rounded-full mb-2">
-                            <i data-lucide="building" class="w-8 h-8"></i>
+                        <!-- Tarjeta Ciudad -->
+                        <div onclick="openModal('ciudad-modal')" class="bg-white p-6 rounded-xl border border-gray-200 shadow-xs hover:shadow-md transition-all cursor-pointer group h-full flex flex-col justify-center">
+                            <div class="flex flex-col items-center text-center">
+                                <div class="bg-purple-100 p-4 rounded-full text-purple-600 group-hover:bg-purple-600 group-hover:text-white transition-colors mb-4">
+                                    <i data-lucide="building" class="w-8 h-8"></i>
+                                </div>
+                                <h3 class="text-xl font-semibold text-gray-800 group-hover:text-purple-600 transition-colors">Ciudades</h3>
+                                <p class="text-sm text-gray-500 mt-2">Administrar ciudades</p>
+                                <button class="mt-4 text-sm bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 mx-auto">
+                                    <i data-lucide="plus" class="w-4 h-4"></i>
+                                    <span>Agregar</span>
+                                </button>
+                            </div>
                         </div>
-                        <span class="text-lg">Ciudad</span>
-                        <span class="text-sm font-normal opacity-80 mt-1">Administrar ciudades</span>
-                    </button>
+                    </div>
                 </div>
 
-                <!-- Columna derecha para el listado -->
-                <div class="w-full md:w-3/4">
-                    <!-- Listado de Países -->
-                    <div class="mb-8">
-                        <h3 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-                            <i data-lucide="globe" class="w-5 h-5 mr-2 text-teal-600"></i>
-                            Países
-                        </h3>
-                        <div class="bg-gray-50 rounded-lg p-4">
+                <!-- Contenido principal -->
+                <div class="w-full lg:w-3/4 p-6">
+                    <!-- Sección de Países -->
+                    <div class="mb-10">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-xl font-semibold text-gray-800 flex items-center">
+                                <i data-lucide="globe" class="w-5 h-5 mr-2 text-teal-600"></i>
+                                Listado de Países
+                            </h2>
+                            <div class="flex items-center space-x-4">
+                                <div class="relative flex-grow">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <i data-lucide="search" class="w-5 h-5 text-gray-400"></i>
+                                    </div>
+                                    <input type="text" 
+                                           id="pais-search" 
+                                           value="{{ request.GET.pais_query }}" 
+                                           class="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500" 
+                                           placeholder="Buscar país..."
+                                           onkeyup="filterPaises()">
+                                    {% if request.GET.pais_query %}
+                                    <button onclick="clearSearch('pais')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600">
+                                        <i data-lucide="x" class="w-5 h-5"></i>
+                                    </button>
+                                    {% endif %}
+                                </div>
+                                <button onclick="openModal('pais-modal')" class="text-sm bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg flex items-center space-x-1">
+                                    <i data-lucide="plus" class="w-4 h-4"></i>
+                                    <span>Nuevo País</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
                             {% if paises %}
-                                <ul class="divide-y divide-gray-200">
+                                <div class="pais-container divide-y divide-gray-200">
                                     {% for pais in paises %}
-                                        <li class="py-3 flex justify-between items-center">
-                                            <span>{{ pais.nombre_pais }}</span>
-                                            <div class="flex space-x-2">
-                                                <button onclick="openEditModal('pais', {{ pais.id }}, '{{ pais.nombre_pais }}')" class="text-blue-500 hover:text-blue-700">
-                                                    <i data-lucide="edit" class="w-5 h-5"></i>
-                                                </button>
-                                                
+                                    <div class="pais-item p-4 hover:bg-gray-50 transition-colors flex justify-between items-center">
+                                        <div class="flex items-center space-x-3">
+                                            <div class="bg-teal-100 p-2 rounded-lg text-teal-600">
+                                                <i data-lucide="flag" class="w-5 h-5"></i>
                                             </div>
-                                        </li>
+                                            <span class="font-medium">{{ pais.nombre_pais }}</span>
+                                        </div>
+                                        <div class="flex space-x-2">
+                                            <button onclick="openEditModal('pais', {{ pais.id }}, '{{ pais.nombre_pais }}')" class="text-blue-600 hover:text-blue-800 p-2 rounded-full hover:bg-blue-50 transition-colors">
+                                                <i data-lucide="edit" class="w-5 h-5"></i>
+                                            </button>
+                                        </div>
+                                    </div>
                                     {% endfor %}
-                                </ul>
+                                </div>
+                                
+                                <!-- Paginación -->
+                                <div class="px-4 py-3 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
+                                    <div class="text-sm text-gray-500">
+                                        Mostrando página {{ paises.number }} de {{ paises.paginator.num_pages }}
+                                    </div>
+                                    <div class="flex space-x-1">
+                                        {% if paises.has_previous %}
+                                        <a href="?pais_page={{ paises.previous_page_number }}" class="px-3 py-1 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-50 flex items-center">
+                                            <i data-lucide="chevron-left" class="w-4 h-4 mr-1"></i>
+                                            <span>Anterior</span>
+                                        </a>
+                                        {% endif %}
+                                        {% if paises.has_next %}
+                                        <a href="?pais_page={{ paises.next_page_number }}" class="px-3 py-1 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-50 flex items-center">
+                                            <span>Siguiente</span>
+                                            <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i>
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
                             {% else %}
-                                <p class="text-gray-500">No hay países registrados</p>
+                                <div class="p-8 text-center">
+                                    <i data-lucide="globe" class="w-10 h-10 mx-auto text-gray-400 mb-3"></i>
+                                    <h3 class="text-gray-500 font-medium">No hay países registrados</h3>
+                                    <p class="text-gray-400 text-sm mt-1">Comience agregando un nuevo país</p>
+                                </div>
                             {% endif %}
                         </div>
                     </div>
 
-                    <!-- Listado de Estados -->
-                    <div class="mb-8">
-                        <h3 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-                            <i data-lucide="map" class="w-5 h-5 mr-2 text-blue-600"></i>
-                            Estados
-                        </h3>
-                        <div class="bg-gray-50 rounded-lg p-4">
+                    <!-- Sección de Estados -->
+                    <div class="mb-10">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-xl font-semibold text-gray-800 flex items-center">
+                                <i data-lucide="map" class="w-5 h-5 mr-2 text-blue-600"></i>
+                                Listado de Estados
+                            </h2>
+                            <div class="flex items-center space-x-4">
+                                <div class="relative flex-grow">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <i data-lucide="search" class="w-5 h-5 text-gray-400"></i>
+                                    </div>
+                                    <input type="text" 
+                                           id="estado-search" 
+                                           value="{{ request.GET.estado_query }}" 
+                                           class="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                                           placeholder="Buscar estado..."
+                                           onkeyup="filterEstados()">
+                                    {% if request.GET.estado_query %}
+                                    <button onclick="clearSearch('estado')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600">
+                                        <i data-lucide="x" class="w-5 h-5"></i>
+                                    </button>
+                                    {% endif %}
+                                </div>
+                                <button onclick="openModal('estado-modal')" class="text-sm bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-1">
+                                    <i data-lucide="plus" class="w-4 h-4"></i>
+                                    <span>Nuevo Estado</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
                             {% if estados %}
-                                <ul class="divide-y divide-gray-200">
+                                <div class="estado-container divide-y divide-gray-200">
                                     {% for estado in estados %}
-                                        <li class="py-3 flex justify-between items-center">
-                                            <span>{{ estado.nombre_estado }} ({{ estado.pais.nombre_pais }})</span>
-                                            <div class="flex space-x-2">
-                                                <button onclick="openEditModal('estado', {{ estado.id }}, '{{ estado.nombre_estado }}', {{ estado.pais.id }})" class="text-blue-500 hover:text-blue-700">
-                                                    <i data-lucide="edit" class="w-5 h-5"></i>
-                                                </button>
-                                                
+                                    <div class="estado-item p-4 hover:bg-gray-50 transition-colors flex justify-between items-center">
+                                        <div>
+                                            <div class="font-medium">{{ estado.nombre_estado }}</div>
+                                            <div class="text-sm text-gray-500 mt-1 flex items-center">
+                                                <i data-lucide="flag" class="w-3 h-3 mr-1"></i>
+                                                {{ estado.pais.nombre_pais }}
                                             </div>
-                                        </li>
+                                        </div>
+                                        <div class="flex space-x-2">
+                                            <button onclick="openEditModal('estado', {{ estado.id }}, '{{ estado.nombre_estado }}', {{ estado.pais.id }})" class="text-blue-600 hover:text-blue-800 p-2 rounded-full hover:bg-blue-50 transition-colors">
+                                                <i data-lucide="edit" class="w-5 h-5"></i>
+                                            </button>
+                                        </div>
+                                    </div>
                                     {% endfor %}
-                                </ul>
+                                </div>
+                                
+                                <!-- Paginación -->
+                                <div class="px-4 py-3 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
+                                    <div class="text-sm text-gray-500">
+                                        Mostrando página {{ estados.number }} de {{ estados.paginator.num_pages }}
+                                    </div>
+                                    <div class="flex space-x-1">
+                                        {% if estados.has_previous %}
+                                        <a href="?estado_page={{ estados.previous_page_number }}" class="px-3 py-1 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-50 flex items-center">
+                                            <i data-lucide="chevron-left" class="w-4 h-4 mr-1"></i>
+                                            <span>Anterior</span>
+                                        </a>
+                                        {% endif %}
+                                        {% if estados.has_next %}
+                                        <a href="?estado_page={{ estados.next_page_number }}" class="px-3 py-1 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-50 flex items-center">
+                                            <span>Siguiente</span>
+                                            <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i>
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
                             {% else %}
-                                <p class="text-gray-500">No hay estados registrados</p>
+                                <div class="p-8 text-center">
+                                    <i data-lucide="map" class="w-10 h-10 mx-auto text-gray-400 mb-3"></i>
+                                    <h3 class="text-gray-500 font-medium">No hay estados registrados</h3>
+                                    <p class="text-gray-400 text-sm mt-1">Comience agregando un nuevo estado</p>
+                                </div>
                             {% endif %}
                         </div>
                     </div>
 
-                    <!-- Listado de Ciudades -->
+                    <!-- Sección de Ciudades -->
                     <div>
-                        <h3 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-                            <i data-lucide="building" class="w-5 h-5 mr-2 text-purple-600"></i>
-                            Ciudades
-                        </h3>
-                        <div class="bg-gray-50 rounded-lg p-4">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-xl font-semibold text-gray-800 flex items-center">
+                                <i data-lucide="building" class="w-5 h-5 mr-2 text-purple-600"></i>
+                                Listado de Ciudades
+                            </h2>
+                            <div class="flex items-center space-x-4">
+                                <div class="relative flex-grow">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <i data-lucide="search" class="w-5 h-5 text-gray-400"></i>
+                                    </div>
+                                    <input type="text" 
+                                           id="ciudad-search" 
+                                           value="{{ request.GET.ciudad_query }}" 
+                                           class="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500" 
+                                           placeholder="Buscar ciudad..."
+                                           onkeyup="filterCiudades()">
+                                    {% if request.GET.ciudad_query %}
+                                    <button onclick="clearSearch('ciudad')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600">
+                                        <i data-lucide="x" class="w-5 h-5"></i>
+                                    </button>
+                                    {% endif %}
+                                </div>
+                                <button onclick="openModal('ciudad-modal')" class="text-sm bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg flex items-center space-x-1">
+                                    <i data-lucide="plus" class="w-4 h-4"></i>
+                                    <span>Nueva Ciudad</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
                             {% if ciudades %}
-                                <ul class="divide-y divide-gray-200">
+                                <div class="ciudad-container divide-y divide-gray-200">
                                     {% for ciudad in ciudades %}
-                                        <li class="py-3 flex justify-between items-center">
-                                            <span>{{ ciudad.nombre_ciudad }} ({{ ciudad.estado.nombre_estado }})</span>
-                                            <div class="flex space-x-2">
-                                                <button onclick="openEditModal('ciudad', {{ ciudad.id }}, '{{ ciudad.nombre_ciudad }}', {{ ciudad.estado.id }})" class="text-blue-500 hover:text-blue-700">
-                                                    <i data-lucide="edit" class="w-5 h-5"></i>
-                                                </button>
-                                                
+                                    <div class="ciudad-item p-4 hover:bg-gray-50 transition-colors flex justify-between items-center">
+                                        <div>
+                                            <div class="font-medium">{{ ciudad.nombre_ciudad }}</div>
+                                            <div class="text-sm text-gray-500 mt-1 flex items-center">
+                                                <i data-lucide="map-pin" class="w-3 h-3 mr-1"></i>
+                                                {{ ciudad.estado.nombre_estado }} ({{ ciudad.estado.pais.nombre_pais }})
                                             </div>
-                                        </li>
+                                        </div>
+                                        <div class="flex space-x-2">
+                                            <button onclick="openEditModal('ciudad', {{ ciudad.id }}, '{{ ciudad.nombre_ciudad }}', {{ ciudad.estado.id }})" class="text-blue-600 hover:text-blue-800 p-2 rounded-full hover:bg-blue-50 transition-colors">
+                                                <i data-lucide="edit" class="w-5 h-5"></i>
+                                            </button>
+                                        </div>
+                                    </div>
                                     {% endfor %}
-                                </ul>
+                                </div>
+                                
+                                <!-- Paginación -->
+                                <div class="px-4 py-3 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
+                                    <div class="text-sm text-gray-500">
+                                        Mostrando página {{ ciudades.number }} de {{ ciudades.paginator.num_pages }}
+                                    </div>
+                                    <div class="flex space-x-1">
+                                        {% if ciudades.has_previous %}
+                                        <a href="?ciudad_page={{ ciudades.previous_page_number }}" class="px-3 py-1 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-50 flex items-center">
+                                            <i data-lucide="chevron-left" class="w-4 h-4 mr-1"></i>
+                                            <span>Anterior</span>
+                                        </a>
+                                        {% endif %}
+                                        {% if ciudades.has_next %}
+                                        <a href="?ciudad_page={{ ciudades.next_page_number }}" class="px-3 py-1 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-50 flex items-center">
+                                            <span>Siguiente</span>
+                                            <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i>
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
                             {% else %}
-                                <p class="text-gray-500">No hay ciudades registradas</p>
+                                <div class="p-8 text-center">
+                                    <i data-lucide="building" class="w-10 h-10 mx-auto text-gray-400 mb-3"></i>
+                                    <h3 class="text-gray-500 font-medium">No hay ciudades registradas</h3>
+                                    <p class="text-gray-400 text-sm mt-1">Comience agregando una nueva ciudad</p>
+                                </div>
                             {% endif %}
                         </div>
                     </div>
@@ -139,114 +334,174 @@
     </main>
 </div>
 
+<!-- Modales -->
 <!-- Modal para País -->
-<div id="pais-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-    <div class="bg-white rounded-lg p-6 w-full max-w-md">
-        <div class="flex justify-between items-center mb-4">
-            <h3 class="text-xl font-semibold text-gray-800">Agregar País</h3>
-            <button onclick="closeModal('pais-modal')" class="text-gray-500 hover:text-gray-700">
+<div id="pais-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden px-4">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-md transform transition-all">
+        <div class="border-b border-gray-200 px-6 py-4 flex items-center justify-between bg-gradient-to-r from-teal-600 to-teal-700 rounded-t-xl">
+            <h3 class="text-lg font-semibold text-white">Agregar País</h3>
+            <button onclick="closeModal('pais-modal')" class="text-white/80 hover:text-white">
                 <i data-lucide="x" class="w-6 h-6"></i>
             </button>
         </div>
         <form method="POST" action="{% url 'Crear_pais' %}">
             {% csrf_token %}
-            <div class="mb-4">
-                <label for="nombre_pais" class="block text-gray-700 mb-2">Nombre del País</label>
-                <input type="text" id="nombre_pais" name="nombre_pais" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500" required>
+            <div class="p-6">
+                <div class="mb-5">
+                    <label for="nombre_pais" class="block text-sm font-medium text-gray-700 mb-2">Nombre del País</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i data-lucide="flag" class="w-5 h-5 text-gray-400"></i>
+                        </div>
+                        <input type="text" id="nombre_pais" name="nombre_pais" class="pl-10 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500" placeholder="Ej: Venezuela" required>
+                    </div>
+                </div>
             </div>
-            <div class="flex justify-end space-x-3">
-                <button type="button" onclick="closeModal('pais-modal')" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400">Cancelar</button>
-                <button type="submit" class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700">Guardar</button>
+            <div class="bg-gray-50 px-6 py-4 rounded-b-xl flex justify-end space-x-3">
+                <button type="button" onclick="closeModal('pais-modal')" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+                    Cancelar
+                </button>
+                <button type="submit" class="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg transition-colors flex items-center space-x-2">
+                    <i data-lucide="save" class="w-4 h-4"></i>
+                    <span>Guardar País</span>
+                </button>
             </div>
         </form>
     </div>
 </div>
 
 <!-- Modal para Estado -->
-<div id="estado-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-    <div class="bg-white rounded-lg p-6 w-full max-w-md">
-        <div class="flex justify-between items-center mb-4">
-            <h3 class="text-xl font-semibold text-gray-800">Agregar Estado</h3>
-            <button onclick="closeModal('estado-modal')" class="text-gray-500 hover:text-gray-700">
+<div id="estado-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden px-4">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-md transform transition-all">
+        <div class="border-b border-gray-200 px-6 py-4 flex items-center justify-between bg-gradient-to-r from-blue-600 to-blue-700 rounded-t-xl">
+            <h3 class="text-lg font-semibold text-white">Agregar Estado</h3>
+            <button onclick="closeModal('estado-modal')" class="text-white/80 hover:text-white">
                 <i data-lucide="x" class="w-6 h-6"></i>
             </button>
         </div>
         <form method="POST" action="{% url 'Crear_estado' %}">
             {% csrf_token %}
-            <div class="mb-4">
-                <label for="nombre_estado" class="block text-gray-700 mb-2">Nombre del Estado</label>
-                <input type="text" id="nombre_estado" name="nombre_estado" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+            <div class="p-6">
+                <div class="mb-5">
+                    <label for="nombre_estado" class="block text-sm font-medium text-gray-700 mb-2">Nombre del Estado</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i data-lucide="map" class="w-5 h-5 text-gray-400"></i>
+                        </div>
+                        <input type="text" id="nombre_estado" name="nombre_estado" class="pl-10 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Ej: Miranda" required>
+                    </div>
+                </div>
+                <div class="mb-5">
+                    <label for="pais" class="block text-sm font-medium text-gray-700 mb-2">País</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i data-lucide="globe" class="w-5 h-5 text-gray-400"></i>
+                        </div>
+                        <select id="pais" name="pais" class="pl-10 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none" required>
+                            <option value="">Seleccione un país</option>
+                            {% for pais in paises %}
+                                <option value="{{ pais.id }}">{{ pais.nombre_pais }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                            <i data-lucide="chevron-down" class="w-5 h-5 text-gray-400"></i>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="mb-4">
-                <label for="pais" class="block text-gray-700 mb-2">País</label>
-                <select id="pais" name="pais" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                    <option value="">Seleccione un país</option>
-                    {% for pais in paises %}
-                        <option value="{{ pais.id }}">{{ pais.nombre_pais }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="flex justify-end space-x-3">
-                <button type="button" onclick="closeModal('estado-modal')" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400">Cancelar</button>
-                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Guardar</button>
+            <div class="bg-gray-50 px-6 py-4 rounded-b-xl flex justify-end space-x-3">
+                <button type="button" onclick="closeModal('estado-modal')" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+                    Cancelar
+                </button>
+                <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center space-x-2">
+                    <i data-lucide="save" class="w-4 h-4"></i>
+                    <span>Guardar Estado</span>
+                </button>
             </div>
         </form>
     </div>
 </div>
 
 <!-- Modal para Ciudad -->
-<div id="ciudad-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-    <div class="bg-white rounded-lg p-6 w-full max-w-md">
-        <div class="flex justify-between items-center mb-4">
-            <h3 class="text-xl font-semibold text-gray-800">Agregar Ciudad</h3>
-            <button onclick="closeModal('ciudad-modal')" class="text-gray-500 hover:text-gray-700">
+<div id="ciudad-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden px-4">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-md transform transition-all">
+        <div class="border-b border-gray-200 px-6 py-4 flex items-center justify-between bg-gradient-to-r from-purple-600 to-purple-700 rounded-t-xl">
+            <h3 class="text-lg font-semibold text-white">Agregar Ciudad</h3>
+            <button onclick="closeModal('ciudad-modal')" class="text-white/80 hover:text-white">
                 <i data-lucide="x" class="w-6 h-6"></i>
             </button>
         </div>
         <form method="POST" action="{% url 'Crear_ciudad' %}">
             {% csrf_token %}
-            <div class="mb-4">
-                <label for="nombre_ciudad" class="block text-gray-700 mb-2">Nombre de la Ciudad</label>
-                <input type="text" id="nombre_ciudad" name="nombre_ciudad" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500" required>
+            <div class="p-6">
+                <div class="mb-5">
+                    <label for="nombre_ciudad" class="block text-sm font-medium text-gray-700 mb-2">Nombre de la Ciudad</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i data-lucide="building" class="w-5 h-5 text-gray-400"></i>
+                        </div>
+                        <input type="text" id="nombre_ciudad" name="nombre_ciudad" class="pl-10 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500" placeholder="Ej: Caracas" required>
+                    </div>
+                </div>
+                <div class="mb-5">
+                    <label for="estado" class="block text-sm font-medium text-gray-700 mb-2">Estado/Provincia</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i data-lucide="map" class="w-5 h-5 text-gray-400"></i>
+                        </div>
+                        <select id="estado" name="estado" class="pl-10 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 appearance-none" required>
+                            <option value="">Seleccione un estado</option>
+                            {% for estado in estados %}
+                                <option value="{{ estado.id }}">{{ estado.nombre_estado }} ({{ estado.pais.nombre_pais }})</option>
+                            {% endfor %}
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                            <i data-lucide="chevron-down" class="w-5 h-5 text-gray-400"></i>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="mb-4">
-                <label for="estado" class="block text-gray-700 mb-2">Estado</label>
-                <select id="estado" name="estado" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500" required>
-                    <option value="">Seleccione un estado</option>
-                    {% for estado in estados %}
-                        <option value="{{ estado.id }}">{{ estado.nombre_estado }} ({{ estado.pais.nombre_pais }})</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="flex justify-end space-x-3">
-                <button type="button" onclick="closeModal('ciudad-modal')" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400">Cancelar</button>
-                <button type="submit" class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700">Guardar</button>
+            <div class="bg-gray-50 px-6 py-4 rounded-b-xl flex justify-end space-x-3">
+                <button type="button" onclick="closeModal('ciudad-modal')" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+                    Cancelar
+                </button>
+                <button type="submit" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors flex items-center space-x-2">
+                    <i data-lucide="save" class="w-4 h-4"></i>
+                    <span>Guardar Ciudad</span>
+                </button>
             </div>
         </form>
     </div>
 </div>
 
 <!-- Modal para Editar -->
-<div id="edit-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-    <div class="bg-white rounded-lg p-6 w-full max-w-md">
-        <div class="flex justify-between items-center mb-4">
-            <h3 id="edit-modal-title" class="text-xl font-semibold text-gray-800">Editar</h3>
-            <button onclick="closeModal('edit-modal')" class="text-gray-500 hover:text-gray-700">
+<div id="edit-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden px-4">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-md transform transition-all">
+        <div class="border-b border-gray-200 px-6 py-4 flex items-center justify-between bg-gradient-to-r from-blue-600 to-blue-700 rounded-t-xl">
+            <h3 id="edit-modal-title" class="text-lg font-semibold text-white">Editar</h3>
+            <button onclick="closeModal('edit-modal')" class="text-white/80 hover:text-white">
                 <i data-lucide="x" class="w-6 h-6"></i>
             </button>
         </div>
         <form id="edit-form" method="POST" action="">
             {% csrf_token %}
-            <div class="mb-4">
-                <label for="edit-nombre" class="block text-gray-700 mb-2">Nombre</label>
-                <input type="text" id="edit-nombre" name="nombre" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+            <div class="p-6">
+                <div class="mb-5">
+                    <label for="edit-nombre" class="block text-sm font-medium text-gray-700 mb-2">Nombre</label>
+                    <input type="text" id="edit-nombre" name="nombre" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+                </div>
+                <div id="edit-extra-fields" class="mb-5 hidden">
+                    <!-- Aquí se agregarán campos adicionales dinámicamente -->
+                </div>
             </div>
-            <div id="edit-extra-fields" class="mb-4 hidden">
-                <!-- Aquí se agregarán campos adicionales dinámicamente -->
-            </div>
-            <div class="flex justify-end space-x-3">
-                <button type="button" onclick="closeModal('edit-modal')" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400">Cancelar</button>
-                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Actualizar</button>
+            <div class="bg-gray-50 px-6 py-4 rounded-b-xl flex justify-end space-x-3">
+                <button type="button" onclick="closeModal('edit-modal')" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+                    Cancelar
+                </button>
+                <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center space-x-2">
+                    <i data-lucide="save" class="w-4 h-4"></i>
+                    <span>Actualizar</span>
+                </button>
             </div>
         </form>
     </div>
@@ -281,6 +536,7 @@
                 title.textContent = 'Editar País';
                 form.action = `/editar_pais/${id}/`;
                 nombreInput.name = 'nombre_pais';
+                extraFields.classList.add('hidden');
                 break;
             case 'estado':
                 title.textContent = 'Editar Estado';
@@ -288,8 +544,8 @@
                 nombreInput.name = 'nombre_estado';
                 // Agregar campo de país
                 extraFields.innerHTML = `
-                    <label for="edit-pais" class="block text-gray-700 mb-2">País</label>
-                    <select id="edit-pais" name="pais" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    <label for="edit-pais" class="block text-sm font-medium text-gray-700 mb-2">País</label>
+                    <select id="edit-pais" name="pais" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
                         {% for pais in paises %}
                             <option value="{{ pais.id }}" ${pais.id == relacionId ? 'selected' : ''}>{{ pais.nombre_pais }}</option>
                         {% endfor %}
@@ -303,8 +559,8 @@
                 nombreInput.name = 'nombre_ciudad';
                 // Agregar campo de estado
                 extraFields.innerHTML = `
-                    <label for="edit-estado" class="block text-gray-700 mb-2">Estado</label>
-                    <select id="edit-estado" name="estado" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    <label for="edit-estado" class="block text-sm font-medium text-gray-700 mb-2">Estado</label>
+                    <select id="edit-estado" name="estado" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
                         {% for estado in estados %}
                             <option value="{{ estado.id }}" ${estado.id == relacionId ? 'selected' : ''}>{{ estado.nombre_estado }} ({{ estado.pais.nombre_pais }})</option>
                         {% endfor %}
@@ -334,5 +590,107 @@
             });
         }
     }
+
+    // Funciones de búsqueda automática
+    function filterPaises() {
+        const input = document.getElementById("pais-search");
+        const filter = input.value.toLowerCase();
+        const items = document.querySelectorAll(".pais-item");
+        
+        items.forEach(item => {
+            const text = item.textContent.toLowerCase();
+            item.style.display = text.includes(filter) ? "" : "none";
+        });
+        
+        // Actualizar URL después de un breve retraso
+        clearTimeout(window.paisSearchTimer);
+        window.paisSearchTimer = setTimeout(() => {
+            updateSearchParam('pais_query', filter);
+        }, 500);
+    }
+
+    function filterEstados() {
+        const input = document.getElementById("estado-search");
+        const filter = input.value.toLowerCase();
+        const items = document.querySelectorAll(".estado-item");
+        
+        items.forEach(item => {
+            const text = item.textContent.toLowerCase();
+            item.style.display = text.includes(filter) ? "" : "none";
+        });
+        
+        clearTimeout(window.estadoSearchTimer);
+        window.estadoSearchTimer = setTimeout(() => {
+            updateSearchParam('estado_query', filter);
+        }, 500);
+    }
+
+    function filterCiudades() {
+        const input = document.getElementById("ciudad-search");
+        const filter = input.value.toLowerCase();
+        const items = document.querySelectorAll(".ciudad-item");
+        
+        items.forEach(item => {
+            const text = item.textContent.toLowerCase();
+            item.style.display = text.includes(filter) ? "" : "none";
+        });
+        
+        clearTimeout(window.ciudadSearchTimer);
+        window.ciudadSearchTimer = setTimeout(() => {
+            updateSearchParam('ciudad_query', filter);
+        }, 500);
+    }
+
+    function updateSearchParam(param, value) {
+        const url = new URL(window.location.href);
+        
+        if (value) {
+            url.searchParams.set(param, value);
+            // Resetear a página 1 al buscar
+            url.searchParams.set(param.replace('_query', '_page'), '1');
+        } else {
+            url.searchParams.delete(param);
+        }
+        
+        // Mantener otros parámetros de paginación
+        const otherPages = ['pais_page', 'estado_page', 'ciudad_page'];
+        otherPages.forEach(pageParam => {
+            if (url.searchParams.get(pageParam) && !pageParam.includes(param.split('_')[0])) {
+                url.searchParams.set(pageParam, url.searchParams.get(pageParam));
+            }
+        });
+        
+        window.history.replaceState({}, '', url.toString());
+    }
+
+    function clearSearch(type) {
+        const input = document.getElementById(`${type}-search`);
+        input.value = "";
+        
+        // Actualizar la URL eliminando el parámetro de búsqueda
+        const url = new URL(window.location.href);
+        url.searchParams.delete(`${type}_query`);
+        window.location.href = url.toString();
+    }
+
+    // Inicializar búsquedas si hay parámetros en la URL
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        
+        if (urlParams.has('pais_query')) {
+            document.getElementById('pais-search').value = urlParams.get('pais_query');
+            filterPaises();
+        }
+        
+        if (urlParams.has('estado_query')) {
+            document.getElementById('estado-search').value = urlParams.get('estado_query');
+            filterEstados();
+        }
+        
+        if (urlParams.has('ciudad_query')) {
+            document.getElementById('ciudad-search').value = urlParams.get('ciudad_query');
+            filterCiudades();
+        }
+    });
 </script>
 {% endblock %}

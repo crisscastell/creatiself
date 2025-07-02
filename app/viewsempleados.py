@@ -7,9 +7,11 @@ from .forms import EmpleadoForm, UsuarioCreationForm, UsuarioChangeForm
 from .models import *
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
+from django.db.models import Count, Avg, Q
 
 def crear_empleado(request):
     usuario = request.user
+    
     # Comprobamos si el usuario tiene el rol de 'Administrador'
     if usuario.rol.nombre_rol == 'Administrador':
         if request.method == 'POST':
@@ -20,24 +22,49 @@ def crear_empleado(request):
                 empleado.save()
                 return redirect('Listar_empleados')
             else:
-                print(form.errors) # Cambia a la URL que muestra la lista de empleados
+                print(form.errors)
 
         # Si el método es GET, mostramos el formulario vacío
         form = EmpleadoForm()
 
-        # Obtenemos los países, estados y ciudades desde la base de datos
-        usuarios = Usuario.objects.all()
-        paises = Pais.objects.all()
-        estados = Estado.objects.all()
-        ciudades = Ciudad.objects.all()
+        # Obtenemos los datos necesarios desde la base de datos
+        usuarios = Usuario.objects.filter(is_active=True).order_by('username')
+        paises = Pais.objects.all().order_by('nombre_pais')
+        estados = Estado.objects.all().order_by('nombre_estado')
+        ciudades = Ciudad.objects.all().order_by('nombre_ciudad')
+        
+        # Estadísticas para el panel lateral
+        total_empleados = Empleado.objects.count()
+        empleados_activos = Empleado.objects.filter(status=True).count()
+        empleados_inactivos = total_empleados - empleados_activos
+        
+        # Distribución por género
+        distribucion_genero = Empleado.objects.values('sexo').annotate(total=Count('id'))
+        
+        # Distribución por nivel académico
+        distribucion_nivel = Empleado.objects.values('nivel_academico').annotate(total=Count('id'))
+        
+        # Edad promedio
+        empleados_con_edad = Empleado.objects.exclude(edad__isnull=True)
+        edad_promedio = empleados_con_edad.aggregate(avg_edad=Avg('edad'))['avg_edad'] or 0
+        
+        # Cargos más comunes
+        cargos_comunes = Empleado.objects.values('cargo').annotate(total=Count('id')).order_by('-total')[:5]
 
-        # Pasamos estos datos al contexto
+        # Contexto con todos los datos necesarios
         context = {
             'form': form,
             'paises': paises,
             'estados': estados,
             'ciudades': ciudades,
-            'usuarios':usuarios
+            'usuarios': usuarios,
+            'total_empleados': total_empleados,
+            'empleados_activos': empleados_activos,
+            'empleados_inactivos': empleados_inactivos,
+            'distribucion_genero': distribucion_genero,
+            'distribucion_nivel': distribucion_nivel,
+            'edad_promedio': round(edad_promedio, 1),
+            'cargos_comunes': cargos_comunes,
         }
 
         return render(request, 'admin/crear_empleado.html', context)

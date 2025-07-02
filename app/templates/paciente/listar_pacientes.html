@@ -5,21 +5,30 @@
 {% block content %}
 <div class="min-h-screen bg-gradient-to-r from-blue-50 to-purple-50 py-8">
     <div class="max-w-6xl mx-auto bg-white p-8 rounded-xl shadow-xl">
-        <!-- Encabezado y botón de nuevo paciente -->
-        <div class="flex flex-col md:flex-row justify-between items-center mb-8">
-            <h1 class="text-3xl font-bold text-gray-800 mb-4 md:mb-0">
-                <i data-lucide="users" class="inline mr-2"></i> Gestión de Pacientes
-            </h1>
+        <!-- Encabezado y botones -->
+        <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-800">
+                    <i data-lucide="users" class="inline mr-2 text-teal-600"></i> Gestión de Pacientes
+                </h1>
+                <p class="text-gray-600 mt-2">Administra el registro de pacientes de tu consultorio</p>
+            </div>
             
-            <a href="{% url 'Crear_pacientes' %}" 
-               class="bg-teal-600 hover:bg-teal-700 text-white py-3 px-6 rounded-lg flex items-center gap-2 transition-all">
-               <i data-lucide="plus" class="w-5 h-5"></i> Nuevo Paciente
-            </a>
+            <div class="flex gap-3">
+                <button onclick="exportAllToPDF()" 
+                       class="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-lg flex items-center gap-2 transition-all">
+                    <i data-lucide="file-text" class="w-5 h-5"></i> Exportar PDF
+                </button>
+                
+                <a href="{% url 'Crear_pacientes' %}" 
+                   class="bg-teal-600 hover:bg-teal-700 text-white py-2 px-4 rounded-lg flex items-center gap-2 transition-all">
+                   <i data-lucide="plus" class="w-5 h-5"></i> Nuevo Paciente
+                </a>
+            </div>
         </div>
 
         <!-- Barra de búsqueda y filtros -->
-        
-        <div class="bg-gray-50 p-4 rounded-lg mb-6">
+        <div class="bg-gray-50 p-4 rounded-lg mb-6 border border-gray-200">
             <form method="GET" action="" class="flex flex-col md:flex-row gap-4">
                 <!-- Barra de búsqueda principal -->
                 <div class="relative flex-grow">
@@ -27,22 +36,24 @@
                     <input 
                         type="text" 
                         id="searchInput"
+                        name="q"
                         placeholder="Buscar por nombre, cédula, teléfono..." 
-                        class="pl-10 pr-4 py-2 w-full border border-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        onkeyup="filterCards()"
+                        class="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                        value="{{ request.GET.q }}"
+                        autocomplete="off"
                     />
                 </div>
                 
                 <!-- Filtros adicionales -->
                 <div class="flex gap-2">
-                    <select name="tipo_paciente" class="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500">
+                    <select name="tipo_paciente" class="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500 text-sm">
                         <option value="">Tipo de paciente</option>
                         <option value="individual" {% if request.GET.tipo_paciente == "individual" %}selected{% endif %}>Individual</option>
                         <option value="infantil" {% if request.GET.tipo_paciente == "infantil" %}selected{% endif %}>Infantil</option>
                         <option value="pareja" {% if request.GET.tipo_paciente == "pareja" %}selected{% endif %}>Pareja</option>
                     </select>
                     
-                    <select name="sexo" class="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500">
+                    <select name="sexo" class="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500 text-sm">
                         <option value="">Sexo</option>
                         <option value="masculino" {% if request.GET.sexo == "masculino" %}selected{% endif %}>Masculino</option>
                         <option value="femenino" {% if request.GET.sexo == "femenino" %}selected{% endif %}>Femenino</option>
@@ -53,32 +64,31 @@
                         <i data-lucide="filter" class="w-4 h-4"></i>
                         Filtrar
                     </button>
-            
                 </div>
             </form>
         </div>
 
         <!-- Tabla de pacientes -->
         <div class="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
-            <table class="min-w-full bg-white">
+            <table class="min-w-full bg-white divide-y divide-gray-200">
                 <thead class="bg-gradient-to-r from-teal-600 to-teal-800 text-white">
                     <tr>
-                        <th class="py-4 px-6 text-left font-semibold uppercase text-sm">Tipo</th>
-                        <th class="py-4 px-6 text-left font-semibold uppercase text-sm">Cédula</th>
-                        <th class="py-4 px-6 text-left font-semibold uppercase text-sm">Nombre Completo</th>
-                        <th class="py-4 px-6 text-left font-semibold uppercase text-sm">Edad</th>
-                        <th class="py-4 px-6 text-left font-semibold uppercase text-sm">Sexo</th>
-                        <th class="py-4 px-6 text-left font-semibold uppercase text-sm">Teléfono</th>
-                        <th class="py-4 px-6 text-center font-semibold uppercase text-sm">Acciones</th>
+                        <th class="py-3 px-6 text-left font-semibold uppercase text-sm">Tipo</th>
+                        <th class="py-3 px-6 text-left font-semibold uppercase text-sm">Cédula</th>
+                        <th class="py-3 px-6 text-left font-semibold uppercase text-sm">Nombre Completo</th>
+                        <th class="py-3 px-6 text-left font-semibold uppercase text-sm">Edad</th>
+                        <th class="py-3 px-6 text-left font-semibold uppercase text-sm">Sexo</th>
+                        <th class="py-3 px-6 text-left font-semibold uppercase text-sm">Teléfono</th>
+                        <th class="py-3 px-6 text-center font-semibold uppercase text-sm">Acciones</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200">
                     {% for paciente in pacientes %}
                     <tr class="paciente-card hover:bg-blue-50 transition-colors">
                         <td class="py-4 px-6">
-                            <span class="px-3 py-1 rounded-full text-xs 
-                                {% if paciente.tipo_paciente == 'individual' %}bg-blue-200 text-blue-800
-                                {% elif paciente.tipo_paciente == 'infantil' %}bg-purple-200 text-purple-800
+                            <span class="px-3 py-1 rounded-full text-xs font-medium
+                                {% if paciente.tipo_paciente == 'individual' %}bg-blue-100 text-blue-800
+                                {% elif paciente.tipo_paciente == 'infantil' %}bg-purple-100 text-purple-800
                                 {% else %}bg-pink-100 text-pink-800{% endif %}">
                                 {{ paciente.tipo_paciente|title }}
                             </span>
@@ -92,28 +102,32 @@
                         </td>
                         <td class="py-4 px-6">{{ paciente.edad }}</td>
                         <td class="py-4 px-6 capitalize">
-                            <span class="px-2 py-1 rounded-full text-xs 
-                                {% if paciente.sexo == 'masculino' %}bg-blue-200 text-blue-800
-                                {% else %}bg-pink-200 text-pink-800{% endif %}">
+                            <span class="px-2 py-1 rounded-full text-xs font-medium
+                                {% if paciente.sexo == 'masculino' %}bg-blue-100 text-blue-800
+                                {% else %}bg-pink-100 text-pink-800{% endif %}">
                                 {{ paciente.sexo }}
                             </span>
                         </td>
                         <td class="py-4 px-6">{{ paciente.telefono }}</td>
                         <td class="py-4 px-6">
                             <div class="flex justify-center gap-2">
-
-                                <a onclick="openModalHistorialPaciente('{{ paciente.id }}')" 
-                                class="text-green-600 hover:text-green-800 p-2 rounded-full hover:bg-green-100 transition-colors"
-                                title="Historial">
+                                <button onclick="event.stopPropagation(); exportToPDF('{{ paciente.id }}')" 
+                                        class="text-indigo-600 hover:text-indigo-800 p-2 rounded-full hover:bg-indigo-50 transition-colors"
+                                        title="Exportar PDF">
                                     <i data-lucide="file-text" class="w-5 h-5"></i>
-                                </a>
+                                </button>
                                 
-                                <button onclick="openModalEditarPaciente('{{ paciente.id }}')"
-                                        class="text-blue-600 hover:text-blue-800 p-2 rounded-full hover:bg-blue-100 transition-colors"
+                                <button onclick="event.stopPropagation(); openModalHistorialPaciente('{{ paciente.id }}')" 
+                                        class="text-green-600 hover:text-green-800 p-2 rounded-full hover:bg-green-50 transition-colors"
+                                        title="Historial">
+                                    <i data-lucide="clipboard-list" class="w-5 h-5"></i>
+                                </button>
+                                
+                                <button onclick="event.stopPropagation(); openModalEditarPaciente('{{ paciente.id }}')"
+                                        class="text-blue-600 hover:text-blue-800 p-2 rounded-full hover:bg-blue-50 transition-colors"
                                         title="Editar">
                                     <i data-lucide="pencil" class="w-5 h-5"></i>
                                 </button>
-                               
                             </div>
                         </td>
                     </tr>
@@ -123,7 +137,7 @@
                         <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-auto">
                             <div class="sticky top-0 bg-white p-6 border-b flex justify-between items-center">
                                 <h3 class="text-2xl font-bold text-gray-800">
-                                    <i data-lucide="user" class="inline mr-2"></i> Editar Paciente
+                                    <i data-lucide="user" class="inline mr-2 text-teal-600"></i> Editar Paciente
                                 </h3>
                                 <button onclick="closeModalEditarPaciente('{{ paciente.id }}')" 
                                         class="text-gray-500 hover:text-gray-700">
@@ -136,8 +150,8 @@
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <!-- Tipo de Paciente -->
                                     <div>
-                                        <label for="tipo_paciente" class="block text-lg font-semibold text-gray-700">Tipo de Paciente</label>
-                                        <select id="tipo_paciente" name="tipo_paciente" class="form-control w-full p-3 border-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                        <label for="tipo_paciente" class="block text-lg font-semibold text-gray-700 mb-2">Tipo de Paciente</label>
+                                        <select id="tipo_paciente" name="tipo_paciente" class="w-full p-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all">
                                             <option value="individual" {% if paciente.tipo_paciente == 'individual' %}selected{% endif %}>Individual</option>
                                             <option value="infantil" {% if paciente.tipo_paciente == 'infantil' %}selected{% endif %}>Infantil</option>
                                             <option value="pareja" {% if paciente.tipo_paciente == 'pareja' %}selected{% endif %}>Pareja</option>
@@ -145,59 +159,56 @@
                                     </div>
                                     <!-- Cédula -->
                                     <div>
-                                        <label for="cedula" class="block text-lg font-semibold text-gray-700">Cédula</label>
-                                        <input type="text" id="cedula" name="cedula" class="form-control w-full p-3 border-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Ingrese la cédula" value="{{ paciente.cedula }}">
+                                        <label for="cedula" class="block text-lg font-semibold text-gray-700 mb-2">Cédula</label>
+                                        <input type="text" id="cedula" name="cedula" class="w-full p-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all" value="{{ paciente.cedula }}">
                                     </div>
                                 </div>
                 
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
                                     <!-- Nombre Completo -->
                                     <div>
-                                        <label for="nombre" class="block text-lg font-semibold text-gray-700">Primer Nombre</label>
-                                        <input type="text" id="nombre" name="nombre" class="form-control w-full p-3 border-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Primer nombre" value="{{ paciente.nombre }}">
+                                        <label for="nombre" class="block text-lg font-semibold text-gray-700 mb-2">Primer Nombre</label>
+                                        <input type="text" id="nombre" name="nombre" class="w-full p-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all" value="{{ paciente.nombre }}">
                                     </div>
                                     <div>
-                                        <label for="nombre2" class="block text-lg font-semibold text-gray-700">Segundo Nombre</label>
-                                        <input type="text" id="nombre2" name="nombre2" class="form-control w-full p-3 border-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Segundo nombre (opcional)" value="{{ paciente.nombre2 }}">
+                                        <label for="nombre2" class="block text-lg font-semibold text-gray-700 mb-2">Segundo Nombre</label>
+                                        <input type="text" id="nombre2" name="nombre2" class="w-full p-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all" value="{{ paciente.nombre2 }}">
                                     </div>
                                     <div>
-                                        <label for="apellido" class="block text-lg font-semibold text-gray-700">Primer Apellido</label>
-                                        <input type="text" id="apellido" name="apellido" class="form-control w-full p-3 border-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Primer apellido" value="{{ paciente.apellido }}">
+                                        <label for="apellido" class="block text-lg font-semibold text-gray-700 mb-2">Primer Apellido</label>
+                                        <input type="text" id="apellido" name="apellido" class="w-full p-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all" value="{{ paciente.apellido }}">
                                     </div>
                                 </div>
                 
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
                                     <div>
-                                        <label for="apellido2" class="block text-lg font-semibold text-gray-700">Segundo Apellido</label>
-                                        <input type="text" id="apellido2" name="apellido2" class="form-control w-full p-3 border-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Segundo apellido (opcional)" value="{{ paciente.apellido2 }}">
+                                        <label for="apellido2" class="block text-lg font-semibold text-gray-700 mb-2">Segundo Apellido</label>
+                                        <input type="text" id="apellido2" name="apellido2" class="w-full p-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all" value="{{ paciente.apellido2 }}">
                                     </div>
                                     <div>
-                                        <label for="telefono" class="block text-lg font-semibold text-gray-700">Teléfono</label>
-                                        <input type="text" id="telefono" name="telefono" class="form-control w-full p-3 border-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Teléfono" value="{{ paciente.telefono }}">
+                                        <label for="telefono" class="block text-lg font-semibold text-gray-700 mb-2">Teléfono</label>
+                                        <input type="text" id="telefono" name="telefono" class="w-full p-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all" value="{{ paciente.telefono }}">
                                     </div>
                                 </div>
                 
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
                                     <!-- Edad y Sexo -->
                                     <div>
-                                        <label for="edad" class="block text-lg font-semibold text-gray-700">Edad</label>
-                                        <input type="number" id="edad" name="edad" class="form-control w-full p-3 border-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Edad" value="{{ paciente.edad }}">
+                                        <label for="edad" class="block text-lg font-semibold text-gray-700 mb-2">Edad</label>
+                                        <input type="number" id="edad" name="edad" class="w-full p-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all" value="{{ paciente.edad }}">
                                     </div>
                                     <div>
-                                        <label for="sexo" class="block text-lg font-semibold text-gray-700">Sexo</label>
-                                        <select id="sexo" name="sexo" class="form-control w-full p-3 border-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                        <label for="sexo" class="block text-lg font-semibold text-gray-700 mb-2">Sexo</label>
+                                        <select id="sexo" name="sexo" class="w-full p-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all">
                                             <option value="masculino" {% if paciente.sexo == 'masculino' %}selected{% endif %}>Masculino</option>
                                             <option value="femenino" {% if paciente.sexo == 'femenino' %}selected{% endif %}>Femenino</option>
                                         </select>
                                     </div>
                                     <div>
-                                        <label class="block text-lg font-semibold text-gray-700">Condición</label>
-                                        <select name="condicion" class="form-control w-full p-3 border-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                        <label class="block text-lg font-semibold text-gray-700 mb-2">Condición</label>
+                                        <select name="condicion" class="w-full p-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all">
                                             {% for condicion in condiciones %}
-                                                <option value="{{ condicion.id }}" 
-                                                    {% if paciente.condicion.id == condicion.id %}selected{% endif %}>
-                                                    {{ condicion.nombre }}
-                                                </option>
+                                                <option value="{{ condicion.id }}" {% if paciente.condicion.id == condicion.id %}selected{% endif %}>{{ condicion.nombre }}</option>
                                             {% endfor %}
                                         </select>
                                     </div>
@@ -205,20 +216,18 @@
                 
                                 <!-- Antecedentes Personales -->
                                 <div class="mt-4">
-                                    <label for="antecedentes_personales" class="block text-lg font-semibold text-gray-700">Antecedentes</label>
-                                    <select id="antecedentes_personales" name="antecedentes_personales" class="form-control w-full p-3 border-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                    <label for="antecedentes_personales" class="block text-lg font-semibold text-gray-700 mb-2">Antecedentes</label>
+                                    <select id="antecedentes_personales" name="antecedentes_personales" class="w-full p-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all">
                                         {% for antecedente in antecedentes %}
-                                            <option value="{{ antecedente.id }}" 
-                                                    {% if paciente.antecedentes_personales.id == antecedente.id %}selected{% endif %}>
-                                                {{ antecedente.descripcion }}
-                                            </option>
+                                            <option value="{{ antecedente.id }}" {% if paciente.antecedentes_personales.id == antecedente.id %}selected{% endif %}>{{ antecedente.descripcion }}</option>
                                         {% endfor %}
                                     </select>       
                                 </div>
+                                
                                 <!-- Nivel Academico -->
                                 <div class="mt-4">
-                                    <label for="nivel_academico" class="block text-lg font-semibold text-gray-700">Nivel Académico</label>
-                                    <select id="nivel_academico" name="nivel_academico" class="form-control w-full p-3 border-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                    <label for="nivel_academico" class="block text-lg font-semibold text-gray-700 mb-2">Nivel Académico</label>
+                                    <select id="nivel_academico" name="nivel_academico" class="w-full p-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all">
                                         <option value="primaria" {% if paciente.nivel_academico == 'primaria' %}selected{% endif %}>Primaria</option>
                                         <option value="secundaria" {% if paciente.nivel_academico == 'secundaria' %}selected{% endif %}>Secundaria</option>
                                         <option value="bachillerato" {% if paciente.nivel_academico == 'bachillerato' %}selected{% endif %}>Bachillerato</option>
@@ -238,8 +247,8 @@
                 
                                 <!-- Dirección -->
                                 <div class="mt-4">
-                                    <label for="direccion" class="block text-lg font-semibold text-gray-700">Dirección</label>
-                                    <textarea id="direccion" name="direccion" rows="3" class="form-control w-full p-3 border-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Ingrese la dirección">{{ paciente.direccion }}</textarea>
+                                    <label for="direccion" class="block text-lg font-semibold text-gray-700 mb-2">Dirección</label>
+                                    <textarea id="direccion" name="direccion" rows="3" class="w-full p-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all">{{ paciente.direccion }}</textarea>
                                 </div>
                 
                                 <!-- Ubicación -->
@@ -247,12 +256,9 @@
                                     <!-- País -->
                                     <div>
                                         <label for="pais" class="block text-sm font-semibold text-gray-700 mb-2">País</label>
-                                        <select id="pais" name="pais" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" required>
+                                        <select id="pais" name="pais" class="w-full p-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all">
                                             {% for pais in paises %}
-                                                <option value="{{ pais.id }}" 
-                                                        {% if paciente.pais.id == pais.id %}selected{% endif %}>
-                                                    {{ pais.nombre_pais }}
-                                                </option>
+                                                <option value="{{ pais.id }}" {% if paciente.pais.id == pais.id %}selected{% endif %}>{{ pais.nombre_pais }}</option>
                                             {% endfor %}
                                         </select>
                                     </div>
@@ -260,12 +266,9 @@
                                     <!-- Estado -->
                                     <div>
                                         <label for="estado" class="block text-sm font-semibold text-gray-700 mb-2">Estado</label>
-                                        <select id="estado" name="estado" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" required>
+                                        <select id="estado" name="estado" class="w-full p-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all">
                                             {% for estado in estados %}
-                                                <option value="{{ estado.id }}" 
-                                                        {% if paciente.estado.id == estado.id %}selected{% endif %}>
-                                                    {{ estado.nombre_estado }}
-                                                </option>
+                                                <option value="{{ estado.id }}" {% if paciente.estado.id == estado.id %}selected{% endif %}>{{ estado.nombre_estado }}</option>
                                             {% endfor %}
                                         </select>
                                     </div>
@@ -273,12 +276,9 @@
                                     <!-- Ciudad -->
                                     <div>
                                         <label for="ciudad" class="block text-sm font-semibold text-gray-700 mb-2">Ciudad</label>
-                                        <select id="ciudad" name="ciudad" class="form-control border-2 border-gray-200 rounded-lg p-3 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" required>
+                                        <select id="ciudad" name="ciudad" class="w-full p-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all">
                                             {% for ciudad in ciudades %}
-                                                <option value="{{ ciudad.id }}" 
-                                                        {% if paciente.ciudad.id == ciudad.id %}selected{% endif %}>
-                                                    {{ ciudad.nombre_ciudad }}
-                                                </option>
+                                                <option value="{{ ciudad.id }}" {% if paciente.ciudad.id == ciudad.id %}selected{% endif %}>{{ ciudad.nombre_ciudad }}</option>
                                             {% endfor %}
                                         </select>
                                     </div>
@@ -291,7 +291,7 @@
                                         Cancelar
                                     </button>
                                     <button type="submit" 
-                                            class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2">
+                                            class="px-6 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors flex items-center gap-2">
                                         <i data-lucide="save" class="w-5 h-5"></i> Guardar Cambios
                                     </button>
                                 </div>
@@ -304,7 +304,7 @@
                         <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-auto">
                             <div class="sticky top-0 bg-white p-6 border-b flex justify-between items-center">
                                 <h3 class="text-2xl font-bold text-gray-800">
-                                    <i data-lucide="file-text" class="inline mr-2"></i> Historial del Paciente
+                                    <i data-lucide="file-text" class="inline mr-2 text-teal-600"></i> Historial del Paciente
                                 </h3>
                                 <button onclick="closeModalHistorialPaciente('{{ paciente.id }}')" 
                                         class="text-gray-500 hover:text-gray-700">
@@ -315,8 +315,8 @@
                             <div class="p-6">
                                 <!-- Información Básica -->
                                 <div class="mb-8">
-                                    <h4 class="text-xl font-semibold text-gray-700 mb-4 border-b pb-2">
-                                        <i data-lucide="user" class="inline mr-2"></i> Información Básica
+                                    <h4 class="text-xl font-semibold text-gray-700 mb-4 border-b pb-2 flex items-center">
+                                        <i data-lucide="user" class="mr-2 text-teal-600"></i> Información Básica
                                     </h4>
                                     
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -353,8 +353,8 @@
                                 
                                 <!-- Información de Contacto -->
                                 <div class="mb-8">
-                                    <h4 class="text-xl font-semibold text-gray-700 mb-4 border-b pb-2">
-                                        <i data-lucide="phone" class="inline mr-2"></i> Información de Contacto
+                                    <h4 class="text-xl font-semibold text-gray-700 mb-4 border-b pb-2 flex items-center">
+                                        <i data-lucide="phone" class="mr-2 text-teal-600"></i> Información de Contacto
                                     </h4>
                                     
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -386,8 +386,8 @@
                                 
                                 <!-- Información Médica -->
                                 <div class="mb-8">
-                                    <h4 class="text-xl font-semibold text-gray-700 mb-4 border-b pb-2">
-                                        <i data-lucide="heart-pulse" class="inline mr-2"></i> Información Médica
+                                    <h4 class="text-xl font-semibold text-gray-700 mb-4 border-b pb-2 flex items-center">
+                                        <i data-lucide="heart-pulse" class="mr-2 text-teal-600"></i> Información Médica
                                     </h4>
                                     
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -404,8 +404,8 @@
                                 
                                 <!-- Información Académica -->
                                 <div>
-                                    <h4 class="text-xl font-semibold text-gray-700 mb-4 border-b pb-2">
-                                        <i data-lucide="graduation-cap" class="inline mr-2"></i> Información Académica
+                                    <h4 class="text-xl font-semibold text-gray-700 mb-4 border-b pb-2 flex items-center">
+                                        <i data-lucide="graduation-cap" class="mr-2 text-teal-600"></i> Información Académica
                                     </h4>
                                     
                                     <div>
@@ -432,8 +432,12 @@
                             </div>
                             
                             <div class="sticky bottom-0 bg-white p-4 border-t flex justify-end">
+                                <button type="button" onclick="event.stopPropagation(); exportToPDF('{{ paciente.id }}')"
+                                        class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 flex items-center mr-2">
+                                    <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Exportar PDF
+                                </button>
                                 <button type="button" onclick="closeModalHistorialPaciente('{{ paciente.id }}')"
-                                        class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                        class="px-6 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors">
                                     Cerrar
                                 </button>
                             </div>
@@ -444,7 +448,23 @@
             </table>
         </div>
 
+        <!-- Mensaje cuando no hay pacientes -->
+        {% if not pacientes %}
+        <div class="bg-white rounded-xl shadow-sm p-12 text-center border border-gray-100 mt-6">
+            <i data-lucide="users" class="mx-auto h-12 w-12 text-gray-400"></i>
+            <h3 class="mt-2 text-lg font-medium text-gray-900">No se encontraron pacientes</h3>
+            <p class="mt-1 text-sm text-gray-500">No hay pacientes que coincidan con los criterios de búsqueda.</p>
+            <div class="mt-6">
+                <a href="{% url 'Crear_pacientes' %}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
+                    <i data-lucide="plus" class="mr-2 w-4 h-4"></i>
+                    Agregar nuevo paciente
+                </a>
+            </div>
+        </div>
+        {% endif %}
+
         <!-- Paginación -->
+        {% if pacientes.has_other_pages %}
         <div class="flex flex-col sm:flex-row justify-between items-center mt-6 pt-4 border-t border-gray-200">
             <div class="text-sm text-gray-600 mb-4 sm:mb-0">
                 Mostrando <span class="font-semibold">{{ pacientes.start_index }}</span> a 
@@ -463,7 +483,7 @@
 
                 {% for num in pacientes.paginator.page_range %}
                     {% if pacientes.number == num %}
-                        <span class="px-3 py-1 border rounded-lg bg-blue-600 text-white">{{ num }}</span>
+                        <span class="px-3 py-1 border rounded-lg bg-teal-600 text-white">{{ num }}</span>
                     {% elif num > pacientes.number|add:'-3' and num < pacientes.number|add:'3' %}
                         <a href="?page={{ num }}" class="px-3 py-1 border rounded-lg hover:bg-gray-100">{{ num }}</a>
                     {% endif %}
@@ -479,14 +499,37 @@
                 {% endif %}
             </div>
         </div>
+        {% endif %}
     </div>
 </div>
 
+<!-- Include jsPDF library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+
+
 <script>
+
+    document.addEventListener('DOMContentLoaded', function() {
+        {% if messages %}
+            {% for message in messages %}
+                Swal.fire({
+                    title: '{{ message.tags|title }}',
+                    text: '{{ message }}',
+                    icon: '{{ message.tags }}',
+                    confirmButtonText: 'Entendido',
+                    timer: 3000,
+                    timerProgressBar: true
+                });
+            {% endfor %}
+        {% endif %}
+    });
+
     document.addEventListener("DOMContentLoaded", function() {
         lucide.createIcons();
         
-        // Función para filtrar pacientes
+        // Función para filtrar pacientes en el cliente
         window.filterCards = function() {
             const input = document.getElementById("searchInput").value.toLowerCase();
             const cards = document.querySelectorAll(".paciente-card");
@@ -512,10 +555,25 @@
             document.body.style.overflow = '';
         };
         
-        // Cerrar modal al hacer clic fuera del contenido
+        // Funciones para el modal de historial
+        window.openModalHistorialPaciente = function(id) {
+            const modal = document.getElementById(`modalHistorialPaciente${id}`);
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.body.style.overflow = 'hidden';
+        };
+
+        window.closeModalHistorialPaciente = function(id) {
+            const modal = document.getElementById(`modalHistorialPaciente${id}`);
+            modal.classList.remove('flex');
+            modal.classList.add('hidden');
+            document.body.style.overflow = '';
+        };
+
+        // Cerrar modales al hacer clic fuera
         document.addEventListener('click', function(e) {
             if (e.target.classList.contains('fixed') && e.target.classList.contains('bg-gray-900')) {
-                const modals = document.querySelectorAll('[id^="modalEditarPaciente"]');
+                const modals = document.querySelectorAll('[id^="modalEditarPaciente"], [id^="modalHistorialPaciente"]');
                 modals.forEach(modal => {
                     modal.classList.remove('flex');
                     modal.classList.add('hidden');
@@ -525,31 +583,268 @@
         });
     });
 
-    // Funciones para el modal de historial
-    window.openModalHistorialPaciente = function(id) {
-        const modal = document.getElementById(`modalHistorialPaciente${id}`);
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-        document.body.style.overflow = 'hidden';
-    };
+    // Initialize jsPDF
+    const { jsPDF } = window.jspdf;
 
-    window.closeModalHistorialPaciente = function(id) {
-        const modal = document.getElementById(`modalHistorialPaciente${id}`);
-        modal.classList.remove('flex');
-        modal.classList.add('hidden');
-        document.body.style.overflow = '';
-    };
-
-    // Actualiza el event listener para cerrar modales al hacer clic fuera
-    document.addEventListener('click', function(e) {
-        if (e.target.classList.contains('fixed') && e.target.classList.contains('bg-gray-900')) {
-            const modals = document.querySelectorAll('[id^="modalEditarPaciente"], [id^="modalHistorialPaciente"]');
-            modals.forEach(modal => {
-                modal.classList.remove('flex');
-                modal.classList.add('hidden');
-                document.body.style.overflow = '';
+    // Función para exportar a PDF un paciente individual
+    async function exportToPDF(id) {
+        try {
+            const doc = new jsPDF('p', 'mm', 'a4');
+            const margin = 15;
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const pageHeight = doc.internal.pageSize.getHeight();
+            let y = 20;
+        
+            const styles = {
+                title: { size: 16, color: [15, 118, 110], style: 'bold' },
+                section: { size: 13, color: [75, 85, 99], style: 'bold' },
+                label: { size: 11, color: [0, 0, 0], style: 'normal' },
+                value: { size: 11, color: [15, 118, 110], style: 'bold' },
+                footer: { size: 9, color: [100, 100, 100], style: 'normal' },
+            };
+        
+            function applyStyle({ size, color, style }) {
+                doc.setFontSize(size);
+                doc.setFont('helvetica', style);
+                doc.setTextColor(...color);
+            }
+        
+            const toBase64 = url => fetch(url)
+                .then(res => res.blob())
+                .then(blob => new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(blob);
+                }));
+            const logoBase64 = await toBase64('/static/creatiself.jpg');
+        
+            doc.addImage(logoBase64, 'JPEG', margin, y, 30, 30);
+            applyStyle(styles.title);
+            doc.text('Creatiself', margin + 38, y + 10);
+            applyStyle(styles.label);
+            doc.text('RIF: J-50521532-9', margin + 38, y + 18);
+            doc.text(`Generado el: ${new Date().toLocaleDateString()}`, pageWidth - margin, y + 18, { align: 'right' });
+        
+            y += 35;
+            doc.setDrawColor(15, 118, 110);
+            doc.line(margin, y, pageWidth - margin, y);
+            y += 10;
+        
+            applyStyle(styles.title);
+            doc.text('INFORMACIÓN DEL PACIENTE', pageWidth / 2, y, { align: 'center' });
+            y += 10;
+        
+            const modal = document.getElementById(`modalHistorialPaciente${id}`);
+            if (!modal) return alert('No se pudo encontrar la información del paciente');
+        
+            const getText = (label) => {
+                const fields = Array.from(modal.querySelectorAll('p.text-lg.font-medium.text-gray-900'));
+                for (const el of fields) {
+                    if (el.previousElementSibling?.textContent.includes(label)) {
+                        return el.textContent.trim();
+                    }
+                }
+                return 'No disponible';
+            };
+        
+            // Obtener y recortar nombre
+            const nombreCompleto = getText('Nombre Completo');
+            const primerNombreApellido = nombreCompleto.split(' ').slice(0, 2).join(' ');
+        
+            const datosPersonales = [
+                ['Nombre completo', primerNombreApellido],
+                ['Tipo de paciente', getText('Tipo de Paciente')],
+                ['Cédula', getText('Cédula')],
+                ['Edad', getText('Edad')],
+                ['Sexo', getText('Sexo')],
+            ];
+        
+            const datosContacto = [
+                ['Teléfono', getText('Teléfono')],
+                ['Dirección', getText('Dirección')],
+            ];
+        
+            const datosUbicacion = [
+                ['País', getText('País')],
+                ['Estado', getText('Estado')],
+                ['Ciudad', getText('Ciudad')],
+            ];
+        
+            const datosMedicos = [
+                ['Condición', getText('Condición')],
+                ['Antecedentes', getText('Antecedentes')],
+            ];
+        
+            const datosAcademicos = [
+                ['Nivel académico', getText('Nivel Académico')],
+            ];
+        
+            // Sección helper
+            function printSection(title, data) {
+                applyStyle(styles.section);
+                doc.text(title, margin, y);
+                y += 7;
+        
+                data.forEach(([label, value]) => {
+                    applyStyle(styles.label);
+                    doc.text(`${label}:`, margin, y);
+                    const labelWidth = doc.getTextWidth(`${label}: `);
+                    applyStyle(styles.value);
+        
+                    if (label === 'Dirección' || label === 'Antecedentes') {
+                        const textLines = doc.splitTextToSize(value, pageWidth - margin * 2 - labelWidth);
+                        doc.text(textLines, margin + labelWidth + 2, y);
+                        y += textLines.length * 6;
+                    } else {
+                        doc.text(value, margin + labelWidth + 2, y);
+                        y += 7;
+                    }
+        
+                    if (y > pageHeight - 30) {
+                        doc.addPage();
+                        y = 20;
+                    }
+                });
+        
+                y += 5;
+            }
+        
+            // Secciones
+            printSection('DATOS PERSONALES', datosPersonales);
+            printSection('INFORMACIÓN DE CONTACTO', datosContacto);
+            printSection('UBICACIÓN', datosUbicacion);
+            printSection('INFORMACIÓN MÉDICA', datosMedicos);
+            printSection('INFORMACIÓN ACADÉMICA', datosAcademicos);
+        
+            // Footer
+            const pageCount = doc.internal.getNumberOfPages();
+            for (let i = 1; i <= pageCount; i++) {
+                doc.setPage(i);
+                doc.setDrawColor(15, 118, 110);
+                doc.line(margin, pageHeight - 15, pageWidth - margin, pageHeight - 15);
+                applyStyle(styles.footer);
+                doc.text('Creatiself - Gestión de Pacientes', margin, pageHeight - 10);
+                doc.text(`Página ${i} de ${pageCount}`, pageWidth / 2, pageHeight - 10, { align: 'center' });
+                doc.text(`Generado el ${new Date().toLocaleDateString()}`, pageWidth - margin, pageHeight - 10, { align: 'right' });
+            }
+        
+            doc.save(`Paciente_${primerNombreApellido.replace(/ /g, '_')}.pdf`);
+        } catch (error) {
+            Swal.fire({
+                title: 'Error',
+                text: 'Ocurrió un error al generar el PDF: ' + error.message,
+                icon: 'error',
+                confirmButtonText: 'Entendido'
             });
         }
-    });
+
+    }
+
+    // Función para exportar todos los pacientes a PDF
+    async function exportAllToPDF() {
+        const doc = new jsPDF('p', 'mm', 'a4');
+        const marginLeft = 15;
+        const marginRight = 15;
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+    
+        const titleStyle = { fontSize: 16, textColor: [15, 118, 110], fontStyle: 'bold' };
+        const headerStyle = { fontSize: 12, textColor: [255, 255, 255], fontStyle: 'bold', fillColor: [15, 118, 110] };
+        const rowStyle = { fontSize: 10, textColor: [0, 0, 0] };
+    
+        function applyStyle(style) {
+            doc.setFont('helvetica', style.fontStyle);
+            doc.setFontSize(style.fontSize);
+            doc.setTextColor(...style.textColor);
+            if (style.fillColor) {
+                doc.setFillColor(...style.fillColor);
+            }
+        }
+    
+        const toBase64 = (url) => {
+            return fetch(url)
+                .then(response => response.blob())
+                .then(blob => new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(blob);
+                }));
+        };
+    
+        const logoBase64 = await toBase64('/static/creatiself.jpg');
+    
+        // --- ENCABEZADO ---
+        const logoSize = 35;
+        doc.addImage(logoBase64, 'JPEG', marginLeft, 10, logoSize, logoSize);
+    
+        applyStyle(titleStyle);
+        doc.text('Creatiself', marginLeft + logoSize + 8, 18);
+    
+        applyStyle({ fontSize: 11, textColor: [0, 0, 0], fontStyle: 'normal' });
+        doc.text('RIF: J-50521532-9', marginLeft + logoSize + 8, 26);
+    
+        doc.setDrawColor(15, 118, 110);
+        doc.setLineWidth(0.3);
+        doc.line(marginLeft, 48, pageWidth - marginRight, 48);
+    
+        applyStyle(titleStyle);
+        doc.text('LISTADO DE PACIENTES', pageWidth / 2, 58, { align: 'center' });
+    
+        applyStyle({ fontSize: 11, textColor: [0, 0, 0], fontStyle: 'normal' });
+        doc.text(`Generado el: ${new Date().toLocaleDateString()}`, pageWidth - marginRight, 53, { align: 'right' });
+    
+        let yPosition = 68;
+    
+        // Preparar datos para la tabla
+        const pacientesData = [];
+        const pacientesRows = document.querySelectorAll('.paciente-card');
+        
+        pacientesRows.forEach(row => {
+            const tipo = row.querySelector('td:nth-child(1) span').textContent.trim();
+            const cedula = row.querySelector('td:nth-child(2)').textContent.trim();
+            const nombre = row.querySelector('td:nth-child(3) div:first-child').textContent.trim();
+            const edad = row.querySelector('td:nth-child(4)').textContent.trim();
+            const sexo = row.querySelector('td:nth-child(5) span').textContent.trim();
+            const telefono = row.querySelector('td:nth-child(6)').textContent.trim();
+            
+            pacientesData.push([tipo, cedula, nombre, edad, sexo, telefono]);
+        });
+    
+        // Crear tabla
+        doc.autoTable({
+            startY: yPosition,
+            head: [['Tipo', 'Cédula', 'Nombre', 'Edad', 'Sexo', 'Teléfono']],
+            body: pacientesData,
+            headStyles: {
+                fillColor: [15, 118, 110],
+                textColor: [255, 255, 255],
+                fontStyle: 'bold'
+            },
+            styles: {
+                fontSize: 10,
+                cellPadding: 3,
+                overflow: 'linebreak'
+            },
+            margin: { left: marginLeft, right: marginRight }
+        });
+    
+        // --- FOOTER ---
+        const pageCount = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+            doc.setDrawColor(15, 118, 110);
+            doc.setLineWidth(0.2);
+            doc.line(marginLeft, pageHeight - 15, pageWidth - marginRight, pageHeight - 15);
+    
+            applyStyle({ fontSize: 9, textColor: [100, 100, 100], fontStyle: 'normal' });
+            doc.text(`Creatiself - Gestión de Pacientes`, marginLeft, pageHeight - 12);
+            doc.text(`Página ${i} de ${pageCount}`, pageWidth / 2, pageHeight - 12, { align: 'center' });
+            doc.text(`Generado el ${new Date().toLocaleDateString()}`, pageWidth - marginRight, pageHeight - 12, { align: 'right' });
+        }
+    
+        doc.save(`Listado_Pacientes_${new Date().toISOString().slice(0,10)}.pdf`);
+    }
 </script>
 {% endblock %}
