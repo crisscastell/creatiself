@@ -30,6 +30,7 @@ DEBUG = True
 ALLOWED_HOSTS = [
     '*',
     '127.0.0.1',
+    '54.226.27.49'
 ]
 
 # Application definition
@@ -79,16 +80,16 @@ WSGI_APPLICATION = 'project.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
-      'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'creatiself1',
-        'USER': 'miusuario',
-        'PASSWORD': '1234',
-        'HOST': 'localhost',  # o la IP de tu servidor
-        'PORT': '5432',       # puerto por defecto de PostgreSQL
-    }
-}
+# DATABASES = {
+#       'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'creatiself1',
+#         'USER': 'miusuario',
+#         'PASSWORD': '1234',
+#         'HOST': 'localhost',  # o la IP de tu servidor
+#         'PORT': '5432',       # puerto por defecto de PostgreSQL
+#     }
+# }
 
 
 # Password validation
