@@ -33,6 +33,11 @@ ALLOWED_HOSTS = [
     '54.226.27.49'
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    'http://54.226.27.49:8080',
+    'https://54.226.27.49'
+]
+
 # Application definition
 
 INSTALLED_APPS = [
