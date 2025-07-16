@@ -59,6 +59,9 @@ urlpatterns = [
     path('crear_estado/', crear_estado, name='Crear_estado'),
     path('editar_estado/<int:id>/', editar_estado, name='Editar_estado'),
     path('crear_ciudad/', crear_ciudad, name='Crear_ciudad'),
-    path('editar_ciudad/<int:id>/', editar_ciudad, name='Editar_ciudad'),   
+    path('editar_ciudad/<int:id>/', editar_ciudad, name='Editar_ciudad'),
+
+    path('obtener_estados/', obtener_estados, name='obtener_estados'),
+    path('obtener_ciudades/', obtener_ciudades, name='obtener_ciudades'),
 ]
 

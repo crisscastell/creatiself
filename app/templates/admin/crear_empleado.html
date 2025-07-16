@@ -639,27 +639,6 @@
         const estadoSelect = document.getElementById('estado');
         const ciudadSelect = document.getElementById('ciudad');
         
-        // Datos precargados
-        const estadosData = {
-            {% for pais in paises %}
-                '{{ pais.id }}': [
-                    {% for estado in pais.estado_set.all %}
-                        {id: '{{ estado.id }}', nombre: '{{ estado.nombre_estado }}'},
-                    {% endfor %}
-                ],
-            {% endfor %}
-        };
-        
-        const ciudadesData = {
-            {% for estado in estados %}
-                '{{ estado.id }}': [
-                    {% for ciudad in estado.ciudad_set.all %}
-                        {id: '{{ ciudad.id }}', nombre: '{{ ciudad.nombre_ciudad }}'},
-                    {% endfor %}
-                ],
-            {% endfor %}
-        };
-
         // Cuando cambia el país
         paisSelect.addEventListener('change', function() {
             const paisId = this.value;
@@ -672,13 +651,19 @@
             ciudadSelect.disabled = true;
             
             // Si se seleccionó un país, cargar sus estados
-            if (paisId && estadosData[paisId]) {
-                estadosData[paisId].forEach(estado => {
-                    const option = document.createElement('option');
-                    option.value = estado.id;
-                    option.textContent = estado.nombre;
-                    estadoSelect.appendChild(option);
-                });
+            if (paisId) {
+                fetch(`/obtener_estados/?pais_id=${paisId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.estados && data.estados.length > 0) {
+                            data.estados.forEach(estado => {
+                                const option = document.createElement('option');
+                                option.value = estado.id;
+                                option.textContent = estado.nombre;
+                                estadoSelect.appendChild(option);
+                            });
+                        }
+                    });
             }
         });
         
@@ -691,21 +676,28 @@
             ciudadSelect.disabled = !estadoId;
             
             // Si se seleccionó un estado, cargar sus ciudades
-            if (estadoId && ciudadesData[estadoId]) {
-                ciudadesData[estadoId].forEach(ciudad => {
-                    const option = document.createElement('option');
-                    option.value = ciudad.id;
-                    option.textContent = ciudad.nombre;
-                    ciudadSelect.appendChild(option);
-                });
+            if (estadoId) {
+                fetch(`/obtener_ciudades/?estado_id=${estadoId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.ciudades && data.ciudades.length > 0) {
+                            data.ciudades.forEach(ciudad => {
+                                const option = document.createElement('option');
+                                option.value = ciudad.id;
+                                option.textContent = ciudad.nombre;
+                                ciudadSelect.appendChild(option);
+                            });
+                        }
+                    });
             }
         });
         
         // Si hay valores preseleccionados (para edición)
         if (paisSelect.value) {
-            paisSelect.dispatchEvent(new Event('change'));
+            const event = new Event('change');
+            paisSelect.dispatchEvent(event);
             if (estadoSelect.value) {
-                estadoSelect.dispatchEvent(new Event('change'));
+                estadoSelect.dispatchEvent(event);
             }
         }
     }
@@ -825,7 +817,7 @@
             mostrarNotificacion('El nombre del país es requerido', 'error');
             return;
         }
-
+    
         const submitBtn = form.querySelector('button[type="button"]');
         const originalText = submitBtn.innerHTML;
         submitBtn.disabled = true;
@@ -847,6 +839,14 @@
                 const newOption = new Option(data.nombre, data.id, true, true);
                 selectPais.add(newOption);
                 
+                // Seleccionar el nuevo país automáticamente
+                selectPais.value = data.id;
+                
+                // Disparar el evento change para cargar los estados
+                const event = new Event('change');
+                selectPais.dispatchEvent(event);
+                
+                // Actualizar también el select en el modal de estados
                 const selectPaisEstado = document.getElementById('pais_estado');
                 const newOptionEstado = new Option(data.nombre, data.id);
                 selectPaisEstado.add(newOptionEstado);
@@ -867,7 +867,7 @@
             submitBtn.innerHTML = originalText;
         });
     }
-
+    
     function guardarEstado() {
         const form = document.getElementById('formEstado');
         const formData = new FormData(form);
@@ -878,12 +878,12 @@
             mostrarNotificacion('Todos los campos son requeridos', 'error');
             return;
         }
-
+    
         const submitBtn = form.querySelector('button[type="button"]');
         const originalText = submitBtn.innerHTML;
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Guardando...';
-
+    
         fetch("{% url 'Crear_estado' %}", {
             method: 'POST',
             body: formData,
@@ -900,6 +900,17 @@
                 const newOption = new Option(data.nombre, data.id, true, true);
                 selectEstado.add(newOption);
                 
+                // Seleccionar el nuevo estado automáticamente
+                selectEstado.value = data.id;
+                
+                // Habilitar el select de estado si estaba deshabilitado
+                selectEstado.disabled = false;
+                
+                // Disparar el evento change para cargar las ciudades
+                const event = new Event('change');
+                selectEstado.dispatchEvent(event);
+                
+                // Actualizar también el select en el modal de ciudades
                 const selectEstadoCiudad = document.getElementById('estado_ciudad');
                 const newOptionCiudad = new Option(data.nombre, data.id);
                 selectEstadoCiudad.add(newOptionCiudad);
@@ -920,7 +931,7 @@
             submitBtn.innerHTML = originalText;
         });
     }
-
+    
     function guardarCiudad() {
         const form = document.getElementById('formCiudad');
         const formData = new FormData(form);
@@ -931,12 +942,12 @@
             mostrarNotificacion('Todos los campos son requeridos', 'error');
             return;
         }
-
+    
         const submitBtn = form.querySelector('button[type="button"]');
         const originalText = submitBtn.innerHTML;
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Guardando...';
-
+    
         fetch("{% url 'Crear_ciudad' %}", {
             method: 'POST',
             body: formData,
@@ -952,6 +963,12 @@
                 const selectCiudad = document.getElementById('ciudad');
                 const newOption = new Option(data.nombre, data.id, true, true);
                 selectCiudad.add(newOption);
+                
+                // Seleccionar la nueva ciudad automáticamente
+                selectCiudad.value = data.id;
+                
+                // Habilitar el select de ciudad si estaba deshabilitado
+                selectCiudad.disabled = false;
                 
                 cerrarModalCiudad();
                 mostrarNotificacion(data.message, 'success');

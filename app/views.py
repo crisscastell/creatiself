@@ -605,3 +605,13 @@ class GetAppointmentCounts(View):
             counts[fecha_str] = counts.get(fecha_str, 0) + 1
         
         return JsonResponse(counts)
+    
+def obtener_estados(request):
+    pais_id = request.GET.get('pais_id')
+    estados = Estado.objects.filter(pais_id=pais_id).values('id', 'nombre_estado')
+    return JsonResponse({'estados': list(estados)})
+
+def obtener_ciudades(request):
+    estado_id = request.GET.get('estado_id')
+    ciudades = Ciudad.objects.filter(estado_id=estado_id).values('id', 'nombre_ciudad')
+    return JsonResponse({'ciudades': list(ciudades)})

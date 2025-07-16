@@ -191,16 +191,16 @@
                             &gt;
                         </button>
                     </div>
-                    <div class="grid grid-cols-7 gap-3 mb-4">
-                        <div class="text-sm font-semibold text-gray-600 py-2">Lun</div>
-                        <div class="text-sm font-semibold text-gray-600 py-2">Mar</div>
-                        <div class="text-sm font-semibold text-gray-600 py-2">Mié</div>
-                        <div class="text-sm font-semibold text-gray-600 py-2">Jue</div>
-                        <div class="text-sm font-semibold text-gray-600 py-2">Vie</div>
-                        <div class="text-sm font-semibold text-gray-600 py-2">Sáb</div>
-                        <div class="text-sm font-semibold text-gray-600 py-2">Dom</div>
+                    <div class="grid grid-cols-7 text-center font-semibold mb-2">
+                        <div>Lun</div>
+                        <div>Mar</div>
+                        <div>Mié</div>
+                        <div>Jue</div>
+                        <div>Vie</div>
+                        <div>Sáb</div>
+                        <div>Dom</div>
                     </div>
-                    <div id="calendarDays" class="grid grid-cols-7 gap-2"></div>
+                    <div id="calendarDays" class="grid grid-cols-7 gap-1"></div>
                 </div>
             </div>
         </div>
@@ -506,39 +506,41 @@
         background-color: #6d28d9 !important; /* purple-700 */
     }
 
-    /* Mejora para tooltips */
-    .tooltip .tooltiptext {
-        visibility: hidden;
-        width: 220px;
-        background-color: #1f2937; /* gray-800 */
-        color: #fff;
-        text-align: left;
-        border-radius: 0.5rem;
-        padding: 0.5rem;
+    /* TOOLTIP */
+    .group:hover .group-hover\:block {
+        display: block;
+    }
+
+    .group-hover\:block {
+        display: none;
+    }
+
+    .relative {
+        position: relative;
+    }
+
+    .absolute {
         position: absolute;
-        z-index: 10;
-        bottom: 125%;
+    }
+
+    .tooltip {
+        position: relative;
+    }
+
+    .tooltip-content {
+        position: absolute;
+        bottom: 100%;
         left: 50%;
         transform: translateX(-50%);
-        opacity: 0;
-        transition: opacity 0.3s;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    }
-
-    .tooltip .tooltiptext::after {
-        content: "";
-        position: absolute;
-        top: 100%;
-        left: 50%;
-        margin-left: -5px;
-        border-width: 5px;
-        border-style: solid;
-        border-color: #1f2937 transparent transparent transparent;
-    }
-
-    .tooltip:hover .tooltiptext {
-        visibility: visible;
-        opacity: 1;
+        margin-bottom: 0.5rem;
+        width: 15rem;
+        background-color: #1f2937;
+        color: white;
+        padding: 0.5rem;
+        border-radius: 0.5rem;
+        font-size: 0.75rem;
+        z-index: 20;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06);
     }
 </style>
 
@@ -673,26 +675,25 @@
         const prevMonthButton = document.getElementById("prevMonth");
         const nextMonthButton = document.getElementById("nextMonth");
         const citaModal = document.getElementById("citaModal");
-
+    
         let today = new Date();
         let currentYear = today.getFullYear();
         let currentMonth = today.getMonth();
-
+    
+        const citasPorMes = {};
+    
         async function fetchCitasAgendadas(year, month) {
             const clave = `${year}-${month}`;
-            
-            // Primero buscar en los datos iniciales
+    
             if (citasPorMes[clave]) {
                 return citasPorMes[clave];
             }
-            
-            // Si no están en los datos iniciales, hacer petición al backend
+    
             try {
                 const response = await fetch(`/api/citas/?year=${year}&month=${month + 1}`);
                 if (!response.ok) throw new Error('Error al obtener citas');
                 const citas = await response.json();
-                
-                // Guardar en el mapa para futuras referencias
+    
                 citasPorMes[clave] = citas;
                 return citas;
             } catch (error) {
@@ -700,86 +701,79 @@
                 return [];
             }
         }
-
+    
         async function renderCalendar() {
             calendarDaysElement.innerHTML = "";
-        
+    
             const firstDay = new Date(currentYear, currentMonth, 1).getDay();
             const lastDate = new Date(currentYear, currentMonth + 1, 0).getDate();
             const prevLastDate = new Date(currentYear, currentMonth, 0).getDate();
-            const firstDayIndex = firstDay === 0 ? 6 : firstDay - 1; // Ajuste para que lunes sea el primer día
-            const today = new Date();
-            today.setHours(0, 0, 0, 0); // Normalizar la fecha de hoy
-            
-            // Obtener citas para el mes actual
+            const firstDayIndex = (firstDay + 6) % 7;
+    
+            const hoy = new Date();
+            hoy.setHours(0, 0, 0, 0);
+    
             const citas = await fetchCitasAgendadas(currentYear, currentMonth);
-            
-            // Crear un mapa de citas por día para fácil acceso
             const citasPorDia = {};
+    
             citas.forEach(cita => {
-                const fechaCita = new Date(cita.fecha);
-                // Asegurarnos de que estamos comparando con el mes correcto
+                const [anio, mes, dia] = cita.fecha.split('-').map(Number);
+                const fechaCita = new Date(anio, mes - 1, dia);
+    
                 if (fechaCita.getMonth() === currentMonth && fechaCita.getFullYear() === currentYear) {
-                    const dia = fechaCita.getDate();
                     if (!citasPorDia[dia]) {
                         citasPorDia[dia] = [];
                     }
                     citasPorDia[dia].push(cita);
                 }
             });
-        
-            // Días del mes anterior (siempre deshabilitados)
+    
+            // Días del mes anterior
             for (let i = firstDayIndex; i > 0; i--) {
                 const dayElement = document.createElement("div");
                 dayElement.className = "py-3 text-center text-sm text-gray-400";
                 dayElement.textContent = prevLastDate - i + 1;
                 calendarDaysElement.appendChild(dayElement);
             }
-        
+    
             // Días del mes actual
             for (let i = 1; i <= lastDate; i++) {
                 const dayElement = document.createElement("div");
                 const dayDate = new Date(currentYear, currentMonth, i);
-                dayDate.setHours(0, 0, 0, 0); // Normalizar la fecha
-                
-                // Determinar si el día es pasado, hoy o futuro
-                const isPastDay = dayDate < today;
-                const isToday = dayDate.getTime() === today.getTime();
-        
-                // Verificar si hay citas para este día
+                dayDate.setHours(0, 0, 0, 0);
+    
+                const isPastDay = dayDate < hoy;
+                const isToday = dayDate.getTime() === hoy.getTime();
                 const tieneCitas = citasPorDia[i] && citasPorDia[i].length > 0;
-                
-                // Clases base para todos los días
-                let dayClasses = "py-3 text-center text-sm font-medium rounded-lg cursor-pointer";
-                
+    
+                let dayClasses = "relative py-3 text-center text-sm font-medium rounded-lg cursor-pointer";
+    
                 if (isPastDay && !isToday) {
-                    // Días pasados (no clickeables)
                     dayClasses = "py-3 text-center text-sm text-gray-400 cursor-not-allowed";
                     dayElement.className = dayClasses;
                     dayElement.textContent = i;
+                    calendarDaysElement.appendChild(dayElement);
                 } else {
-                    // Días presentes/futuros (clickeables)
                     if (isToday) {
                         dayClasses += " bg-blue-500 text-white hover:bg-blue-600";
                     } else if (tieneCitas) {
-                        // Días con citas - color morado más intenso con borde
                         dayClasses += " bg-purple-600 text-white hover:bg-purple-700 border-2 border-purple-800";
                     } else {
                         dayClasses += " hover:bg-blue-100 text-gray-700";
                     }
-                    
+    
                     dayElement.className = dayClasses;
                     dayElement.textContent = i;
-                    
-                    // Si tiene citas, agregar tooltip
+    
                     if (tieneCitas) {
-                        const tooltip = document.createElement("span");
-                        tooltip.className = "tooltiptext absolute z-10 invisible bg-gray-800 text-white p-2 rounded-lg text-xs";
-                        tooltip.style.width = "220px";
-                        
-                        let tooltipContent = `<div class="text-left">`;
+                        const tooltipContainer = document.createElement("div");
+                        tooltipContainer.className = "relative group";
+                    
+                        const tooltip = document.createElement("div");
+                        tooltip.className = "absolute hidden group-hover:block w-60 p-2 bg-gray-800 text-white text-xs rounded-lg z-20 shadow-lg left-1/2 -translate-x-1/2 mt-2";
+                    
+                        let tooltipContent = ``;
                         citasPorDia[i].forEach(cita => {
-                            // Formatear hora (HH:MM)
                             const hora = cita.hora.slice(0, 2) + ":" + cita.hora.slice(2);
                             tooltipContent += `
                                 <div class="mb-1 border-b border-gray-700 pb-1">
@@ -791,48 +785,43 @@
                                 </div>
                             `;
                         });
-                        tooltipContent += `</div>`;
-                        
                         tooltip.innerHTML = tooltipContent;
-                        
-                        const tooltipContainer = document.createElement("div");
-                        tooltipContainer.className = "tooltip relative";
+                    
+                        // Añade el día al contenedor
                         tooltipContainer.appendChild(dayElement);
                         tooltipContainer.appendChild(tooltip);
-                        
                         calendarDaysElement.appendChild(tooltipContainer);
                     } else {
                         calendarDaysElement.appendChild(dayElement);
                     }
-                    
-                    dayElement.addEventListener("click", function() {
+    
+                    dayElement.addEventListener("click", function () {
                         const fechaSeleccionada = new Date(currentYear, currentMonth, i);
                         document.getElementById("modalFecha").value = fechaSeleccionada.toISOString().split('T')[0];
                         citaModal.classList.remove("hidden");
                     });
                 }
             }
-        
-            // Días del siguiente mes (si el mes actual no es el futuro)
+    
+            // Días del siguiente mes
             const totalBoxes = firstDayIndex + lastDate;
             const remainingDays = totalBoxes % 7 === 0 ? 0 : 7 - (totalBoxes % 7);
-        
+    
             for (let i = 1; i <= remainingDays; i++) {
                 const dayElement = document.createElement("div");
                 dayElement.className = "py-3 text-center text-sm text-gray-400";
                 dayElement.textContent = i;
                 calendarDaysElement.appendChild(dayElement);
             }
-        
-            currentMonthElement.textContent = new Date(currentYear, currentMonth).toLocaleDateString('es-ES', { 
-                month: 'long', 
-                year: 'numeric' 
+    
+            currentMonthElement.textContent = new Date(currentYear, currentMonth).toLocaleDateString('es-ES', {
+                month: 'long',
+                year: 'numeric'
             });
-        
-            // Deshabilitar botón de mes anterior si estamos en el mes actual
+    
             prevMonthButton.disabled = currentMonth <= today.getMonth() && currentYear <= today.getFullYear();
         }
-
+    
         function changeMonth(step) {
             currentMonth += step;
             if (currentMonth < 0) {
@@ -844,7 +833,7 @@
             }
             renderCalendar();
         }
-
+    
         prevMonthButton.addEventListener("click", () => changeMonth(-1));
         nextMonthButton.addEventListener("click", () => changeMonth(1));
         renderCalendar();
