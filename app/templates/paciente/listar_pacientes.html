@@ -283,6 +283,34 @@
                                         </select>
                                     </div>
                                 </div>
+
+                                <!-- Historial Psicológico -->
+                                <div class="mt-4">
+                                    <label for="historial" class="block text-lg font-semibold text-gray-700 mb-2">Historial Psicológico</label>
+                                    <textarea 
+                                        id="historial" 
+                                        name="historial" 
+                                        rows="4" 
+                                        class="w-full p-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all"
+                                    >{{ paciente.historial|default:"" }}</textarea>
+                                </div>
+
+                                <!--Empleado Asignado -->
+                                <div class="mt-4">
+                                    <label for="empleado_asignado" class="block text-lg font-semibold text-gray-700 mb-2">Profesional Asignado</label>
+                                    <select 
+                                        id="empleado_asignado" 
+                                        name="empleado_asignado" 
+                                        class="w-full p-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all"
+                                    >
+                                        <option value="">Seleccione un profesional</option>
+                                        {% for empleado in empleados %}
+                                            <option value="{{ empleado.id }}" {% if paciente.empleado_asignado.id == empleado.id %}selected{% endif %}>
+                                                {{ empleado.nombre }} {{ empleado.apellido }} - {{ empleado.cargo }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
                 
                                 <!-- Botón de Envío -->
                                 <div class="sticky bottom-0 bg-white p-4 border-t flex justify-end gap-3">
@@ -429,6 +457,97 @@
                                         </p>
                                     </div>
                                 </div>
+
+                                <!-- Historial Psicológico -->
+                                <div class="mb-8">
+                                    <h4 class="text-xl font-semibold text-gray-700 mb-4 border-b pb-2 flex items-center">
+                                        <i data-lucide="file-text" class="mr-2 text-teal-600"></i> Historial Psicológico
+                                    </h4>
+                                    <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                        <p class="text-gray-700 whitespace-pre-line">{{ paciente.historial|default:"No se ha registrado historial psicológico." }}</p>
+                                    </div>
+                                </div>
+
+                                <!-- Profesional Asignado -->
+                                <div class="mb-8">
+                                    <h4 class="text-xl font-semibold text-gray-700 mb-4 border-b pb-2 flex items-center">
+                                        <i data-lucide="user-check" class="mr-2 text-teal-600"></i> Profesional Asignado
+                                    </h4>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-500">Profesional</label>
+                                            <p class="mt-1 text-lg font-medium text-gray-900">
+                                                {% if paciente.empleado_asignado %}
+                                                    {{ paciente.empleado_asignado.nombre }} {{ paciente.empleado_asignado.apellido }}
+                                                {% else %}
+                                                    No asignado
+                                                {% endif %}
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-500">Especialidad</label>
+                                            <p class="mt-1 text-lg font-medium text-gray-900">
+                                                {% if paciente.empleado_asignado %}
+                                                    {{ paciente.empleado_asignado.cargo}}
+                                                {% else %}
+                                                    -
+                                                {% endif %}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- sección de Representante (solo para pacientes infantiles) -->
+                                {% if paciente.tipo_paciente == 'infantil' %}
+                                <div class="mb-8">
+                                    <h4 class="text-xl font-semibold text-gray-700 mb-4 border-b pb-2 flex items-center">
+                                        <i data-lucide="user-cog" class="mr-2 text-teal-600"></i> Representante Legal
+                                    </h4>
+                                    {% if paciente.pacienterepresentante_set.first %}
+                                        {% with representante=paciente.pacienterepresentante_set.first.representante %}
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-500">Nombre Completo</label>
+                                                <p class="mt-1 text-lg font-medium text-gray-900">
+                                                    {{ representante.nombre }} {{ representante.apellido }}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-500">Cédula</label>
+                                                <p class="mt-1 text-lg font-medium text-gray-900">
+                                                    {{ representante.cedula }}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-500">Teléfono</label>
+                                                <p class="mt-1 text-lg font-medium text-gray-900">
+                                                    {{ representante.telefono }}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-500">Parentesco</label>
+                                                <p class="mt-1 text-lg font-medium text-gray-900">
+                                                    {{ paciente.pacienterepresentante_set.first.parentesco }}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        {% endwith %}
+                                    {% else %}
+                                        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4">
+                                            <div class="flex">
+                                                <div class="flex-shrink-0">
+                                                    <i data-lucide="alert-triangle" class="h-5 w-5 text-yellow-400"></i>
+                                                </div>
+                                                <div class="ml-3">
+                                                    <p class="text-sm text-yellow-700">
+                                                        Este paciente infantil no tiene un representante asignado.
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                {% endif %}
                             </div>
                             
                             <div class="sticky bottom-0 bg-white p-4 border-t flex justify-end">

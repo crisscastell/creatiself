@@ -317,6 +317,33 @@
                             </div>
                         </div>
                     </div>
+
+                    <div class="relative">
+                        <label for="empleado_asignado" class="block text-sm font-medium text-gray-700 mb-2">Profesional Asignado</label>
+                        <div class="relative">
+                            <select 
+                                id="empleado_asignado" 
+                                name="empleado_asignado" 
+                                class="appearance-none w-full pl-4 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white"
+                            >
+                                <option value="">Seleccione un profesional</option>
+                                {% for empleado in empleados %}
+                                    <option value="{{ empleado.id }}" 
+                                            {% if empleado.id == request.user.empleado.id %}selected{% endif %}
+                                            data-especialidad="{{ empleado.especialidad }}">
+                                        {{ empleado.nombre }} {{ empleado.apellido }} - {{ empleado.cargo }}
+                                        {% if empleado.id == request.user.empleado.id %} (Usted){% endif %}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                <i class="fas fa-chevron-down text-gray-400"></i>
+                            </div>
+                        </div>
+                        {% if request.user.empleado %}
+                        <p class="mt-1 text-xs text-blue-600">Su perfil está seleccionado por defecto</p>
+                        {% endif %}
+                    </div>
                 </div>
                 
                 <!-- Sección 4: Ubicación -->
@@ -396,6 +423,8 @@
                             </div>
                         </div>
                     </div>
+
+                    
                     
                     <!-- Dirección -->
                     <div class="mt-8">
@@ -405,6 +434,36 @@
                             <div class="absolute top-3 right-3">
                                 <i class="fas fa-home text-gray-400"></i>
                             </div>
+                        </div>
+                    </div>
+                    <!-- Sección 5: Historial Psicológico -->
+                    <div class="mb-12">
+                        <div class="flex items-center mb-6">
+                            <div class="h-px flex-1 bg-gradient-to-r from-transparent via-teal-400 to-transparent"></div>
+                            <h2 class="mx-4 text-xl font-semibold text-gray-800 flex items-center">
+                                <span class="bg-teal-100 text-teal-800 p-2 rounded-full mr-3">
+                                    <i class="fas fa-notes-medical"></i>
+                                </span>
+                                Historial Psicológico
+                            </h2>
+                            <div class="h-px flex-1 bg-gradient-to-r from-transparent via-teal-400 to-transparent"></div>
+                        </div>
+                        
+                        <div class="relative">
+                            <label for="historial" class="block text-sm font-medium text-gray-700 mb-2">Notas del Historial</label>
+                            <div class="relative">
+                                <textarea 
+                                    id="historial" 
+                                    name="historial" 
+                                    rows="6" 
+                                    class="w-full pl-4 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white" 
+                                    placeholder="Registro detallado del historial psicológico del paciente..."
+                                ></textarea>
+                                <div class="absolute top-3 right-3">
+                                    <i class="fas fa-file-medical text-gray-400"></i>
+                                </div>
+                            </div>
+                            <p class="mt-2 text-xs text-gray-500">Puedes registrar información relevante sobre el historial psicológico del paciente.</p>
                         </div>
                     </div>
                 </div>
@@ -899,6 +958,30 @@
 </style>
 
 <script>
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const selectEmpleado = document.getElementById('empleado_asignado');
+        const empleadoLogueadoId = "{{ request.user.empleado.id }}";
+        
+        if (selectEmpleado && empleadoLogueadoId) {
+            // Seleccionar automáticamente al empleado logueado
+            selectEmpleado.value = empleadoLogueadoId;
+            
+            // Cambiar estilo cuando se selecciona otro empleado
+            selectEmpleado.addEventListener('change', function() {
+                if (this.value === empleadoLogueadoId) {
+                    this.style.borderColor = '#3b82f6'; // Azul
+                    this.style.boxShadow = '0 0 0 2px rgba(59, 130, 246, 0.2)';
+                } else {
+                    this.style.borderColor = '#d1d5db'; // Gris
+                    this.style.boxShadow = 'none';
+                }
+            });
+            
+            // Disparar el evento change inicial
+            selectEmpleado.dispatchEvent(new Event('change'));
+        }
+    });
 
     // Cargar datos de ubicación
     const paisSelect = document.getElementById('pais');
@@ -1815,6 +1898,21 @@
             const tipoPaciente = document.getElementById('tipo_paciente').value;
             const representanteId = document.getElementById('representante_id').value;
             const edad = document.getElementById('edad').value;
+            const empleadoAsignado = document.getElementById('empleado_asignado').value;
+    
+            // Validar empleado asignado
+            if (!empleadoAsignado) {
+                e.preventDefault();
+                mostrarNotificacion('Debe seleccionar un profesional asignado', 'error');
+                
+                // Resaltar el campo
+                const selectEmpleado = document.getElementById('empleado_asignado');
+                selectEmpleado.style.borderColor = '#ef4444'; // Rojo
+                selectEmpleado.style.boxShadow = '0 0 0 2px rgba(239, 68, 68, 0.2)';
+                selectEmpleado.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                
+                return;
+            }
             
             // Validar paciente infantil
             if (tipoPaciente === 'infantil') {

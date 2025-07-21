@@ -50,6 +50,7 @@ def crear_pacientes(request, representante_id=None):
     paises = Pais.objects.all()
     estados = Estado.objects.all()
     ciudades = Ciudad.objects.all()
+    empleados = Empleado.objects.all()
 
     total_pacientes = Paciente.objects.count()
     pacientes_hombres = Paciente.objects.filter(sexo='masculino').count()
@@ -69,6 +70,7 @@ def crear_pacientes(request, representante_id=None):
         'paises': paises,
         'estados': estados,
         'ciudades': ciudades,
+        'empleados': empleados,
         'representante_id': representante_id,
         'stats_data': json.dumps({
             'total': total_pacientes,
@@ -81,8 +83,18 @@ def crear_pacientes(request, representante_id=None):
     })
 
 def listar_pacientes(request):
-    pacientes = Paciente.objects.all()
-    
+    # Optimización: Usar select_related y prefetch_related para reducir consultas a la DB
+    pacientes = Paciente.objects.all().select_related(
+        'condicion',
+        'antecedentes_personales',
+        'pais',
+        'estado',
+        'ciudad',
+        'empleado_asignado'  # Añadido para el nuevo campo
+    ).prefetch_related(
+        'pacienterepresentante_set__representante'  # Para pacientes infantiles
+    ).order_by('-creado_en')  # Ordenar por fecha de creación descendente
+
     # Búsqueda
     query = request.GET.get('q', '')
     if query:
@@ -90,7 +102,9 @@ def listar_pacientes(request):
             Q(cedula__icontains=query) |
             Q(nombre__icontains=query) |
             Q(apellido__icontains=query) |
-            Q(telefono__icontains=query)
+            Q(telefono__icontains=query) |
+            Q(empleado_asignado__nombre__icontains=query) |  # Búsqueda por nombre de empleado
+            Q(empleado_asignado__apellido__icontains=query)  # Búsqueda por apellido de empleado
         )
     
     # Filtros
@@ -102,6 +116,13 @@ def listar_pacientes(request):
     if sexo:
         pacientes = pacientes.filter(sexo=sexo)
     
+    empleado_id = request.GET.get('empleado')
+    if empleado_id:
+        pacientes = pacientes.filter(empleado_asignado_id=empleado_id)
+
+    # Optimización: Cargar empleados una sola vez
+    empleados = Empleado.objects.all().only('id', 'nombre', 'apellido', 'cargo')
+    
     # Paginación
     paginator = Paginator(pacientes, 15)
     page_number = request.GET.get('page')
@@ -110,11 +131,12 @@ def listar_pacientes(request):
     context = {
         'pacientes': pacientes_paginados,
         'query': query,
-        'condiciones': Condicion.objects.all(),
-        'antecedentes': AntecedentesPersonales.objects.all(),
-        'paises': Pais.objects.all(),
-        'estados': Estado.objects.all(),
-        'ciudades': Ciudad.objects.all(),
+        'condiciones': Condicion.objects.all().only('id', 'nombre'),
+        'antecedentes': AntecedentesPersonales.objects.all().only('id', 'descripcion'),
+        'paises': Pais.objects.all().only('id', 'nombre_pais'),
+        'estados': Estado.objects.all().only('id', 'nombre_estado', 'pais'),
+        'ciudades': Ciudad.objects.all().only('id', 'nombre_ciudad', 'estado'),
+        'empleados': empleados,  # Usar la versión optimizada
     }
     return render(request, 'paciente/listar_pacientes.html', context)
 

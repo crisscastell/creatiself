@@ -8,6 +8,14 @@ from .models import *
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 from django.db.models import Count, Avg, Q
+from django.db.models import Count, Q
+from datetime import datetime, timedelta
+from .models import Paciente 
+from .models import Cita
+from django.db.models import Prefetch
+from django.db.models import IntegerField
+from django.db.models import Count, Q, Subquery, OuterRef
+from datetime import datetime, timedelta
 
 def crear_empleado(request):
     usuario = request.user
@@ -94,14 +102,9 @@ def listar_empleados(request):
         return redirect('acceso_denegado')
     
     # Base query
-    empleados = Empleado.objects.select_related(
-        'usuario', 
-        'pais', 
-        'estado', 
-        'ciudad'
-    ).all()
+    empleados = Empleado.objects.select_related('usuario', 'pais', 'estado', 'ciudad')
     
-    # Búsqueda (ampliada con más campos)
+    # Búsqueda y filtros
     query = request.GET.get('q', '')
     if query:
         empleados = empleados.filter(
@@ -112,32 +115,129 @@ def listar_empleados(request):
             Q(apellido2__icontains=query) |
             Q(cargo__icontains=query) |
             Q(telefono__icontains=query) |
-            Q(usuario__email__icontains=query)  # Búsqueda en FK Usuario
+            Q(usuario__email__icontains=query)
         )
     
-    # Filtro por estado (activo/inactivo)
     status = request.GET.get('status')
     if status == '1':
-        empleados = empleados.filter(status=True)  # Asumo que el campo se llama 'activo'
+        empleados = empleados.filter(status=True)
     elif status == '0':
         empleados = empleados.filter(status=False)
     
+    cargo_filter = request.GET.get('cargo')
+    if cargo_filter and cargo_filter != 'all':
+        empleados = empleados.filter(cargo__iexact=cargo_filter)
+    
+    cargos = Empleado.objects.values_list('cargo', flat=True).distinct().order_by('cargo')
+    
+    # Conteo de pacientes asignados
+    empleados = empleados.annotate(
+        pacientes_count=Count('paciente', distinct=True)
+    )
+    
+    # Prefetch de pacientes asignados
+    empleados = empleados.prefetch_related(
+        Prefetch('paciente_set',
+                queryset=Paciente.objects.only('id', 'nombre', 'apellido', 'cedula'),
+                to_attr='pacientes_asignados')
+    )
+    
+    # Estadísticas de citas - versión corregida
+    hoy = datetime.now().date()
+    inicio_semana = hoy - timedelta(days=hoy.weekday())
+    fin_semana = inicio_semana + timedelta(days=6)
+    
+    # Primero obtenemos los IDs de empleados que necesitamos
+    empleados_ids = empleados.values_list('id', flat=True)
+    
+    # Luego obtenemos las estadísticas de citas para estos empleados
+    from django.db.models import F
+    citas_stats = (
+        Cita.objects
+        .filter(paciente__empleado_asignado_id__in=empleados_ids)
+        .values('paciente__empleado_asignado_id')
+        .annotate(
+            citas_count=Count('id'),
+            citas_hoy=Count('id', filter=Q(fecha=hoy)),
+            citas_semana=Count('id', filter=Q(fecha__range=[inicio_semana, fin_semana])),
+            citas_pendientes=Count('id', filter=Q(estatus='pendiente')),
+            citas_completadas=Count('id', filter=Q(estatus='completada')),
+            citas_canceladas=Count('id', filter=Q(estatus='cancelada'))
+        )
+    )
+    
+    # Creamos un diccionario para mapear empleado_id a sus estadísticas
+    stats_dict = {
+        stat['paciente__empleado_asignado_id']: {
+            'citas_count': stat['citas_count'],
+            'citas_hoy': stat['citas_hoy'],
+            'citas_semana': stat['citas_semana'],
+            'citas_pendientes': stat['citas_pendientes'],
+            'citas_completadas': stat['citas_completadas'],
+            'citas_canceladas': stat['citas_canceladas']
+        }
+        for stat in citas_stats
+    }
+    
+    # Prefetch para citas recientes (sin usar OuterRef)
+    citas_recientes = (
+        Cita.objects
+        .filter(paciente__empleado_asignado_id__in=empleados_ids)
+        .select_related('paciente')
+        .order_by('-fecha', '-hora')
+    )
+    
+    # Agrupamos citas por empleado
+    from collections import defaultdict
+    citas_por_empleado = defaultdict(list)
+    for cita in citas_recientes:
+        citas_por_empleado[cita.paciente.empleado_asignado_id].append(cita)
+    
+    # Ordenamos y limitamos a 5 citas por empleado
+    for emp_id in citas_por_empleado:
+        citas_por_empleado[emp_id] = sorted(
+            citas_por_empleado[emp_id],
+            key=lambda x: (x.fecha, x.hora),
+            reverse=True
+        )[:5]
+    
     # Paginación
-    paginator = Paginator(empleados, 15)
+    empleados = empleados.order_by('-status', 'apellido', 'nombre')
+    paginator = Paginator(empleados, 12)
     page_number = request.GET.get('page')
     empleados_paginados = paginator.get_page(page_number)
     
-    # Contexto con datos para filtros/forms
+    # Añadimos las estadísticas a cada empleado
+    for empleado in empleados_paginados:
+        stats = stats_dict.get(empleado.id, {
+            'citas_count': 0,
+            'citas_hoy': 0,
+            'citas_semana': 0,
+            'citas_pendientes': 0,
+            'citas_completadas': 0,
+            'citas_canceladas': 0
+        })
+        empleado.citas_count = stats['citas_count']
+        empleado.citas_hoy_count = stats['citas_hoy']
+        empleado.citas_semana_count = stats['citas_semana']
+        empleado.citas_pendientes_count = stats['citas_pendientes']
+        empleado.citas_completadas_count = stats['citas_completadas']
+        empleado.citas_canceladas_count = stats['citas_canceladas']
+        empleado.citas_recientes = citas_por_empleado.get(empleado.id, [])
+    
     context = {
         'empleados': empleados_paginados,
         'query': query,
+        'status_filter': status,
+        'cargo_filter': cargo_filter,
+        'cargos': cargos,
         'paises': Pais.objects.all(),
         'estados': Estado.objects.all(),
         'ciudades': Ciudad.objects.all(),
         'usuarios': Usuario.objects.all(),
         'niveles_academicos': Empleado._meta.get_field('nivel_academico').choices,
         'sexos': Empleado._meta.get_field('sexo').choices,
-        'request': request,  # Asegúrate de pasar el request al contexto
+        'request': request,
     }
     
     return render(request, 'admin/listar_empleados.html', context)

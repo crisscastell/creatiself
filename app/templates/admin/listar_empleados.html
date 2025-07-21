@@ -3,105 +3,138 @@
 {% block title %}Gestión de Empleados{% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-gray-50 py-20 px-4 sm:px-6 lg:px-8">
+<div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-7xl mx-auto">
         <!-- Header -->
-        <div class="mb-8 text-center sm:text-left">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div class="mb-8">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                 <div>
                     <h1 class="text-3xl font-bold text-gray-900">Gestión de Empleados</h1>
-                    <p class="mt-2 text-lg text-gray-600">Administra el registro de empleados de tu organización</p>
+                    <p class="mt-2 text-lg text-gray-600">Administra el registro de empleados y sus asignaciones</p>
                 </div>
-                <a href="{% url 'Crear_empleado' %}" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
-                    <i data-lucide="plus" class="mr-2 w-5 h-5"></i>
-                    Agregar Empleado
-                </a>
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <a href="{% url 'Crear_empleado' %}" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg shadow-sm text-white bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200">
+                        <i data-lucide="user-plus" class="mr-2 w-5 h-5"></i>
+                        Nuevo Empleado
+                    </a>
+                </div>
             </div>
         </div>
 
         <!-- Search and Filters -->
-        <!-- Barra de búsqueda principal -->
-        <div class="relative flex-grow">
-            <i data-lucide="search" class="absolute left-3 top-3 text-gray-500"></i>
-            <input 
-                type="text" 
-                id="searchInput"
-                placeholder="Buscar por nombre, cédula, teléfono..." 
-                class="pl-10 pr-4 py-2 w-full border border-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                onkeyup="filterCards()"
-            />
+        <div class="mb-8 bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- Barra de búsqueda principal -->
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i data-lucide="search" class="text-gray-400"></i>
+                    </div>
+                    <input 
+                        type="text" 
+                        id="searchInput"
+                        placeholder="Buscar empleados..." 
+                        class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                        onkeyup="filterCards()"
+                    />
+                </div>
+                
+                <!-- Filtro por estado -->
+                <div>
+                    <select id="statusFilter" onchange="filterCards()" class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-lg">
+                        <option value="all">Todos los estados</option>
+                        <option value="active">Activos</option>
+                        <option value="inactive">Inactivos</option>
+                    </select>
+                </div>
+                
+                <!-- Filtro por cargo -->
+                <div>
+                    <select id="cargoFilter" onchange="filterCards()" class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-lg">
+                        <option value="all">Todos los cargos</option>
+                        {% for cargo in cargos %}
+                            <option value="{{ cargo }}">{{ cargo }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
         </div>
+
         <!-- Employee Cards Container -->
         {% if empleados %}
-        <div class="empleado-card grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 empleado-card">
             {% for empleado in empleados %}
-            <div class="empleado-card bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow duration-200 transform hover:-translate-y-1 cursor-pointer" onclick="openModalVerEmpleado('{{ empleado.id }}')">
-                <!-- Card Header -->
-                <div class="flex justify-between items-start p-6 pb-4">
-                    <div class="flex items-center space-x-4">
-                        <div class="flex-shrink-0">
-                            <div class="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold text-lg">
-                                {{ empleado.nombre|first }}{{ empleado.apellido|first }}
-                            </div>
-                        </div>
-                        <div>
-                            <h3 class="font-semibold text-gray-900">{{ empleado.nombre }} {{ empleado.apellido }}</h3>
-                            <p class="text-sm text-gray-500">{{ empleado.cargo }}</p>
-                        </div>
-                    </div>
-                    <div>
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-all duration-200 transform hover:-translate-y-1 cursor-pointer empleado-card-item" 
+                 data-status="{% if empleado.status %}active{% else %}inactive{% endif %}" 
+                 data-cargo="{{ empleado.cargo|lower }}"
+                 onclick="openModalVerEmpleado('{{ empleado.id }}')">
+                
+                <!-- Card Header with Status -->
+                <div class="relative">
+                    <div class="h-2 w-full {% if empleado.status %}bg-blue-600{% else %}bg-gray-400{% endif %}"></div>
+                    <div class="absolute top-3 right-3">
                         {% if empleado.status %}
-                            <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Activo</span>
+                            <span class="px-2.5 py-0.5 inline-flex text-xs leading-4 font-semibold rounded-full bg-green-100 text-green-800">Activo</span>
                         {% else %}
-                            <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Inactivo</span>
+                            <span class="px-2.5 py-0.5 inline-flex text-xs leading-4 font-semibold rounded-full bg-red-100 text-red-800">Inactivo</span>
                         {% endif %}
                     </div>
                 </div>
                 
-                <!-- Progress Bar -->
-                <div class="px-6 pb-4">
-                    <div class="flex justify-between text-sm text-gray-600 mb-1">
-                        <span>Disponibilidad</span>
-                        <span>{% if empleado.status %}90%{% else %}10%{% endif %}</span>
+                <!-- Employee Info -->
+                <div class="p-6">
+                    <div class="flex items-center space-x-4">
+                        <div class="flex-shrink-0">
+                            <div class="h-14 w-14 rounded-full bg-gradient-to-r from-blue-100 to-blue-50 flex items-center justify-center text-blue-600 font-semibold text-xl">
+                                {{ empleado.nombre|first }}{{ empleado.apellido|first }}
+                            </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="text-lg font-semibold text-gray-900 truncate">{{ empleado.nombre }} {{ empleado.apellido }}</h3>
+                            <p class="text-sm text-gray-500 truncate">{{ empleado.cargo }}</p>
+                            <div class="mt-1 flex items-center text-sm text-gray-500">
+                                <i data-lucide="id-card" class="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400"></i>
+                                <span class="truncate">{{ empleado.cedula }}</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="w-full bg-gray-200 rounded-full h-2">
-                        <div class="h-2 rounded-full {% if empleado.status %}bg-blue-600{% else %}bg-gray-400{% endif %}" style="width: {% if empleado.status %}90%{% else %}10%{% endif %}"></div>
+                    
+                    <!-- Stats -->
+                    <div class="mt-6 grid grid-cols-3 gap-2 text-center">
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">Pacientes</p>
+                            <p class="text-lg font-semibold text-blue-600">{{ empleado.pacientes_count|default:"0" }}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">Citas hoy</p>
+                            <p class="text-lg font-semibold text-green-600">{{ empleado.citas_hoy_count|default:"0" }}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">Citas sem.</p>
+                            <p class="text-lg font-semibold text-purple-600">{{ empleado.citas_semana_count|default:"0" }}</p>
+                        </div>
                     </div>
-                </div>
-                
-                <!-- Employee Details -->
-                <div class="border-t border-gray-100 px-6 py-4">
-                    <div class="grid grid-cols-2 gap-4 text-sm">
-                        <div class="flex items-center">
-                            <i data-lucide="id-card" class="w-4 h-4 text-gray-500 mr-2"></i>
-                            <span class="text-gray-700 truncate">{{ empleado.cedula }}</span>
+                    
+                    <!-- Progress Bar -->
+                    <div class="mt-4">
+                        <div class="flex justify-between text-xs text-gray-500 mb-1">
+                            <span>Disponibilidad</span>
+                            <span>{% if empleado.status %}90%{% else %}10%{% endif %}</span>
                         </div>
-                        <div class="flex items-center">
-                            <i data-lucide="phone" class="w-4 h-4 text-gray-500 mr-2"></i>
-                            <span class="text-gray-700 truncate">{{ empleado.telefono }}</span>
-                        </div>
-                        <div class="flex items-center">
-                            <i data-lucide="venus-mars" class="w-4 h-4 text-gray-500 mr-2"></i>
-                            <span class="text-gray-700">
-                                {% if empleado.sexo == 'masculino' %}Masculino{% else %}Femenino{% endif %}
-                            </span>
-                        </div>
-                        <div class="flex items-center">
-                            <i data-lucide="calendar" class="w-4 h-4 text-gray-500 mr-2"></i>
-                            <span class="text-gray-700">{{ empleado.edad }} años</span>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="h-2 rounded-full {% if empleado.status %}bg-gradient-to-r from-blue-500 to-blue-400{% else %}bg-gray-400{% endif %}" style="width: {% if empleado.status %}90%{% else %}10%{% endif %}"></div>
                         </div>
                     </div>
                 </div>
                 
                 <!-- Actions -->
-                <div class="bg-gray-50 px-6 py-3 flex justify-between items-center border-t border-gray-100">
-                    <button onclick="event.stopPropagation(); exportToPDF('{{ empleado.id }}')" class="px-3 py-2 text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-100 transition-colors duration-200 flex items-center">
-                        <i data-lucide="file-text" class="w-4 h-4 mr-2"></i>
+                <div class="bg-gray-50 px-4 py-3 flex justify-between items-center border-t border-gray-200">
+                    <button onclick="event.stopPropagation(); exportToPDF('{{ empleado.id }}')" class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        <i data-lucide="file-text" class="mr-2 h-4 w-4"></i>
                         PDF
                     </button>
                     <div class="flex space-x-2">
-                        <button onclick="event.stopPropagation(); openModalEditarEmpleado('{{ empleado.id }}')" class="p-2 text-blue-500 hover:text-blue-700 rounded-lg hover:bg-blue-50 transition-colors duration-200">
-                            <i data-lucide="edit" class="w-5 h-5"></i>
+                        <button onclick="event.stopPropagation(); openModalEditarEmpleado('{{ empleado.id }}')" class="inline-flex items-center p-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            <i data-lucide="edit" class="h-4 w-4"></i>
                         </button>
                     </div>
                 </div>
@@ -109,13 +142,13 @@
             {% endfor %}
         </div>
         {% else %}
-        <div class="bg-white rounded-xl shadow-sm p-12 text-center border border-gray-100">
+        <div class="bg-white rounded-xl shadow-sm p-12 text-center border border-gray-200">
             <i data-lucide="users" class="mx-auto h-12 w-12 text-gray-400"></i>
             <h3 class="mt-2 text-lg font-medium text-gray-900">No se encontraron empleados</h3>
-            <p class="mt-1 text-sm text-gray-500">No hay empleados que coincidan con los criterios de búsqueda.</p>
+            <p class="mt-1 text-sm text-gray-500">No hay empleados registrados o que coincidan con los criterios de búsqueda.</p>
             <div class="mt-6">
-                <a href="{% url 'Crear_empleado' %}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                    <i data-lucide="plus" class="mr-2 w-4 h-4"></i>
+                <a href="{% url 'Crear_empleado' %}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    <i data-lucide="user-plus" class="mr-2 w-4 h-4"></i>
                     Agregar nuevo empleado
                 </a>
             </div>
@@ -124,17 +157,17 @@
 
         <!-- Pagination -->
         {% if empleados.has_other_pages %}
-        <div class="mt-8 bg-white px-6 py-4 flex items-center justify-between border border-gray-100 rounded-xl shadow-sm">
+        <div class="mt-8 bg-white px-6 py-4 flex items-center justify-between border border-gray-200 rounded-xl shadow-sm">
             <div class="flex-1 flex flex-col sm:flex-row justify-between items-center gap-4">
                 <p class="text-sm text-gray-700">
                     Mostrando <span class="font-medium">{{ empleados.start_index }}</span> a <span class="font-medium">{{ empleados.end_index }}</span> de <span class="font-medium">{{ empleados.paginator.count }}</span> empleados
                 </p>
                 <div class="flex space-x-1">
                     {% if empleados.has_previous %}
-                    <a href="?page=1" class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center">
+                    <a href="?page=1" class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 flex items-center">
                         <i data-lucide="chevrons-left" class="w-4 h-4"></i>
                     </a>
-                    <a href="?page={{ empleados.previous_page_number }}" class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center">
+                    <a href="?page={{ empleados.previous_page_number }}" class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 flex items-center">
                         <i data-lucide="chevron-left" class="w-4 h-4"></i>
                     </a>
                     {% endif %}
@@ -146,7 +179,7 @@
                                 {{ num }}
                             </span>
                             {% else %}
-                            <a href="?page={{ num }}" class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+                            <a href="?page={{ num }}" class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
                                 {{ num }}
                             </a>
                             {% endif %}
@@ -154,10 +187,10 @@
                     {% endfor %}
                     
                     {% if empleados.has_next %}
-                    <a href="?page={{ empleados.next_page_number }}" class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center">
+                    <a href="?page={{ empleados.next_page_number }}" class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 flex items-center">
                         <i data-lucide="chevron-right" class="w-4 h-4"></i>
                     </a>
-                    <a href="?page={{ empleados.paginator.num_pages }}" class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center">
+                    <a href="?page={{ empleados.paginator.num_pages }}" class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 flex items-center">
                         <i data-lucide="chevrons-right" class="w-4 h-4"></i>
                     </a>
                     {% endif %}
@@ -168,53 +201,66 @@
     </div>
 </div>
 
-<!-- Modal para Ver Empleado (solo lectura) -->
+<!-- Modal para Ver Empleado -->
 {% for empleado in empleados %}
-    <div id="modalVerEmpleado{{ empleado.id }}" class="fixed inset-0 bg-gray-500 bg-opacity-75 hidden flex items-center justify-center z-50 p-4 transition-opacity duration-300">
-        <div class="bg-white rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto transform transition-all duration-300">
-            <!-- Modal Header -->
-            <div class="px-6 py-4 border-b flex justify-between items-center sticky top-0 bg-white z-10">
-                <h3 class="text-xl font-semibold text-gray-900">Información del Empleado</h3>
-                <button type="button" onclick="closeModalVerEmpleado('{{ empleado.id }}')" class="text-gray-400 hover:text-gray-500 rounded-full p-1 hover:bg-gray-100">
-                    <i data-lucide="x" class="w-6 h-6"></i>
-                </button>
+<div id="modalVerEmpleado{{ empleado.id }}" class="fixed inset-0 bg-gray-500 bg-opacity-75 hidden flex items-center justify-center z-50 p-4 transition-opacity duration-300">
+    <div class="bg-white rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto transform transition-all duration-300">
+        <!-- Modal Header -->
+        <div class="px-6 py-4 border-b flex justify-between items-center sticky top-0 bg-white z-10">
+            <div class="flex items-center space-x-3">
+                <div class="h-10 w-10 rounded-full bg-gradient-to-r from-blue-100 to-blue-50 flex items-center justify-center text-blue-600 font-semibold">
+                    {{ empleado.nombre|first }}{{ empleado.apellido|first }}
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900">{{ empleado.nombre }} {{ empleado.apellido }}</h3>
             </div>
-            
-            <!-- Modal Content -->
-            <div class="p-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <!-- Columna 1 -->
-                    <div class="space-y-6">
-                        <!-- Información Básica -->
-                        <div>
-                            <h4 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Información Básica</h4>
-                            <div class="space-y-4">
+            <button type="button" onclick="closeModalVerEmpleado('{{ empleado.id }}')" class="text-gray-400 hover:text-gray-500 rounded-full p-1 hover:bg-gray-100">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+        </div>
+        
+        <!-- Modal Content -->
+        <div class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Columna 1 -->
+                <div class="space-y-6">
+                    <!-- Información Básica -->
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h4 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3 flex items-center">
+                            <i data-lucide="user" class="mr-2 w-4 h-4"></i>
+                            Información Básica
+                        </h4>
+                        <div class="space-y-3">
+                            <div class="grid grid-cols-2 gap-4">
                                 <div>
                                     <p class="text-xs text-gray-500 mb-1">Usuario</p>
                                     <p class="text-sm font-medium text-gray-800">{{ empleado.usuario.username }}</p>
                                 </div>
-                                
                                 <div>
                                     <p class="text-xs text-gray-500 mb-1">Cédula</p>
                                     <p class="text-sm font-medium text-gray-800">{{ empleado.cedula }}</p>
                                 </div>
-                                
-                                <div>
-                                    <p class="text-xs text-gray-500 mb-1">Nombres</p>
-                                    <p class="text-sm font-medium text-gray-800">{{ empleado.nombre }} {{ empleado.nombre2 }}</p>
-                                </div>
-                                
-                                <div>
-                                    <p class="text-xs text-gray-500 mb-1">Apellidos</p>
-                                    <p class="text-sm font-medium text-gray-800">{{ empleado.apellido }} {{ empleado.apellido2 }}</p>
-                                </div>
+                            </div>
+                            
+                            <div>
+                                <p class="text-xs text-gray-500 mb-1">Nombres</p>
+                                <p class="text-sm font-medium text-gray-800">{{ empleado.nombre }} {{ empleado.nombre2 }}</p>
+                            </div>
+                            
+                            <div>
+                                <p class="text-xs text-gray-500 mb-1">Apellidos</p>
+                                <p class="text-sm font-medium text-gray-800">{{ empleado.apellido }} {{ empleado.apellido2 }}</p>
                             </div>
                         </div>
-                        
-                        <!-- Información Laboral -->
-                        <div>
-                            <h4 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Información Laboral</h4>
-                            <div class="space-y-4">
+                    </div>
+                    
+                    <!-- Información Laboral -->
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h4 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3 flex items-center">
+                            <i data-lucide="briefcase" class="mr-2 w-4 h-4"></i>
+                            Información Laboral
+                        </h4>
+                        <div class="space-y-3">
+                            <div class="grid grid-cols-2 gap-4">
                                 <div>
                                     <p class="text-xs text-gray-500 mb-1">Cargo</p>
                                     <p class="text-sm font-medium text-gray-800">{{ empleado.cargo }}</p>
@@ -224,49 +270,54 @@
                                     <p class="text-xs text-gray-500 mb-1">Fecha de Ingreso</p>
                                     <p class="text-sm font-medium text-gray-800">{{ empleado.fecha_ingreso|date:"d/m/Y" }}</p>
                                 </div>
-                                
-                                <div>
-                                    <p class="text-xs text-gray-500 mb-1">Nivel Académico</p>
-                                    <p class="text-sm font-medium text-gray-800">
-                                        {% if empleado.nivel_academico == 'primaria' %}Primaria
-                                        {% elif empleado.nivel_academico == 'secundaria' %}Secundaria
-                                        {% elif empleado.nivel_academico == 'bachillerato' %}Bachillerato
-                                        {% elif empleado.nivel_academico == 'tecnico' %}Técnico
-                                        {% elif empleado.nivel_academico == 'tecnologo' %}Tecnólogo
-                                        {% elif empleado.nivel_academico == 'pregrado' %}Pregrado
-                                        {% elif empleado.nivel_academico == 'licenciatura' %}Licenciatura
-                                        {% elif empleado.nivel_academico == 'especializacion' %}Especialización
-                                        {% elif empleado.nivel_academico == 'maestria' %}Maestría
-                                        {% elif empleado.nivel_academico == 'doctorado' %}Doctorado
-                                        {% elif empleado.nivel_academico == 'postdoctorado' %}Postdoctorado
-                                        {% elif empleado.nivel_academico == 'diplomado' %}Diplomado
-                                        {% elif empleado.nivel_academico == 'curso' %}Curso
-                                        {% elif empleado.nivel_academico == 'sin_estudios' %}Sin estudios formales
-                                        {% else %}{{ empleado.nivel_academico|default:"No especificado" }}
-                                        {% endif %}
-                                    </p>
-                                </div>
-                                
-                                <div>
-                                    <p class="text-xs text-gray-500 mb-1">Estado</p>
-                                    <p class="text-sm font-medium text-gray-800">
-                                        {% if empleado.status %}
-                                            <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Activo</span>
-                                        {% else %}
-                                            <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Inactivo</span>
-                                        {% endif %}
-                                    </p>
-                                </div>
+                            </div>
+                            
+                            <div>
+                                <p class="text-xs text-gray-500 mb-1">Nivel Académico</p>
+                                <p class="text-sm font-medium text-gray-800">
+                                    {% if empleado.nivel_academico == 'primaria' %}Primaria
+                                    {% elif empleado.nivel_academico == 'secundaria' %}Secundaria
+                                    {% elif empleado.nivel_academico == 'bachillerato' %}Bachillerato
+                                    {% elif empleado.nivel_academico == 'tecnico' %}Técnico
+                                    {% elif empleado.nivel_academico == 'tecnologo' %}Tecnólogo
+                                    {% elif empleado.nivel_academico == 'pregrado' %}Pregrado
+                                    {% elif empleado.nivel_academico == 'licenciatura' %}Licenciatura
+                                    {% elif empleado.nivel_academico == 'especializacion' %}Especialización
+                                    {% elif empleado.nivel_academico == 'maestria' %}Maestría
+                                    {% elif empleado.nivel_academico == 'doctorado' %}Doctorado
+                                    {% elif empleado.nivel_academico == 'postdoctorado' %}Postdoctorado
+                                    {% elif empleado.nivel_academico == 'diplomado' %}Diplomado
+                                    {% elif empleado.nivel_academico == 'curso' %}Curso
+                                    {% elif empleado.nivel_academico == 'sin_estudios' %}Sin estudios formales
+                                    {% else %}{{ empleado.nivel_academico|default:"No especificado" }}
+                                    {% endif %}
+                                </p>
+                            </div>
+                            
+                            <div>
+                                <p class="text-xs text-gray-500 mb-1">Estado</p>
+                                <p class="text-sm font-medium text-gray-800">
+                                    {% if empleado.status %}
+                                        <span class="px-2 py-0.5 inline-flex text-xs leading-4 font-semibold rounded-full bg-green-100 text-green-800">Activo</span>
+                                    {% else %}
+                                        <span class="px-2 py-0.5 inline-flex text-xs leading-4 font-semibold rounded-full bg-red-100 text-red-800">Inactivo</span>
+                                    {% endif %}
+                                </p>
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Columna 2 -->
-                    <div class="space-y-6">
-                        <!-- Información Personal -->
-                        <div>
-                            <h4 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Información Personal</h4>
-                            <div class="space-y-4">
+                </div>
+                
+                <!-- Columna 2 -->
+                <div class="space-y-6">
+                    <!-- Información Personal -->
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h4 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3 flex items-center">
+                            <i data-lucide="info" class="mr-2 w-4 h-4"></i>
+                            Información Personal
+                        </h4>
+                        <div class="space-y-3">
+                            <div class="grid grid-cols-2 gap-4">
                                 <div>
                                     <p class="text-xs text-gray-500 mb-1">Teléfono</p>
                                     <p class="text-sm font-medium text-gray-800">{{ empleado.telefono }}</p>
@@ -276,13 +327,15 @@
                                     <p class="text-xs text-gray-500 mb-1">Sexo</p>
                                     <p class="text-sm font-medium text-gray-800">
                                         {% if empleado.sexo == 'masculino' %}
-                                            <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">Masculino</span>
+                                            <span class="px-2 py-0.5 inline-flex text-xs leading-4 font-semibold rounded-full bg-blue-100 text-blue-800">Masculino</span>
                                         {% else %}
-                                            <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-pink-100 text-pink-800">Femenino</span>
+                                            <span class="px-2 py-0.5 inline-flex text-xs leading-4 font-semibold rounded-full bg-pink-100 text-pink-800">Femenino</span>
                                         {% endif %}
                                     </p>
                                 </div>
-                                
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-4">
                                 <div>
                                     <p class="text-xs text-gray-500 mb-1">Fecha de Nacimiento</p>
                                     <p class="text-sm font-medium text-gray-800">{{ empleado.fecha_nacimiento|date:"d/m/Y" }}</p>
@@ -294,11 +347,16 @@
                                 </div>
                             </div>
                         </div>
-                        
-                        <!-- Ubicación -->
-                        <div>
-                            <h4 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Ubicación</h4>
-                            <div class="space-y-4">
+                    </div>
+                    
+                    <!-- Ubicación -->
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h4 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3 flex items-center">
+                            <i data-lucide="map-pin" class="mr-2 w-4 h-4"></i>
+                            Ubicación
+                        </h4>
+                        <div class="space-y-3">
+                            <div class="grid grid-cols-2 gap-4">
                                 <div>
                                     <p class="text-xs text-gray-500 mb-1">País</p>
                                     <p class="text-sm font-medium text-gray-800">{{ empleado.pais.nombre_pais }}</p>
@@ -308,16 +366,425 @@
                                     <p class="text-xs text-gray-500 mb-1">Estado</p>
                                     <p class="text-sm font-medium text-gray-800">{{ empleado.estado.nombre_estado }}</p>
                                 </div>
-                                
-                                <div>
-                                    <p class="text-xs text-gray-500 mb-1">Ciudad</p>
-                                    <p class="text-sm font-medium text-gray-800">{{ empleado.ciudad.nombre_ciudad }}</p>
+                            </div>
+                            
+                            <div>
+                                <p class="text-xs text-gray-500 mb-1">Ciudad</p>
+                                <p class="text-sm font-medium text-gray-800">{{ empleado.ciudad.nombre_ciudad }}</p>
+                            </div>
+                            
+                            <div>
+                                <p class="text-xs text-gray-500 mb-1">Dirección</p>
+                                <p class="text-sm font-medium text-gray-800">{{ empleado.direccion }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Reporte de Actividad Mejorado -->
+            <div class="mt-8 bg-white border border-gray-200 rounded-lg shadow-sm">
+                <div class="px-6 py-4 border-b">
+                    <h4 class="text-sm font-medium text-gray-500 uppercase tracking-wider flex items-center">
+                        <i data-lucide="activity" class="mr-2 w-4 h-4"></i>
+                        Reporte de Actividad y Estadísticas
+                    </h4>
+                </div>
+                <div class="p-6">
+                    <!-- Gráficos y Estadísticas -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <!-- Estadísticas Resumen -->
+                        <div class="bg-white p-4 rounded-lg border border-gray-200">
+                            <h5 class="text-sm font-medium text-gray-700 mb-4">Resumen de Actividad</h5>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="bg-blue-50 p-3 rounded-lg flex items-center">
+                                    <div class="bg-blue-100 p-2 rounded-full mr-3">
+                                        <i data-lucide="users" class="w-5 h-5 text-blue-600"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-blue-600">Pacientes</p>
+                                        <p class="text-lg font-bold text-blue-800">{{ empleado.pacientes_count|default:"0" }}</p>
+                                    </div>
                                 </div>
-                                
-                                <div>
-                                    <p class="text-xs text-gray-500 mb-1">Dirección</p>
-                                    <p class="text-sm font-medium text-gray-800">{{ empleado.direccion }}</p>
+                                <div class="bg-green-50 p-3 rounded-lg flex items-center">
+                                    <div class="bg-green-100 p-2 rounded-full mr-3">
+                                        <i data-lucide="calendar-check" class="w-5 h-5 text-green-600"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-green-600">Citas Hoy</p>
+                                        <p class="text-lg font-bold text-green-800">{{ empleado.citas_hoy_count|default:"0" }}</p>
+                                    </div>
                                 </div>
+                                <div class="bg-purple-50 p-3 rounded-lg flex items-center">
+                                    <div class="bg-purple-100 p-2 rounded-full mr-3">
+                                        <i data-lucide="calendar-days" class="w-5 h-5 text-purple-600"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-purple-600">Citas Semana</p>
+                                        <p class="text-lg font-bold text-purple-800">{{ empleado.citas_semana_count|default:"0" }}</p>
+                                    </div>
+                                </div>
+                                <div class="bg-yellow-50 p-3 rounded-lg flex items-center">
+                                    <div class="bg-yellow-100 p-2 rounded-full mr-3">
+                                        <i data-lucide="clock" class="w-5 h-5 text-yellow-600"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-yellow-600">Pendientes</p>
+                                        <p class="text-lg font-bold text-yellow-800">{{ empleado.citas_pendientes_count|default:"0" }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Distribución de Citas -->
+                        <div class="bg-white p-4 rounded-lg border border-gray-200">
+                            <h5 class="text-sm font-medium text-gray-700 mb-4">Distribución de Citas</h5>
+                            <div class="flex items-center justify-center h-full">
+                                <div class="w-32 h-32 rounded-full bg-gradient-to-r from-blue-100 to-blue-50 flex items-center justify-center text-blue-600 font-bold text-xl">
+                                    Gráfico
+                                </div>
+                                <div class="ml-6">
+                                    <div class="flex items-center mb-2">
+                                        <div class="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
+                                        <span class="text-xs">Completadas: {{ empleado.citas_completadas_count|default:"0" }}</span>
+                                    </div>
+                                    <div class="flex items-center mb-2">
+                                        <div class="w-3 h-3 bg-yellow-500 rounded-full mr-2"></div>
+                                        <span class="text-xs">Pendientes: {{ empleado.citas_pendientes_count|default:"0" }}</span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <div class="w-3 h-3 bg-red-500 rounded-full mr-2"></div>
+                                        <span class="text-xs">Canceladas: {{ empleado.citas_canceladas_count|default:"0" }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Pacientes Asignados con más detalles -->
+                    <div class="mb-6">
+                        <h5 class="text-sm font-medium text-gray-700 mb-3 flex items-center">
+                            <i data-lucide="users" class="mr-2 w-4 h-4"></i>
+                            Pacientes Asignados ({{ empleado.pacientes_count|default:"0" }})
+                        </h5>
+                        {% if empleado.pacientes_asignados %}
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cédula</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Edad</th>
+                            
+                                        
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    {% for paciente in empleado.pacientes_asignados|slice:":5" %}
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <div class="flex-shrink-0 h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 text-sm font-medium">
+                                                    {{ paciente.nombre|first }}{{ paciente.apellido|first }}
+                                                </div>
+                                                <div class="ml-4">
+                                                    <div class="text-sm font-medium text-gray-900">{{ paciente.nombre }} {{ paciente.apellido }}</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ paciente.cedula }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ paciente.edad }} años</td>
+                                        
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% if empleado.pacientes_count > 5 %}
+                        <div class="text-center mt-3">
+                            <span class="text-sm text-blue-600">+{{ empleado.pacientes_count|add:"-5" }} pacientes más</span>
+                        </div>
+                        {% endif %}
+                        {% else %}
+                        <div class="text-center py-4 bg-gray-50 rounded-lg">
+                            <i data-lucide="user-x" class="mx-auto h-6 w-6 text-gray-400"></i>
+                            <p class="mt-1 text-sm text-gray-500">No hay pacientes asignados</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Citas Recientes con más detalles -->
+                    <div>
+                        <h5 class="text-sm font-medium text-gray-700 mb-3 flex items-center">
+                            <i data-lucide="calendar" class="mr-2 w-4 h-4"></i>
+                            Citas Recientes
+                        </h5>
+                        {% if empleado.citas_recientes %}
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Paciente</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hora</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Modalidad</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    {% for cita in empleado.citas_recientes|slice:":5" %}
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <div class="flex-shrink-0 h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-sm font-medium">
+                                                    {{ cita.paciente.nombre|first }}{{ cita.paciente.apellido|first }}
+                                                </div>
+                                                <div class="ml-4">
+                                                    <div class="text-sm font-medium text-gray-900">{{ cita.paciente.nombre }} {{ cita.paciente.apellido }}</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ cita.fecha|date:"d/m/Y" }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ cita.hora|time:"H:i" }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-2 py-1 text-xs font-medium rounded-full 
+                                                {% if cita.estado == 'pendiente' %}bg-yellow-100 text-yellow-800
+                                                {% elif cita.estado == 'completada' %}bg-green-100 text-green-800
+                                                {% elif cita.estado == 'cancelada' %}bg-red-100 text-red-800
+                                                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                                {{ cita.estatus|title }}
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ cita.modalidad|default:"Consulta" }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% if empleado.citas_count > 5 %}
+                        <div class="text-center mt-3">
+                            <span class="text-sm text-blue-600">+{{ empleado.citas_count|add:"-5" }} citas más</span>
+                        </div>
+                        {% endif %}
+                        {% else %}
+                        <div class="text-center py-4 bg-gray-50 rounded-lg">
+                            <i data-lucide="calendar-off" class="mx-auto h-6 w-6 text-gray-400"></i>
+                            <p class="mt-1 text-sm text-gray-500">No hay citas recientes</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Modal Footer -->
+        <div class="px-6 py-4 border-t flex justify-between items-center sticky bottom-0 bg-white">
+            <div class="flex space-x-3">
+                <button type="button" onclick="event.stopPropagation(); exportToPDF('{{ empleado.id }}')" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    <i data-lucide="file-text" class="mr-2 w-4 h-4"></i>
+                    Exportar a PDF
+                </button>
+                <button type="button" onclick="event.stopPropagation(); generarReporteCompleto('{{ empleado.id }}')" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    <i data-lucide="file-bar-chart" class="mr-2 w-4 h-4"></i>
+                    Reporte Completo
+                </button>
+            </div>
+            <div class="flex space-x-3">
+                <button type="button" onclick="event.stopPropagation(); openModalEditarEmpleado('{{ empleado.id }}')" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    <i data-lucide="edit" class="mr-2 w-4 h-4"></i>
+                    Editar
+                </button>
+                <button type="button" onclick="closeModalVerEmpleado('{{ empleado.id }}')" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<!-- Modal para Editar Empleado -->
+{% for empleado in empleados %}
+<div id="modalEditarEmpleado{{ empleado.id }}" class="fixed inset-0 bg-gray-500 bg-opacity-75 hidden flex items-center justify-center z-50 p-4 transition-opacity duration-300">
+    <div class="bg-white rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto transform transition-all duration-300">
+        <!-- Modal Header -->
+        <div class="px-6 py-4 border-b flex justify-between items-center sticky top-0 bg-white z-10">
+            <h3 class="text-xl font-semibold text-gray-900">Editar Empleado</h3>
+            <button type="button" onclick="closeModalEditarEmpleado('{{ empleado.id }}')" class="text-gray-400 hover:text-gray-500 rounded-full p-1 hover:bg-gray-100">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+        </div>
+        
+        <!-- Modal Form -->
+        <form method="POST" action="{% url 'Editar_empleado' empleado.id %}" class="p-6">
+            {% csrf_token %}
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Columna 1 -->
+                <div class="space-y-6">
+                    <!-- Información Básica -->
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Información Básica</h4>
+                        <div class="space-y-4">
+                            <!-- Usuario -->
+                            <div>
+                                <label for="usuario_{{empleado.id}}" class="block text-sm font-medium text-gray-700 mb-1">Usuario *</label>
+                                <select id="usuario_{{empleado.id}}" name="usuario" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm" required>
+                                    {% for usuario in usuarios %}
+                                        <option value="{{ usuario.id }}" {% if usuario.id == empleado.usuario.id %}selected{% endif %}>{{ usuario.username }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <!-- Cédula -->
+                            <div>
+                                <label for="cedula_{{empleado.id}}" class="block text-sm font-medium text-gray-700 mb-1">Cédula *</label>
+                                <input type="text" id="cedula_{{empleado.id}}" name="cedula" value="{{ empleado.cedula }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm" required>
+                            </div>
+                            
+                            <!-- Nombres -->
+                            <div>
+                                <label for="nombre_{{empleado.id}}" class="block text-sm font-medium text-gray-700 mb-1">Primer Nombre *</label>
+                                <input type="text" id="nombre_{{empleado.id}}" name="nombre" value="{{ empleado.nombre }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm" required>
+                            </div>
+                            
+                            <div>
+                                <label for="nombre2_{{empleado.id}}" class="block text-sm font-medium text-gray-700 mb-1">Segundo Nombre</label>
+                                <input type="text" id="nombre2_{{empleado.id}}" name="nombre2" value="{{ empleado.nombre2 }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm">
+                            </div>
+                            
+                            <!-- Apellidos -->
+                            <div>
+                                <label for="apellido_{{empleado.id}}" class="block text-sm font-medium text-gray-700 mb-1">Primer Apellido *</label>
+                                <input type="text" id="apellido_{{empleado.id}}" name="apellido" value="{{ empleado.apellido }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm" required>
+                            </div>
+                            
+                            <div>
+                                <label for="apellido2_{{empleado.id}}" class="block text-sm font-medium text-gray-700 mb-1">Segundo Apellido</label>
+                                <input type="text" id="apellido2_{{empleado.id}}" name="apellido2" value="{{ empleado.apellido2 }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Información Laboral -->
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Información Laboral</h4>
+                        <div class="space-y-4">
+                            <!-- Cargo -->
+                            <div>
+                                <label for="cargo_{{empleado.id}}" class="block text-sm font-medium text-gray-700 mb-1">Cargo *</label>
+                                <input type="text" id="cargo_{{empleado.id}}" name="cargo" value="{{ empleado.cargo }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm" required>
+                            </div>
+                            
+                            <!-- Fechas -->
+                            <div>
+                                <label for="fecha_ingreso_{{empleado.id}}" class="block text-sm font-medium text-gray-700 mb-1">Fecha de Ingreso *</label>
+                                <input type="date" id="fecha_ingreso_{{empleado.id}}" name="fecha_ingreso" value="{{ empleado.fecha_ingreso|date:'Y-m-d' }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm" required>
+                            </div>
+                            
+                            <!-- Nivel Académico -->
+                            <div>
+                                <label for="nivel_academico_{{empleado.id}}" class="block text-sm font-medium text-gray-700 mb-1">Nivel Académico</label>
+                                <select id="nivel_academico_{{empleado.id}}" name="nivel_academico" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm">
+                                    <option value="primaria" {% if empleado.nivel_academico == 'primaria' %}selected{% endif %}>Primaria</option>
+                                    <option value="secundaria" {% if empleado.nivel_academico == 'secundaria' %}selected{% endif %}>Secundaria</option>
+                                    <option value="bachillerato" {% if empleado.nivel_academico == 'bachillerato' %}selected{% endif %}>Bachillerato</option>
+                                    <option value="tecnico" {% if empleado.nivel_academico == 'tecnico' %}selected{% endif %}>Técnico</option>
+                                    <option value="tecnologo" {% if empleado.nivel_academico == 'tecnologo' %}selected{% endif %}>Tecnólogo</option>
+                                    <option value="pregrado" {% if empleado.nivel_academico == 'pregrado' %}selected{% endif %}>Pregrado</option>
+                                    <option value="licenciatura" {% if empleado.nivel_academico == 'licenciatura' %}selected{% endif %}>Licenciatura</option>
+                                    <option value="especializacion" {% if empleado.nivel_academico == 'especializacion' %}selected{% endif %}>Especialización</option>
+                                    <option value="maestria" {% if empleado.nivel_academico == 'maestria' %}selected{% endif %}>Maestría</option>
+                                    <option value="doctorado" {% if empleado.nivel_academico == 'doctorado' %}selected{% endif %}>Doctorado</option>
+                                    <option value="postdoctorado" {% if empleado.nivel_academico == 'postdoctorado' %}selected{% endif %}>Postdoctorado</option>
+                                    <option value="diplomado" {% if empleado.nivel_academico == 'diplomado' %}selected{% endif %}>Diplomado</option>
+                                    <option value="curso" {% if empleado.nivel_academico == 'curso' %}selected{% endif %}>Curso</option>
+                                    <option value="sin_estudios" {% if empleado.nivel_academico == 'sin_estudios' %}selected{% endif %}>Sin estudios formales</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Estado -->
+                            <div class="flex items-center">
+                                <input type="checkbox" id="status_{{empleado.id}}" name="status" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" {% if empleado.status %}checked{% endif %}>
+                                <label for="status_{{empleado.id}}" class="ml-2 block text-sm text-gray-700">Empleado Activo</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Columna 2 -->
+                <div class="space-y-6">
+                    <!-- Información Personal -->
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Información Personal</h4>
+                        <div class="space-y-4">
+                            <!-- Teléfono -->
+                            <div>
+                                <label for="telefono_{{empleado.id}}" class="block text-sm font-medium text-gray-700 mb-1">Teléfono *</label>
+                                <input type="text" id="telefono_{{empleado.id}}" name="telefono" value="{{ empleado.telefono }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm" required>
+                            </div>
+                            
+                            <!-- Sexo -->
+                            <div>
+                                <label for="sexo_{{empleado.id}}" class="block text-sm font-medium text-gray-700 mb-1">Sexo *</label>
+                                <select id="sexo_{{empleado.id}}" name="sexo" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm" required>
+                                    <option value="masculino" {% if empleado.sexo == 'masculino' %}selected{% endif %}>Masculino</option>
+                                    <option value="femenino" {% if empleado.sexo == 'femenino' %}selected{% endif %}>Femenino</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Fechas -->
+                            <div>
+                                <label for="fecha_nacimiento_{{empleado.id}}" class="block text-sm font-medium text-gray-700 mb-1">Fecha de Nacimiento *</label>
+                                <input type="date" id="fecha_nacimiento_{{empleado.id}}" name="fecha_nacimiento" value="{{ empleado.fecha_nacimiento|date:'Y-m-d' }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm" required>
+                            </div>
+                            
+                            <!-- Edad -->
+                            <div>
+                                <label for="edad_{{empleado.id}}" class="block text-sm font-medium text-gray-700 mb-1">Edad *</label>
+                                <input type="number" id="edad_{{empleado.id}}" name="edad" value="{{ empleado.edad }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Ubicación -->
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Ubicación</h4>
+                        <div class="space-y-4">
+                            <!-- País -->
+                            <div>
+                                <label for="pais_{{empleado.id}}" class="block text-sm font-medium text-gray-700 mb-1">País *</label>
+                                <select id="pais_{{empleado.id}}" name="pais" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm" required>
+                                    {% for pais in paises %}
+                                        <option value="{{ pais.id }}" {% if pais.id == empleado.pais.id %}selected{% endif %}>{{ pais.nombre_pais }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <!-- Estado -->
+                            <div>
+                                <label for="estado_{{empleado.id}}" class="block text-sm font-medium text-gray-700 mb-1">Estado *</label>
+                                <select id="estado_{{empleado.id}}" name="estado" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm" required>
+                                    {% for estado in estados %}
+                                        <option value="{{ estado.id }}" {% if estado.id == empleado.estado.id %}selected{% endif %}>{{ estado.nombre_estado }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <!-- Ciudad -->
+                            <div>
+                                <label for="ciudad_{{empleado.id}}" class="block text-sm font-medium text-gray-700 mb-1">Ciudad *</label>
+                                <select id="ciudad_{{empleado.id}}" name="ciudad" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm" required>
+                                    {% for ciudad in ciudades %}
+                                        <option value="{{ ciudad.id }}" {% if ciudad.id == empleado.ciudad.id %}selected{% endif %}>{{ ciudad.nombre_ciudad }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <!-- Dirección -->
+                            <div>
+                                <label for="direccion_{{empleado.id}}" class="block text-sm font-medium text-gray-700 mb-1">Dirección *</label>
+                                <textarea id="direccion_{{empleado.id}}" name="direccion" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm" required>{{ empleado.direccion }}</textarea>
                             </div>
                         </div>
                     </div>
@@ -326,218 +793,16 @@
             
             <!-- Modal Footer -->
             <div class="px-6 py-4 border-t flex justify-end space-x-3 sticky bottom-0 bg-white">
-                <button type="button" onclick="event.stopPropagation(); exportToPDF('{{ empleado.id }}')" class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 flex items-center">
-                    <i data-lucide="file-text" class="mr-2 w-4 h-4"></i>
-                    Exportar a PDF
+                <button type="button" onclick="closeModalEditarEmpleado('{{ empleado.id }}')" class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    Cancelar
                 </button>
-                <button type="button" onclick="closeModalVerEmpleado('{{ empleado.id }}')" class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                    Cerrar
-                </button>
-            </div>
-        </div>
-    </div>
-{% endfor %}
-
-<!-- Modals -->
-{% for empleado in empleados %}
-    <div id="modalEditarEmpleado{{ empleado.id }}" class="fixed inset-0 bg-gray-500 bg-opacity-75 hidden flex items-center justify-center z-50 p-4 transition-opacity duration-300">
-        <div class="bg-white rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto transform transition-all duration-300">
-            <!-- Modal Header -->
-            <div class="px-6 py-4 border-b flex justify-between items-center sticky top-0 bg-white z-10">
-                <h3 class="text-xl font-semibold text-gray-900">Editar Empleado</h3>
-                <button type="button" onclick="closeModalEditarEmpleado('{{ empleado.id }}')" class="text-gray-400 hover:text-gray-500 rounded-full p-1 hover:bg-gray-100">
-                    <i data-lucide="x" class="w-6 h-6"></i>
+                <button type="submit" class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    Guardar Cambios
                 </button>
             </div>
-            
-            <!-- Modal Form -->
-            <form method="POST" action="{% url 'Editar_empleado' empleado.id %}" class="p-6">
-                {% csrf_token %}
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <!-- Columna 1 -->
-                    <div class="space-y-6">
-                        <!-- Información Básica -->
-                        <div>
-                            <h4 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Información Básica</h4>
-                            <div class="space-y-4">
-                                <!-- Usuario -->
-                                <div>
-                                    <label for="usuario_{{empleado.id}}" class="block text-sm font-medium text-gray-700 mb-1">Usuario *</label>
-                                    <select id="usuario_{{empleado.id}}" name="usuario" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm" required>
-                                        {% for usuario in usuarios %}
-                                            <option value="{{ usuario.id }}" {% if usuario.id == empleado.usuario.id %}selected{% endif %}>{{ usuario.username }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                                
-                                <!-- Cédula -->
-                                <div>
-                                    <label for="cedula_{{empleado.id}}" class="block text-sm font-medium text-gray-700 mb-1">Cédula *</label>
-                                    <input type="text" id="cedula_{{empleado.id}}" name="cedula" value="{{ empleado.cedula }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm" required>
-                                </div>
-                                
-                                <!-- Nombres -->
-                                <div>
-                                    <label for="nombre_{{empleado.id}}" class="block text-sm font-medium text-gray-700 mb-1">Primer Nombre *</label>
-                                    <input type="text" id="nombre_{{empleado.id}}" name="nombre" value="{{ empleado.nombre }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm" required>
-                                </div>
-                                
-                                <div>
-                                    <label for="nombre2_{{empleado.id}}" class="block text-sm font-medium text-gray-700 mb-1">Segundo Nombre</label>
-                                    <input type="text" id="nombre2_{{empleado.id}}" name="nombre2" value="{{ empleado.nombre2 }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm">
-                                </div>
-                                
-                                <!-- Apellidos -->
-                                <div>
-                                    <label for="apellido_{{empleado.id}}" class="block text-sm font-medium text-gray-700 mb-1">Primer Apellido *</label>
-                                    <input type="text" id="apellido_{{empleado.id}}" name="apellido" value="{{ empleado.apellido }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm" required>
-                                </div>
-                                
-                                <div>
-                                    <label for="apellido2_{{empleado.id}}" class="block text-sm font-medium text-gray-700 mb-1">Segundo Apellido</label>
-                                    <input type="text" id="apellido2_{{empleado.id}}" name="apellido2" value="{{ empleado.apellido2 }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm">
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Información Laboral -->
-                        <div>
-                            <h4 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Información Laboral</h4>
-                            <div class="space-y-4">
-                                <!-- Cargo -->
-                                <div>
-                                    <label for="cargo_{{empleado.id}}" class="block text-sm font-medium text-gray-700 mb-1">Cargo *</label>
-                                    <input type="text" id="cargo_{{empleado.id}}" name="cargo" value="{{ empleado.cargo }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm" required>
-                                </div>
-                                
-                                <!-- Fechas -->
-                                <div>
-                                    <label for="fecha_ingreso_{{empleado.id}}" class="block text-sm font-medium text-gray-700 mb-1">Fecha de Ingreso *</label>
-                                    <input type="date" id="fecha_ingreso_{{empleado.id}}" name="fecha_ingreso" value="{{ empleado.fecha_ingreso|date:'Y-m-d' }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm" required>
-                                </div>
-                                
-                                <!-- Nivel Académico -->
-                                <div>
-                                    <label for="nivel_academico_{{empleado.id}}" class="block text-sm font-medium text-gray-700 mb-1">Nivel Académico</label>
-                                    <select id="nivel_academico_{{empleado.id}}" name="nivel_academico" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm">
-                                        <option value="primaria" {% if empleado.nivel_academico == 'primaria' %}selected{% endif %}>Primaria</option>
-                                        <option value="secundaria" {% if empleado.nivel_academico == 'secundaria' %}selected{% endif %}>Secundaria</option>
-                                        <option value="bachillerato" {% if empleado.nivel_academico == 'bachillerato' %}selected{% endif %}>Bachillerato</option>
-                                        <option value="tecnico" {% if empleado.nivel_academico == 'tecnico' %}selected{% endif %}>Técnico</option>
-                                        <option value="tecnologo" {% if empleado.nivel_academico == 'tecnologo' %}selected{% endif %}>Tecnólogo</option>
-                                        <option value="pregrado" {% if empleado.nivel_academico == 'pregrado' %}selected{% endif %}>Pregrado</option>
-                                        <option value="licenciatura" {% if empleado.nivel_academico == 'licenciatura' %}selected{% endif %}>Licenciatura</option>
-                                        <option value="especializacion" {% if empleado.nivel_academico == 'especializacion' %}selected{% endif %}>Especialización</option>
-                                        <option value="maestria" {% if empleado.nivel_academico == 'maestria' %}selected{% endif %}>Maestría</option>
-                                        <option value="doctorado" {% if empleado.nivel_academico == 'doctorado' %}selected{% endif %}>Doctorado</option>
-                                        <option value="postdoctorado" {% if empleado.nivel_academico == 'postdoctorado' %}selected{% endif %}>Postdoctorado</option>
-                                        <option value="diplomado" {% if empleado.nivel_academico == 'diplomado' %}selected{% endif %}>Diplomado</option>
-                                        <option value="curso" {% if empleado.nivel_academico == 'curso' %}selected{% endif %}>Curso</option>
-                                        <option value="sin_estudios" {% if empleado.nivel_academico == 'sin_estudios' %}selected{% endif %}>Sin estudios formales</option>
-                                    </select>
-                                </div>
-                                
-                                <!-- Estado -->
-                                <div class="flex items-center">
-                                    <input type="checkbox" id="status_{{empleado.id}}" name="status" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" {% if empleado.status %}checked{% endif %}>
-                                    <label for="status_{{empleado.id}}" class="ml-2 block text-sm text-gray-700">Empleado Activo</label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Columna 2 -->
-                    <div class="space-y-6">
-                        <!-- Información Personal -->
-                        <div>
-                            <h4 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Información Personal</h4>
-                            <div class="space-y-4">
-                                <!-- Teléfono -->
-                                <div>
-                                    <label for="telefono_{{empleado.id}}" class="block text-sm font-medium text-gray-700 mb-1">Teléfono *</label>
-                                    <input type="text" id="telefono_{{empleado.id}}" name="telefono" value="{{ empleado.telefono }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm" required>
-                                </div>
-                                
-                                <!-- Sexo -->
-                                <div>
-                                    <label for="sexo_{{empleado.id}}" class="block text-sm font-medium text-gray-700 mb-1">Sexo *</label>
-                                    <select id="sexo_{{empleado.id}}" name="sexo" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm" required>
-                                        <option value="masculino" {% if empleado.sexo == 'masculino' %}selected{% endif %}>Masculino</option>
-                                        <option value="femenino" {% if empleado.sexo == 'femenino' %}selected{% endif %}>Femenino</option>
-                                    </select>
-                                </div>
-                                
-                                <!-- Fechas -->
-                                <div>
-                                    <label for="fecha_nacimiento_{{empleado.id}}" class="block text-sm font-medium text-gray-700 mb-1">Fecha de Nacimiento *</label>
-                                    <input type="date" id="fecha_nacimiento_{{empleado.id}}" name="fecha_nacimiento" value="{{ empleado.fecha_nacimiento|date:'Y-m-d' }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm" required>
-                                </div>
-                                
-                                <!-- Edad -->
-                                <div>
-                                    <label for="edad_{{empleado.id}}" class="block text-sm font-medium text-gray-700 mb-1">Edad *</label>
-                                    <input type="number" id="edad_{{empleado.id}}" name="edad" value="{{ empleado.edad }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm" required>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Ubicación -->
-                        <div>
-                            <h4 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Ubicación</h4>
-                            <div class="space-y-4">
-                                <!-- País -->
-                                <div>
-                                    <label for="pais_{{empleado.id}}" class="block text-sm font-medium text-gray-700 mb-1">País *</label>
-                                    <select id="pais_{{empleado.id}}" name="pais" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm" required>
-                                        {% for pais in paises %}
-                                            <option value="{{ pais.id }}" {% if pais.id == empleado.pais.id %}selected{% endif %}>{{ pais.nombre_pais }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                                
-                                <!-- Estado -->
-                                <div>
-                                    <label for="estado_{{empleado.id}}" class="block text-sm font-medium text-gray-700 mb-1">Estado *</label>
-                                    <select id="estado_{{empleado.id}}" name="estado" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm" required>
-                                        {% for estado in estados %}
-                                            <option value="{{ estado.id }}" {% if estado.id == empleado.estado.id %}selected{% endif %}>{{ estado.nombre_estado }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                                
-                                <!-- Ciudad -->
-                                <div>
-                                    <label for="ciudad_{{empleado.id}}" class="block text-sm font-medium text-gray-700 mb-1">Ciudad *</label>
-                                    <select id="ciudad_{{empleado.id}}" name="ciudad" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm" required>
-                                        {% for ciudad in ciudades %}
-                                            <option value="{{ ciudad.id }}" {% if ciudad.id == empleado.ciudad.id %}selected{% endif %}>{{ ciudad.nombre_ciudad }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                                
-                                <!-- Dirección -->
-                                <div>
-                                    <label for="direccion_{{empleado.id}}" class="block text-sm font-medium text-gray-700 mb-1">Dirección *</label>
-                                    <textarea id="direccion_{{empleado.id}}" name="direccion" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm" required>{{ empleado.direccion }}</textarea>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Modal Footer -->
-                <div class="px-6 py-4 border-t flex justify-end space-x-3 sticky bottom-0 bg-white">
-                    <button type="button" onclick="closeModalEditarEmpleado('{{ empleado.id }}')" class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                        Cancelar
-                    </button>
-                    <button type="submit" class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                        Guardar Cambios
-                    </button>
-                </div>
-            </form>
-        </div>
+        </form>
     </div>
+</div>
 {% endfor %}
 
 <!-- Include jsPDF library -->
@@ -545,7 +810,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
 <script>
-
     // Mostrar SweetAlert si hay mensajes
     document.addEventListener('DOMContentLoaded', function() {
         {% if messages %}
@@ -730,6 +994,310 @@
             });
         }
     }
+
+    async function generarReporteCompleto(id) {
+        try {
+            const doc = new jsPDF({
+                orientation: 'p',
+                unit: 'mm',
+                format: 'a4',
+                putOnlyUsedFonts: true
+            });
+
+            const margin = 15;
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const pageHeight = doc.internal.pageSize.getHeight();
+            let y = 20;
+
+            const styles = {
+                title: { size: 18, color: [15, 118, 110], style: 'bold' },
+                subtitle: { size: 14, color: [15, 118, 110], style: 'bold' },
+                section: { size: 12, color: [75, 85, 99], style: 'bold' },
+                subsection: { size: 11, color: [15, 118, 110], style: 'bolditalic' },
+                label: { size: 10, color: [75, 85, 99], style: 'bold' },
+                value: { size: 10, color: [0, 0, 0], style: 'normal' },
+                tableHeader: { size: 9, color: [255, 255, 255], style: 'bold' },
+                tableBody: { size: 8, color: [0, 0, 0], style: 'normal' },
+                footer: { size: 8, color: [100, 100, 100], style: 'normal' },
+                smallText: { size: 8, color: [100, 100, 100], style: 'normal' }
+            };
+
+            function applyStyle({ size, color, style }) {
+                doc.setFontSize(size);
+                doc.setFont('helvetica', style);
+                doc.setTextColor(...color);
+            }
+
+            function addDivider(yPos) {
+                doc.setDrawColor(220, 220, 220);
+                doc.setLineWidth(0.3);
+                doc.line(margin, yPos, pageWidth - margin, yPos);
+                return yPos + 5;
+            }
+
+            function checkPageHeight(neededSpace = 10) {
+                if (y + neededSpace > pageHeight - 20) {
+                    doc.addPage();
+                    y = 20;
+                    return true;
+                }
+                return false;
+            }
+
+            const toBase64 = url => fetch(url)
+                .then(res => res.blob())
+                .then(blob => new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(blob);
+                }));
+
+            const logoBase64 = await toBase64('/static/creatiself.jpg');
+            doc.addImage(logoBase64, 'JPEG', margin, y, 25, 25);
+
+            applyStyle(styles.title);
+            doc.text('CREATISELF', margin + 30, y + 10);
+            applyStyle(styles.subtitle);
+            doc.text('Reporte de Empleado', margin + 30, y + 17);
+            applyStyle(styles.smallText);
+            doc.text('RIF: J-50521532-9', margin + 30, y + 23);
+            doc.text(`Generado: ${new Date().toLocaleString('es-ES', {
+                day: '2-digit', month: '2-digit', year: 'numeric',
+                hour: '2-digit', minute: '2-digit'
+            })}`, pageWidth - margin, y + 10, { align: 'right' });
+
+            y += 32;
+            y = addDivider(y);
+
+            const modal = document.getElementById(`modalVerEmpleado${id}`);
+            if (!modal) throw new Error('No se pudo encontrar la información del empleado');
+
+            const nombre = modal.querySelector('h3.text-gray-900')?.textContent.trim() || 'Nombre no disponible';
+
+            applyStyle(styles.title);
+            const titleLines = doc.splitTextToSize(`REPORTE DEL EMPLEADO: ${nombre.toUpperCase()}`, pageWidth - 2 * margin);
+            doc.text(titleLines, pageWidth / 2, y, { align: 'center' });
+            y += titleLines.length * 7;
+            y = addDivider(y);
+
+            const getText = (label, defaultValue = 'No disponible') => {
+                const fields = Array.from(modal.querySelectorAll('p.text-sm.font-medium.text-gray-800'));
+                for (const el of fields) {
+                    if (el.previousElementSibling?.textContent.includes(label)) {
+                        return el.textContent.trim() || defaultValue;
+                    }
+                }
+                return defaultValue;
+            };
+
+            function printSection(title, data, columns = 1) {
+                checkPageHeight(15);
+                applyStyle(styles.section);
+                doc.text(title.toUpperCase(), margin, y);
+                y += 7;
+
+                const colWidth = (pageWidth - margin * 2) / columns;
+                let currentCol = 0;
+                let maxYInRow = y;
+
+                data.forEach(([label, value], index) => {
+                    if (columns > 1 && index > 0 && index % columns === 0) {
+                        y = maxYInRow + 7;
+                        currentCol = 0;
+                    }
+
+                    const x = margin + (colWidth * currentCol);
+
+                    applyStyle(styles.label);
+                    doc.text(`${label}:`, x, y);
+                    const labelWidth = doc.getTextWidth(`${label}: `);
+
+                    applyStyle(styles.value);
+                    const textLines = doc.splitTextToSize(value, colWidth - labelWidth - 4);
+                    let textY = y;
+                    textLines.forEach(line => {
+                        doc.text(line, x + labelWidth + 2, textY);
+                        textY += 5;
+                    });
+
+                    if (textY > maxYInRow) maxYInRow = textY;
+                    currentCol++;
+                    if (currentCol >= columns) {
+                        y = maxYInRow + 7;
+                        currentCol = 0;
+                        if (checkPageHeight(15)) maxYInRow = y;
+                    }
+                });
+
+                y = maxYInRow + (columns > 1 ? 10 : 5);
+                y = addDivider(y);
+            }
+
+            const datosPersonales = [
+                ['Nombre completo', nombre],
+                ['Cédula', getText('Cédula')],
+                ['Teléfono', getText('Teléfono')],
+                ['Sexo', getText('Sexo')],
+                ['Fecha de nacimiento', getText('Nacimiento')],
+                ['Edad', getText('Edad')],
+                ['Nivel académico', getText('Académico')],
+            ];
+            const datosLaborales = [
+                ['Cargo', getText('Cargo')],
+                ['Fecha de ingreso', getText('Ingreso')],
+            ];
+            const datosUbicacion = [
+                ['País', getText('País')],
+                ['Dirección', getText('Dirección')],
+            ];
+
+            printSection('1. DATOS PERSONALES', datosPersonales, 2);
+            printSection('2. DATOS LABORALES', datosLaborales, 2);
+            printSection('3. UBICACIÓN', datosUbicacion, 1);
+
+            // Tablas
+            const allTables = modal.querySelectorAll('table.min-w-full');
+
+            // Pacientes Asignados
+            checkPageHeight(20);
+            applyStyle(styles.section);
+            doc.text('5. PACIENTES ASIGNADOS', margin, y);
+            y += 10;
+
+            if (allTables.length >= 1) {
+                const pacientesRows = allTables[0].querySelectorAll('tbody tr');
+                if (pacientesRows.length > 0) {
+                    const headers = ['Nombre', 'Cédula', 'Edad'];
+                    const data = [];
+
+                    pacientesRows.forEach(row => {
+                        const cells = row.querySelectorAll('td');
+                        const nombre = cells[0]?.textContent.trim() || 'N/A';
+                        const cedula = cells[1]?.textContent.trim() || 'N/A';
+                        const edad = cells[2]?.textContent.trim() || 'N/A';
+                        const edadValida = edad.includes(':') ? 'N/A' : edad;
+                        data.push([nombre, cedula, edadValida]);
+                    });
+
+                    doc.autoTable({
+                        startY: y,
+                        head: [headers],
+                        body: data,
+                        margin: { left: margin, right: margin },
+                        headStyles: {
+                            fillColor: [15, 118, 110],
+                            textColor: [255, 255, 255],
+                            fontSize: 9,
+                            cellPadding: 2
+                        },
+                        bodyStyles: {
+                            fontSize: 8,
+                            cellPadding: 2
+                        },
+                        alternateRowStyles: {
+                            fillColor: [245, 245, 245]
+                        }
+                    });
+
+                    y = doc.lastAutoTable.finalY + 10;
+                } else {
+                    applyStyle(styles.value);
+                    doc.text('No hay pacientes asignados actualmente', margin, y);
+                    y += 10;
+                }
+            }
+
+            y = addDivider(y);
+
+            // Citas Recientes
+            checkPageHeight(20);
+            applyStyle(styles.section);
+            doc.text('6. CITAS RECIENTES', margin, y);
+            y += 10;
+
+            if (allTables.length >= 2) {
+                const citasRows = allTables[1].querySelectorAll('tbody tr');
+                if (citasRows.length > 0) {
+                    const headers = ['Paciente', 'Fecha', 'Hora'];
+                    const data = [];
+
+                    citasRows.forEach(row => {
+                        const cells = row.querySelectorAll('td');
+                        const paciente = cells[0]?.textContent.trim() || 'N/A';
+                        const fecha = cells[1]?.textContent.trim() || 'N/A';
+                        const hora = cells[2]?.textContent.trim() || 'N/A';
+                        const horaValida = /^\d+\s*años?$/.test(hora) ? 'N/A' : hora;
+                        data.push([paciente, fecha, horaValida]);
+                    });
+
+                    doc.autoTable({
+                        startY: y,
+                        head: [headers],
+                        body: data,
+                        margin: { left: margin, right: margin },
+                        headStyles: {
+                            fillColor: [15, 118, 110],
+                            textColor: [255, 255, 255],
+                            fontSize: 9,
+                            cellPadding: 2
+                        },
+                        bodyStyles: {
+                            fontSize: 8,
+                            cellPadding: 2
+                        },
+                        alternateRowStyles: {
+                            fillColor: [245, 245, 245]
+                        }
+                    });
+
+                    y = doc.lastAutoTable.finalY + 10;
+                } else {
+                    applyStyle(styles.value);
+                    doc.text('No hay citas recientes registradas', margin, y);
+                    y += 10;
+                }
+            }
+
+            // Footer
+            const pageCount = doc.internal.getNumberOfPages();
+            for (let i = 1; i <= pageCount; i++) {
+                doc.setPage(i);
+                doc.setDrawColor(220, 220, 220);
+                doc.setLineWidth(0.3);
+                doc.line(margin, pageHeight - 15, pageWidth - margin, pageHeight - 15);
+
+                applyStyle(styles.footer);
+                doc.text('Creatiself - Sistema de Gestión Psicológica', margin, pageHeight - 10);
+                doc.text(`Página ${i} de ${pageCount}`, pageWidth / 2, pageHeight - 10, { align: 'center' });
+                doc.text(`ID Reporte: ${Date.now()}`, pageWidth - margin, pageHeight - 10, { align: 'right' });
+            }
+
+            const fileName = `Reporte_Empleado_${nombre.replace(/ /g, '_')}_${new Date().toISOString().slice(0, 10)}.pdf`;
+            doc.save(fileName);
+
+            await Swal.fire({
+                title: 'Reporte Generado',
+                text: `El reporte de ${nombre} ha sido generado exitosamente`,
+                icon: 'success',
+                confirmButtonText: 'Descargar',
+                timer: 5000,
+                timerProgressBar: true
+            });
+
+        } catch (error) {
+            console.error('Error al generar reporte:', error);
+            await Swal.fire({
+                title: 'Error',
+                text: `Ocurrió un error al generar el reporte: ${error.message}`,
+                icon: 'error',
+                confirmButtonText: 'Entendido'
+            });
+        }
+    }
+
+
+
 
     document.addEventListener('DOMContentLoaded', function () {
         const form = document.getElementById('filterForm');

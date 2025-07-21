@@ -131,6 +131,19 @@ class Paciente(models.Model):
     ],
     default='sin_estudios'
     )
+    historial = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name="Historial Psicológico",
+        help_text="Registro detallado del historial psicológico del paciente"
+    )
+    empleado_asignado = models.ForeignKey(
+        'Empleado',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Profesional Asignado"
+    )
     pais = models.ForeignKey('Pais', on_delete=models.CASCADE)
     estado = models.ForeignKey('Estado', on_delete=models.CASCADE)
     ciudad = models.ForeignKey('Ciudad', on_delete=models.CASCADE)
